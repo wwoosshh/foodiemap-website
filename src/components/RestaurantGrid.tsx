@@ -29,10 +29,6 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadRestaurants();
-  }, [loadRestaurants]);
-
   const loadRestaurants = useCallback(async () => {
     try {
       setLoading(true);
@@ -59,6 +55,10 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
       setLoading(false);
     }
   }, [limit, category]);
+
+  useEffect(() => {
+    loadRestaurants();
+  }, [loadRestaurants]);
 
   // 더미 데이터 생성 (API 오류 시 대체용)
   const generateDummyRestaurants = (count: number): Restaurant[] => {
