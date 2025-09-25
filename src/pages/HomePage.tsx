@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -7,19 +6,16 @@ import {
   AppBar,
   Toolbar,
   Button,
-  Card,
-  CardContent,
   Avatar,
   Menu,
   MenuItem,
 } from '@mui/material';
-import { Search, Restaurant, Map, Person, Logout } from '@mui/icons-material';
+import { Search, Map, Person, Logout } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';
 
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
   const { user, logout: userLogout } = useAuth();
   const [currentTab, setCurrentTab] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
