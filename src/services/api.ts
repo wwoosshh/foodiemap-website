@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiResponse, AuthData, User, Restaurant, PaginationData } from '../types';
+import { ApiResponse, AuthData, Restaurant, PaginationData } from '../types';
 
 // API Base URL - Render 배포 주소
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://foodiemap-backend.onrender.com';
