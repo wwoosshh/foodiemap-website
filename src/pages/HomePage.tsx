@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -15,19 +15,25 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';
 import BannerCarousel from '../components/BannerCarousel';
+import FeaturedRestaurants from '../components/FeaturedRestaurants';
+import RestaurantSearch from '../components/RestaurantSearch';
 import { ApiService } from '../services/api';
-import { Banner, Category } from '../types';
+import { Banner } from '../types';
 
 const HomePage: React.FC = () => {
   const { user, logout: userLogout } = useAuth();
   const [currentTab, setCurrentTab] = useState('home');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersLoading, setBannersLoading] = useState(true);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // 검색 필터 상태
+  const [searchFilters, setSearchFilters] = useState<{
+    search?: string;
+    categoryId?: number;
+  }>({});
+  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
 
   // 배너 데이터 로드
   useEffect(() => {
@@ -48,41 +54,20 @@ const HomePage: React.FC = () => {
     loadBanners();
   }, []);
 
-  // 카테고리 데이터 로드
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const response = await ApiService.getPublicCategories();
-        if (response.success && response.data) {
-          setCategories(response.data?.categories || []);
-        }
-      } catch (error) {
-        console.error('카테고리 로드 실패:', error);
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
+  // 검색 필터 변경 핸들러
+  const handleSearchChange = useCallback((filters: { search?: string; categoryId?: number }) => {
+    setSearchFilters(filters);
+    setRestaurantsLoading(true);
 
-    loadCategories();
+    // 검색 결과 섹션으로 부드럽게 스크롤
+    setTimeout(() => {
+      document.getElementById('search-results-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+      setRestaurantsLoading(false);
+    }, 300);
   }, []);
-
-  // 카테고리 한국어 -> 영어 매핑
-  const getCategoryEnglishName = (koreanName: string): string => {
-    const mapping: Record<string, string> = {
-      '한식': 'Korean',
-      '중식': 'Chinese',
-      '일식': 'Japanese',
-      '양식': 'Western',
-      '분식': 'Street Food',
-      '치킨': 'Chicken',
-      '피자': 'Pizza',
-      '카페': 'Cafe',
-      '디저트': 'Dessert',
-      '기타': 'Others'
-    };
-    return mapping[koreanName] || koreanName;
-  };
 
   const handleTabChange = (tab: string) => {
     setCurrentTab(tab);
@@ -263,114 +248,29 @@ const HomePage: React.FC = () => {
             autoPlayInterval={6000}
           />
         )}
+      </Container>
 
-        {/* 인기 맛집 그리드 */}
-        <div id="restaurants-section">
-          <RestaurantGrid
-            title={selectedCategory ? `${selectedCategory} 맛집` : "지금 인기 있는 맛집"}
-            limit={8}
-            category={selectedCategory}
-          />
-        </div>
+      {/* Featured Restaurants */}
+      <FeaturedRestaurants />
 
-        {/* 빠른 카테고리 검색 */}
-        <Box sx={{ py: 8, backgroundColor: '#fafafa', borderRadius: 0, mt: 6, border: '1px solid #f0f0f0' }}>
-          <Typography
-            variant="h3"
-            component="h2"
-            align="center"
-            sx={{
-              fontWeight: 300,
-              letterSpacing: 4,
-              fontSize: { xs: '1.8rem', md: '2.5rem' },
-              color: '#1a1a1a',
-              mb: 1,
-              textTransform: 'uppercase',
-              fontFamily: '"Times New Roman", serif'
-            }}
-          >
-            Our Cuisine
-          </Typography>
-          <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 4 }} />
-          <Typography
-            variant="body1"
-            sx={{
-              mb: 6,
-              textAlign: 'center',
-              color: '#666',
-              fontSize: '1rem',
-              letterSpacing: 1,
-              fontWeight: 300,
-              fontStyle: 'italic'
-            }}
-          >
-            Discover exceptional flavors from around the world
-          </Typography>
+      {/* Restaurant Search */}
+      <RestaurantSearch
+        onSearchChange={handleSearchChange}
+        loading={restaurantsLoading}
+      />
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2, mb: 4 }}>
-            <Button
-              variant={!selectedCategory ? "contained" : "outlined"}
-              size="large"
-              onClick={() => {
-                setSelectedCategory('');
-                document.getElementById('restaurants-section')?.scrollIntoView({
-                  behavior: 'smooth'
-                });
-              }}
-              sx={{
-                minWidth: 140,
-                py: 2.5,
-                borderRadius: 1,
-                fontSize: '1rem',
-                fontWeight: 500,
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-                border: '1px solid #e0e0e0',
-                '&:hover': {
-                  backgroundColor: 'primary.main',
-                  color: 'white',
-                  borderColor: 'primary.main'
-                }
-              }}
-            >
-              ALL CUISINE
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.name ? "contained" : "outlined"}
-                size="large"
-                onClick={() => {
-                  setSelectedCategory(category.name);
-                  // 맛집 섹션으로 스크롤
-                  document.getElementById('restaurants-section')?.scrollIntoView({
-                    behavior: 'smooth'
-                  });
-                }}
-                sx={{
-                  minWidth: 140,
-                  py: 2.5,
-                  borderRadius: 1,
-                  fontSize: '1rem',
-                  fontWeight: 500,
-                  letterSpacing: 1,
-                  textTransform: 'uppercase',
-                  border: '1px solid #e0e0e0',
-                  '&:hover': {
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    borderColor: 'primary.main'
-                  }
-                }}
-              >
-                {getCategoryEnglishName(category.name)}
-              </Button>
-            ))}
-          </Box>
-        </Box>
+      {/* Search Results */}
+      <Container maxWidth="lg" id="search-results-section">
+        <RestaurantGrid
+          categoryId={searchFilters.categoryId}
+          search={searchFilters.search}
+          limit={12}
+          showTitle={false}
+        />
+      </Container>
 
-        {/* CTA Section */}
-        <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#1a1a1a', borderRadius: 0, mt: 6 }}>
+      {/* CTA Section */}
+      <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#1a1a1a', borderRadius: 0, mt: 6 }}>
           <Typography
             variant="h3"
             component="h2"
@@ -426,7 +326,6 @@ const HomePage: React.FC = () => {
             Register Now
           </Button>
         </Box>
-      </Container>
 
       {/* Footer */}
       <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 3, mt: 6 }}>

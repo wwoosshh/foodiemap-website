@@ -71,7 +71,7 @@ export class ApiService {
     page?: number;
     limit?: number;
     search?: string;
-    category?: string;
+    category_id?: number;
   } = {}): Promise<ApiResponse<PaginationData<Restaurant>>> {
     const response = await api.get('/api/restaurants', { params });
     return response.data;

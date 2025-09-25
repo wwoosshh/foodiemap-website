@@ -15,15 +15,19 @@ import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
 
 interface RestaurantGridProps {
-  category?: string;
+  categoryId?: number;
+  search?: string;
   limit?: number;
   title?: string;
+  showTitle?: boolean;
 }
 
 const RestaurantGrid: React.FC<RestaurantGridProps> = ({
-  category,
+  categoryId,
+  search,
   limit = 12,
-  title = "인기 맛집"
+  title = "Restaurants",
+  showTitle = true
 }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +40,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
 
       const response = await ApiService.getPublicRestaurants({
         limit,
-        category: category || undefined,
+        category_id: categoryId,
+        search: search,
       });
 
       if (response.success && response.data) {
@@ -53,7 +58,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [limit, category]);
+  }, [limit, categoryId, search]);
 
   useEffect(() => {
     loadRestaurants();
@@ -127,10 +132,26 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   }
 
   return (
-    <Box sx={{ py: 6 }}>
-      <Typography variant="h4" component="h2" gutterBottom align="center" fontWeight={600}>
-        {title}
-      </Typography>
+    <Box sx={{ py: showTitle ? 6 : 3 }}>
+      {showTitle && (
+        <Typography
+          variant="h3"
+          component="h2"
+          align="center"
+          sx={{
+            fontWeight: 300,
+            letterSpacing: 4,
+            fontSize: { xs: '1.8rem', md: '2.5rem' },
+            color: '#1a1a1a',
+            mb: 1,
+            textTransform: 'uppercase',
+            fontFamily: '"Times New Roman", serif'
+          }}
+        >
+          {title}
+        </Typography>
+      )}
+      {showTitle && <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 6 }} />}
 
       {error && (
         <Alert
