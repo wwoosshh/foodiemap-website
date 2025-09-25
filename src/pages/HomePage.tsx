@@ -16,7 +16,7 @@ import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';
 import BannerCarousel from '../components/BannerCarousel';
 import { ApiService } from '../services/api';
-import { Banner } from '../types';
+import { Banner, Category } from '../types';
 
 const HomePage: React.FC = () => {
   const { user, logout: userLogout } = useAuth();
@@ -26,6 +26,8 @@ const HomePage: React.FC = () => {
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersLoading, setBannersLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   // 배너 데이터 로드
   useEffect(() => {
@@ -45,6 +47,42 @@ const HomePage: React.FC = () => {
 
     loadBanners();
   }, []);
+
+  // 카테고리 데이터 로드
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await ApiService.getPublicCategories();
+        if (response.success && response.data) {
+          setCategories(response.data?.categories || []);
+        }
+      } catch (error) {
+        console.error('카테고리 로드 실패:', error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  // 카테고리 한국어 -> 영어 매핑
+  const getCategoryEnglishName = (koreanName: string): string => {
+    const mapping: Record<string, string> = {
+      '한식': 'Korean',
+      '중식': 'Chinese',
+      '일식': 'Japanese',
+      '양식': 'Western',
+      '분식': 'Street Food',
+      '치킨': 'Chicken',
+      '피자': 'Pizza',
+      '카페': 'Cafe',
+      '디저트': 'Dessert',
+      '기타': 'Others'
+    };
+    return mapping[koreanName] || koreanName;
+  };
 
   const handleTabChange = (tab: string) => {
     setCurrentTab(tab);
@@ -96,8 +134,19 @@ const HomePage: React.FC = () => {
       <AppBar position="static" color="primary" elevation={0}>
         <Container maxWidth="lg">
           <Toolbar disableGutters>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 700 }}>
-              Cube
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                flexGrow: 1,
+                fontWeight: 300,
+                letterSpacing: 4,
+                fontSize: '1.5rem',
+                fontFamily: '"Times New Roman", serif',
+                textTransform: 'uppercase'
+              }}
+            >
+              CUBE
             </Typography>
             <Button
               color="inherit"
@@ -160,31 +209,48 @@ const HomePage: React.FC = () => {
 
       {/* Elegant Site Header */}
       <Container maxWidth="lg">
-        <Box sx={{ py: 4, textAlign: 'center', borderBottom: '1px solid rgba(0,0,0,0.08)', mb: 4 }}>
+        <Box sx={{ py: 8, textAlign: 'center', borderBottom: '1px solid #f0f0f0', mb: 6 }}>
           <Typography
-            variant="h3"
+            variant="h1"
             component="h1"
             sx={{
-              fontFamily: '"Playfair Display", "Noto Serif KR", serif',
-              fontWeight: 400,
-              color: '#2c2c2c',
-              mb: 1,
-              letterSpacing: 2,
-              fontSize: { xs: '2rem', md: '3rem' }
+              fontFamily: '"Times New Roman", "Noto Serif KR", serif',
+              fontWeight: 300,
+              color: '#1a1a1a',
+              mb: 2,
+              letterSpacing: 6,
+              fontSize: { xs: '2.5rem', md: '4rem' },
+              textTransform: 'uppercase'
             }}
           >
             CUBE
           </Typography>
+          <Box sx={{ width: 60, height: 1, backgroundColor: '#000', mx: 'auto', mb: 3 }} />
           <Typography
             variant="subtitle1"
             sx={{
-              color: '#6c6c6c',
-              fontWeight: 300,
-              letterSpacing: 1.5,
-              fontSize: { xs: '0.9rem', md: '1.1rem' }
+              color: '#666',
+              fontWeight: 400,
+              letterSpacing: 3,
+              fontSize: { xs: '0.8rem', md: '1rem' },
+              textTransform: 'uppercase',
+              fontFamily: '"Inter", sans-serif'
             }}
           >
-            PREMIUM DINING EXPERIENCE
+            Fine Dining Experience
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#999',
+              fontWeight: 300,
+              letterSpacing: 1,
+              fontSize: { xs: '0.7rem', md: '0.85rem' },
+              mt: 1,
+              fontStyle: 'italic'
+            }}
+          >
+            Curated Excellence in Every Taste
           </Typography>
         </Box>
 
@@ -208,12 +274,37 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* 빠른 카테고리 검색 */}
-        <Box sx={{ py: 6, backgroundColor: 'grey.50', borderRadius: 2, mt: 4 }}>
-          <Typography variant="h4" component="h2" gutterBottom align="center" fontWeight={600}>
-            카테고리별 맛집 찾기
+        <Box sx={{ py: 8, backgroundColor: '#fafafa', borderRadius: 0, mt: 6, border: '1px solid #f0f0f0' }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            align="center"
+            sx={{
+              fontWeight: 300,
+              letterSpacing: 4,
+              fontSize: { xs: '1.8rem', md: '2.5rem' },
+              color: '#1a1a1a',
+              mb: 1,
+              textTransform: 'uppercase',
+              fontFamily: '"Times New Roman", serif'
+            }}
+          >
+            Our Cuisine
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-            원하는 종류의 음식을 빠르게 찾아보세요
+          <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 4 }} />
+          <Typography
+            variant="body1"
+            sx={{
+              mb: 6,
+              textAlign: 'center',
+              color: '#666',
+              fontSize: '1rem',
+              letterSpacing: 1,
+              fontWeight: 300,
+              fontStyle: 'italic'
+            }}
+          >
+            Discover exceptional flavors from around the world
           </Typography>
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2, mb: 4 }}>
@@ -227,32 +318,24 @@ const HomePage: React.FC = () => {
                 });
               }}
               sx={{
-                minWidth: 120,
-                py: 2,
-                borderRadius: 3,
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 0.5,
+                minWidth: 140,
+                py: 2.5,
+                borderRadius: 1,
+                fontSize: '1rem',
+                fontWeight: 500,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+                border: '1px solid #e0e0e0',
                 '&:hover': {
                   backgroundColor: 'primary.main',
                   color: 'white',
+                  borderColor: 'primary.main'
                 }
               }}
             >
-              <Typography sx={{ fontSize: '1.5rem' }}>🍽️</Typography>
-              전체
+              ALL CUISINE
             </Button>
-            {[
-              { name: '한식', icon: '🍚', id: 1 },
-              { name: '중식', icon: '🥢', id: 2 },
-              { name: '일식', icon: '🍣', id: 3 },
-              { name: '양식', icon: '🍝', id: 4 },
-              { name: '치킨', icon: '🍗', id: 5 },
-              { name: '피자', icon: '🍕', id: 6 },
-              { name: '카페', icon: '☕', id: 8 },
-            ].map((category) => (
+            {categories.map((category) => (
               <Button
                 key={category.id}
                 variant={selectedCategory === category.name ? "contained" : "outlined"}
@@ -265,37 +348,82 @@ const HomePage: React.FC = () => {
                   });
                 }}
                 sx={{
-                  minWidth: 120,
-                  py: 2,
-                  borderRadius: 3,
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0.5,
+                  minWidth: 140,
+                  py: 2.5,
+                  borderRadius: 1,
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  border: '1px solid #e0e0e0',
                   '&:hover': {
                     backgroundColor: 'primary.main',
                     color: 'white',
+                    borderColor: 'primary.main'
                   }
                 }}
               >
-                <Typography sx={{ fontSize: '1.5rem' }}>{category.icon}</Typography>
-                {category.name}
+                {getCategoryEnglishName(category.name)}
               </Button>
             ))}
           </Box>
         </Box>
 
         {/* CTA Section */}
-        <Box sx={{ textAlign: 'center', py: 6, backgroundColor: 'grey.50', borderRadius: 2, mt: 4 }}>
-          <Typography variant="h4" component="h2" gutterBottom>
-            지금 시작해보세요
+        <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#1a1a1a', borderRadius: 0, mt: 6 }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: 3,
+              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              mb: 2,
+              textTransform: 'uppercase',
+              fontFamily: '"Times New Roman", serif'
+            }}
+          >
+            Join the Experience
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            무료로 회원가입하고 맛집 탐험을 시작하세요.
+          <Box sx={{ width: 50, height: 1, backgroundColor: 'white', mx: 'auto', mb: 3 }} />
+          <Typography
+            variant="body1"
+            sx={{
+              color: '#ccc',
+              mb: 4,
+              fontSize: '1rem',
+              letterSpacing: 1,
+              fontWeight: 300,
+              fontStyle: 'italic',
+              maxWidth: '400px',
+              mx: 'auto'
+            }}
+          >
+            Begin your culinary journey with carefully curated dining experiences
           </Typography>
-          <Button variant="contained" size="large" onClick={handleSignUp}>
-            회원가입
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={handleSignUp}
+            sx={{
+              color: 'white',
+              borderColor: 'white',
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 400,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              borderRadius: 0,
+              '&:hover': {
+                backgroundColor: 'white',
+                color: '#1a1a1a',
+                borderColor: 'white'
+              }
+            }}
+          >
+            Register Now
           </Button>
         </Box>
       </Container>

@@ -49,8 +49,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
     } catch (err: any) {
       console.error('맛집 데이터 로딩 실패:', err);
       setError(err.message || '맛집 데이터를 불러오는 중 오류가 발생했습니다.');
-      // 에러 시 더미 데이터 표시
-      setRestaurants(generateDummyRestaurants(limit));
+      setRestaurants([]);
     } finally {
       setLoading(false);
     }
@@ -60,33 +59,33 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
     loadRestaurants();
   }, [loadRestaurants]);
 
-  // 더미 데이터 생성 (API 오류 시 대체용)
-  const generateDummyRestaurants = (count: number): Restaurant[] => {
-    const dummyCategories = ['한식', '중식', '일식', '양식', '카페', '치킨', '피자'];
-    const dummyNames = [
-      '맛있는 한식당', '서울 불고기', '전주 비빔밥', '부산 회센터',
-      '이탈리아 파스타', '도쿄 라멘', '베이징 짜장면', '프랑스 비스트로',
-      '홍콩 딤섬', '태국 팟타이', '인도 커리', '멕시코 타코'
-    ];
-
-    return Array.from({ length: Math.min(count, 12) }, (_, index) => ({
-      id: `dummy-${index}`,
-      name: dummyNames[index] || `맛집 ${index + 1}`,
-      description: '신선한 재료로 만드는 정통 요리를 맛보세요.',
-      address: `서울시 강남구 ${index + 1}번지`,
-      phone: `02-${1000 + index}-${1000 + index}`,
-      category_id: index % 7 + 1,
-      rating: 4.0 + (Math.random() * 1.0),
-      review_count: Math.floor(Math.random() * 200) + 10,
-      images: [`/api/placeholder/restaurant-${index % 5 + 1}.jpg`],
-      created_at: new Date().toISOString(),
-      categories: {
-        id: index % 7 + 1,
-        name: dummyCategories[index % 7],
-        icon: '🍽️'
-      }
-    }));
-  };
+  // 빈 상태를 위한 메시지 컴포넌트
+  const renderEmptyState = () => (
+    <Box
+      sx={{
+        textAlign: 'center',
+        py: 8,
+        backgroundColor: 'grey.50',
+        borderRadius: 2,
+        border: '1px solid #f0f0f0'
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{
+          color: 'text.secondary',
+          fontWeight: 300,
+          letterSpacing: 1.5,
+          mb: 2
+        }}
+      >
+        NO RESTAURANTS FOUND
+      </Typography>
+      <Typography variant="body1" color="text.secondary">
+        {error ? 'Service temporarily unavailable' : 'Try adjusting your search criteria'}
+      </Typography>
+    </Box>
+  );
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
     console.log('맛집 클릭:', restaurant.name);
@@ -134,8 +133,20 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
       </Typography>
 
       {error && (
-        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-          🔧 현재 서비스 점검 중입니다. 샘플 데이터를 표시합니다.
+        <Alert
+          severity="warning"
+          sx={{
+            mb: 3,
+            borderRadius: 1,
+            backgroundColor: '#fff8e1',
+            border: '1px solid #ffc107',
+            '& .MuiAlert-message': {
+              fontSize: '0.95rem',
+              letterSpacing: 0.5
+            }
+          }}
+        >
+          Service temporarily unavailable. Please try again later.
         </Alert>
       )}
 
@@ -152,121 +163,165 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
           mt: 2
         }}
       >
-        {restaurants.map((restaurant) => (
+        {restaurants.length === 0 && !loading ? (
+          renderEmptyState()
+        ) : (
+          restaurants.map((restaurant) => (
             <Card
               key={restaurant.id}
               sx={{
                 height: '100%',
                 cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                borderRadius: 1,
+                border: '1px solid #f0f0f0',
+                boxShadow: 'none',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                backgroundColor: '#ffffff',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 6,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                  borderColor: '#e0e0e0'
                 }
               }}
               onClick={() => handleRestaurantClick(restaurant)}
             >
               <CardMedia
                 component="img"
-                height="200"
+                height="240"
                 image={restaurant.images?.[0] || '/api/placeholder/600/400'}
                 alt={restaurant.name}
                 sx={{
                   objectFit: 'cover',
-                  backgroundColor: 'grey.200'
+                  backgroundColor: '#f8f8f8',
+                  borderBottom: '1px solid #f0f0f0'
                 }}
                 onError={(e: any) => {
                   e.target.src = '/api/placeholder/600/400';
                 }}
               />
-              <CardContent sx={{ p: 2, pb: 2 }}>
+              <CardContent sx={{ p: 3, pb: 3 }}>
                 {/* 카테고리 */}
                 {restaurant.categories && (
-                  <Chip
-                    label={restaurant.categories.name}
-                    size="small"
+                  <Typography
+                    variant="caption"
                     sx={{
-                      mb: 1,
-                      backgroundColor: 'primary.main',
-                      color: 'white',
-                      fontSize: '0.75rem'
+                      color: '#666',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      letterSpacing: 2,
+                      textTransform: 'uppercase',
+                      mb: 1.5,
+                      display: 'block'
                     }}
-                  />
+                  >
+                    {restaurant.categories.name}
+                  </Typography>
                 )}
 
                 {/* 맛집 이름 */}
                 <Typography
                   variant="h6"
                   component="h3"
-                  noWrap
                   sx={{
                     fontWeight: 600,
-                    fontSize: '1.1rem',
-                    mb: 1,
-                    color: 'text.primary'
+                    fontSize: '1.25rem',
+                    mb: 2,
+                    color: '#1a1a1a',
+                    lineHeight: 1.3,
+                    fontFamily: '"Noto Sans KR", "Inter", sans-serif'
                   }}
                 >
                   {restaurant.name}
                 </Typography>
 
                 {/* 평점 및 리뷰 수 */}
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Star sx={{ color: '#ffc107', fontSize: '1.2rem', mr: 0.5 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600, mr: 1 }}>
-                    {restaurant.rating.toFixed(1)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ({restaurant.review_count}개 리뷰)
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                    <Box
+                      sx={{
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        backgroundColor: restaurant.rating >= 4.5 ? '#2e7d32' : restaurant.rating >= 4.0 ? '#ed6c02' : '#d32f2f',
+                        mr: 1
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        color: '#333'
+                      }}
+                    >
+                      {restaurant.rating.toFixed(1)}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#666',
+                      fontSize: '0.85rem',
+                      fontWeight: 400
+                    }}
+                  >
+                    {restaurant.review_count} Reviews
                   </Typography>
                 </Box>
 
                 {/* 주소 */}
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                  <LocationOn sx={{ fontSize: '1rem', color: 'text.secondary', mr: 0.5 }} />
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    noWrap
-                    sx={{ fontSize: '0.85rem' }}
-                  >
-                    {restaurant.address}
-                  </Typography>
-                </Box>
-
-                {/* 전화번호 */}
-                {restaurant.phone && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Phone sx={{ fontSize: '1rem', color: 'text.secondary', mr: 0.5 }} />
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ fontSize: '0.85rem' }}
-                    >
-                      {restaurant.phone}
-                    </Typography>
-                  </Box>
-                )}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#666',
+                    fontSize: '0.9rem',
+                    mb: 1,
+                    fontWeight: 400,
+                    lineHeight: 1.4
+                  }}
+                >
+                  {restaurant.address}
+                </Typography>
 
                 {/* 설명 */}
                 {restaurant.description && (
                   <Typography
                     variant="body2"
-                    color="text.secondary"
                     sx={{
-                      mt: 1,
+                      color: '#999',
                       fontSize: '0.85rem',
+                      lineHeight: 1.6,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
+                      fontWeight: 400,
+                      mt: 1.5
                     }}
                   >
                     {restaurant.description}
                   </Typography>
                 )}
+
+                {/* 전화번호 */}
+                {restaurant.phone && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#666',
+                      fontSize: '0.85rem',
+                      mt: 1.5,
+                      fontFamily: 'monospace',
+                      letterSpacing: 0.5
+                    }}
+                  >
+                    {restaurant.phone}
+                  </Typography>
+                )}
               </CardContent>
             </Card>
-        ))}
+          ))
+        )}
       </Box>
 
       {/* 더보기 버튼 */}

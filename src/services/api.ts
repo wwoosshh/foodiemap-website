@@ -83,6 +83,12 @@ export class ApiService {
     return response.data;
   }
 
+  // 공개 카테고리 목록 조회 (로그인 불필요)
+  static async getPublicCategories(): Promise<ApiResponse<{ categories: any[] }>> {
+    const response = await api.get('/api/categories');
+    return response.data;
+  }
+
   // 건강 상태 확인
   static async healthCheck(): Promise<any> {
     const response = await api.get('/health');
