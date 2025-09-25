@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -14,6 +14,9 @@ import { Search, Map, Person, Logout } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';
+import BannerCarousel from '../components/BannerCarousel';
+import { ApiService } from '../services/api';
+import { Banner } from '../types';
 
 const HomePage: React.FC = () => {
   const { user, logout: userLogout } = useAuth();
@@ -21,6 +24,27 @@ const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
+
+  // 배너 데이터 로드
+  useEffect(() => {
+    const loadBanners = async () => {
+      try {
+        setBannersLoading(true);
+        const response = await ApiService.getPublicBanners();
+        if (response.success && response.data) {
+          setBanners(response.data.banners || []);
+        }
+      } catch (error) {
+        console.error('배너 로드 실패:', error);
+      } finally {
+        setBannersLoading(false);
+      }
+    };
+
+    loadBanners();
+  }, []);
 
   const handleTabChange = (tab: string) => {
     setCurrentTab(tab);
@@ -134,81 +158,45 @@ const HomePage: React.FC = () => {
         </Container>
       </AppBar>
 
-      {/* Hero Section */}
+      {/* Elegant Site Header */}
       <Container maxWidth="lg">
-        <Box
-          sx={{
-            py: { xs: 6, md: 8 },
-            textAlign: 'center',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: 3,
-            color: 'white',
-            mb: 4
-          }}
-        >
-          <Typography variant="h2" component="h1" gutterBottom sx={{
-            fontWeight: 700,
-            fontSize: { xs: '2rem', md: '3rem' }
-          }}>
-            🍽️ 맛집을 찾는 새로운 방법
-          </Typography>
-          <Typography variant="h6" sx={{
-            mb: 4,
-            maxWidth: 600,
-            mx: 'auto',
-            opacity: 0.9,
-            fontSize: { xs: '1rem', md: '1.25rem' }
-          }}>
-            Cube와 함께 주변의 숨은 맛집을 발견하고, 리뷰를 공유해보세요.
-            간편하고 직관적인 지도 기반 맛집 검색 서비스입니다.
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<Search />}
+        <Box sx={{ py: 4, textAlign: 'center', borderBottom: '1px solid rgba(0,0,0,0.08)', mb: 4 }}>
+          <Typography
+            variant="h3"
+            component="h1"
             sx={{
-              mr: 2,
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.3)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
-              },
-              transition: 'all 0.3s ease',
-              px: 3,
-              py: 1.5,
-              borderRadius: 2
+              fontFamily: '"Playfair Display", "Noto Serif KR", serif',
+              fontWeight: 400,
+              color: '#2c2c2c',
+              mb: 1,
+              letterSpacing: 2,
+              fontSize: { xs: '2rem', md: '3rem' }
             }}
-            onClick={() => handleTabChange('restaurants')}
           >
-            맛집 찾기
-          </Button>
-          <Button
-            variant="outlined"
-            size="large"
-            startIcon={<Map />}
+            CUBE
+          </Typography>
+          <Typography
+            variant="subtitle1"
             sx={{
-              color: 'white',
-              borderColor: 'rgba(255,255,255,0.5)',
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderColor: 'white',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
-              },
-              transition: 'all 0.3s ease',
-              px: 3,
-              py: 1.5,
-              borderRadius: 2
+              color: '#6c6c6c',
+              fontWeight: 300,
+              letterSpacing: 1.5,
+              fontSize: { xs: '0.9rem', md: '1.1rem' }
             }}
-            onClick={() => handleTabChange('map')}
           >
-            지도 보기
-          </Button>
+            PREMIUM DINING EXPERIENCE
+          </Typography>
         </Box>
+
+        {/* 광고 배너 캐러셀 */}
+        {!bannersLoading && banners.length > 0 && (
+          <BannerCarousel
+            banners={banners}
+            height={350}
+            autoPlay={true}
+            autoPlayInterval={6000}
+          />
+        )}
 
         {/* 인기 맛집 그리드 */}
         <div id="restaurants-section">

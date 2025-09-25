@@ -75,3 +75,16 @@ export interface AuthData {
   token: string;
 }
 
+// Banner types
+export interface Banner {
+  id: string;
+  title: string;
+  description?: string;
+  image_url: string;
+  link_url?: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
