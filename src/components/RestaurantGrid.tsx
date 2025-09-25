@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   CardMedia,
@@ -32,9 +31,9 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
 
   useEffect(() => {
     loadRestaurants();
-  }, [category, limit]);
+  }, [loadRestaurants]);
 
-  const loadRestaurants = async () => {
+  const loadRestaurants = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -59,7 +58,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, category]);
 
   // 더미 데이터 생성 (API 오류 시 대체용)
   const generateDummyRestaurants = (count: number): Restaurant[] => {
