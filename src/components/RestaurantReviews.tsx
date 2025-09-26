@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -21,8 +21,6 @@ import {
   Divider
 } from '@mui/material';
 import {
-  Star,
-  StarBorder,
   ThumbUp,
   ThumbUpOffAlt,
   MoreVert,
@@ -95,7 +93,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   });
 
   // 리뷰 데이터 로딩
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -153,11 +151,11 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [restaurantId, onReviewCountChange, onRatingChange]);
 
   useEffect(() => {
     loadReviews();
-  }, [restaurantId]);
+  }, [loadReviews]);
 
   // 리뷰 작성/수정
   const handleSubmitReview = async () => {

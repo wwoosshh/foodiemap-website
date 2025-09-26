@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -6,7 +6,6 @@ import {
   Avatar,
   Button,
   TextField,
-  Divider,
   Alert,
   Skeleton,
   Chip,
@@ -60,7 +59,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const [selectedComment, setSelectedComment] = useState<string | null>(null);
 
   // 댓글 로딩
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -99,11 +98,11 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [restaurantId, onCommentCountChange]);
 
   useEffect(() => {
     loadComments();
-  }, [restaurantId]);
+  }, [loadComments]);
 
   // 댓글 작성
   const handleSubmitComment = async () => {

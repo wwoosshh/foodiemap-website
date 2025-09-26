@@ -10,7 +10,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
-import { Search, Map, Person, Logout } from '@mui/icons-material';
+import { Person, Logout } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';

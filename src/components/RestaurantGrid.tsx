@@ -5,12 +5,10 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Chip,
   Skeleton,
   Alert,
   Button,
 } from '@mui/material';
-import { LocationOn, Phone, Star } from '@mui/icons-material';
 import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';

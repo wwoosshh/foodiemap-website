@@ -9,8 +9,6 @@ import {
   Tab,
   Chip,
   Rating,
-  Button,
-  Divider,
   Card,
   CardContent,
   List,
@@ -23,7 +21,6 @@ import {
   LocationOn,
   Phone,
   AccessTime,
-  Language,
   Wifi,
   LocalShipping,
   Bookmark,
@@ -33,7 +30,6 @@ import {
   Restaurant as RestaurantIcon,
 } from '@mui/icons-material';
 import { Restaurant } from '../types';
-import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import RestaurantComments from './RestaurantComments';
 import RestaurantReviews from './RestaurantReviews';
@@ -96,7 +92,6 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
   const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [restaurantDetail, setRestaurantDetail] = useState<RestaurantDetail | null>(null);
-  const [loading, setLoading] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
 
@@ -108,7 +103,6 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
 
   const loadRestaurantDetail = async (restaurantId: string) => {
     try {
-      setLoading(true);
       // TODO: API 연동 구현 필요
       // const response = await ApiService.getRestaurantDetail(restaurantId);
       // setRestaurantDetail(response.data);
@@ -148,8 +142,6 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
       });
     } catch (error) {
       console.error('맛집 상세 정보 로딩 실패:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
