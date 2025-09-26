@@ -94,6 +94,122 @@ export class ApiService {
     const response = await api.get('/health');
     return response.data;
   }
+
+  // === 댓글 API ===
+
+  // 맛집 댓글 목록 조회
+  static async getRestaurantComments(restaurantId: string, params: {
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<ApiResponse<{
+    comments: any[];
+    total: number;
+    limit: number;
+    offset: number;
+  }>> {
+    const response = await api.get(`/api/comments/${restaurantId}`, { params });
+    return response.data;
+  }
+
+  // 댓글 작성
+  static async createComment(data: {
+    restaurant_id: string;
+    content: string;
+    parent_id?: string;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/comments', data);
+    return response.data;
+  }
+
+  // 댓글 좋아요 토글
+  static async toggleCommentLike(commentId: string): Promise<ApiResponse<{
+    comment_id: string;
+    is_liked: boolean;
+    likes_count: number;
+  }>> {
+    const response = await api.post(`/api/comments/${commentId}/like`);
+    return response.data;
+  }
+
+  // 댓글 삭제
+  static async deleteComment(commentId: string): Promise<ApiResponse<{ comment_id: string }>> {
+    const response = await api.delete(`/api/comments/${commentId}`);
+    return response.data;
+  }
+
+  // === 리뷰 API ===
+
+  // 맛집 리뷰 목록 조회
+  static async getRestaurantReviews(restaurantId: string, params: {
+    limit?: number;
+    offset?: number;
+    sort?: 'newest' | 'oldest' | 'rating_desc' | 'rating_asc' | 'helpful';
+  } = {}): Promise<ApiResponse<{
+    reviews: any[];
+    total: number;
+    limit: number;
+    offset: number;
+  }>> {
+    const response = await api.get(`/api/reviews/${restaurantId}`, { params });
+    return response.data;
+  }
+
+  // 맛집 리뷰 통계 조회
+  static async getRestaurantReviewStats(restaurantId: string): Promise<ApiResponse<{
+    average_rating: number;
+    total_reviews: number;
+    rating_distribution: {
+      5: number;
+      4: number;
+      3: number;
+      2: number;
+      1: number;
+    };
+  }>> {
+    const response = await api.get(`/api/reviews/${restaurantId}/stats`);
+    return response.data;
+  }
+
+  // 리뷰 작성
+  static async createReview(data: {
+    restaurant_id: string;
+    rating: number;
+    title: string;
+    content: string;
+    images?: string[];
+    tags?: string[];
+  }): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/reviews', data);
+    return response.data;
+  }
+
+  // 리뷰 수정
+  static async updateReview(reviewId: string, data: {
+    rating: number;
+    title: string;
+    content: string;
+    images?: string[];
+    tags?: string[];
+  }): Promise<ApiResponse<any>> {
+    const response = await api.put(`/api/reviews/${reviewId}`, data);
+    return response.data;
+  }
+
+  // 리뷰 도움이 돼요 토글
+  static async toggleReviewHelpful(reviewId: string): Promise<ApiResponse<{
+    review_id: string;
+    is_helpful: boolean;
+    helpful_count: number;
+  }>> {
+    const response = await api.post(`/api/reviews/${reviewId}/helpful`);
+    return response.data;
+  }
+
+  // 리뷰 삭제
+  static async deleteReview(reviewId: string): Promise<ApiResponse<{ review_id: string }>> {
+    const response = await api.delete(`/api/reviews/${reviewId}`);
+    return response.data;
+  }
 }
 
 export default api;

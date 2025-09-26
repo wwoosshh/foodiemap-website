@@ -10,10 +10,13 @@ import {
 } from '@mui/material';
 import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
+import RestaurantDetailModal from './RestaurantDetailModal';
 
 const FeaturedRestaurants: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
     const loadFeaturedRestaurants = async () => {
@@ -82,8 +85,8 @@ const FeaturedRestaurants: React.FC = () => {
   }
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
-    console.log('Featured restaurant 클릭:', restaurant.name);
-    // TODO: 맛집 상세 페이지로 이동
+    setSelectedRestaurant(restaurant);
+    setDetailModalOpen(true);
   };
 
   return (
@@ -264,6 +267,13 @@ const FeaturedRestaurants: React.FC = () => {
           </Card>
         ))}
       </Box>
+
+      {/* 맛집 상세 모달 */}
+      <RestaurantDetailModal
+        open={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        restaurant={selectedRestaurant}
+      />
     </Container>
   );
 };

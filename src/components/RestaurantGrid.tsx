@@ -13,6 +13,7 @@ import {
 import { LocationOn, Phone, Star } from '@mui/icons-material';
 import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
+import RestaurantDetailModal from './RestaurantDetailModal';
 
 interface RestaurantGridProps {
   categoryId?: number;
@@ -32,6 +33,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   const loadRestaurants = useCallback(async () => {
     try {
@@ -93,8 +96,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   );
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
-    console.log('맛집 클릭:', restaurant.name);
-    // TODO: 맛집 상세 페이지로 이동
+    setSelectedRestaurant(restaurant);
+    setDetailModalOpen(true);
   };
 
   if (loading) {
@@ -363,6 +366,13 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
           </Button>
         </Box>
       )}
+
+      {/* 맛집 상세 모달 */}
+      <RestaurantDetailModal
+        open={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        restaurant={selectedRestaurant}
+      />
     </Box>
   );
 };
