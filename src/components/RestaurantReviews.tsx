@@ -115,17 +115,39 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
         onReviewCountChange?.(statsResponse.data.total_reviews);
         onRatingChange?.(statsResponse.data.average_rating);
       } else {
-        throw new Error('리뷰 통계를 불러올 수 없습니다.');
+        // API 에러를 사용자에게 알기 쉽게 표시
+        if (statsResponse.message?.includes('does not exist') || statsResponse.message?.includes('relation')) {
+          setError('리뷰 기능이 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
+        } else {
+          setError(statsResponse.message || '리뷰 통계를 불러올 수 없습니다.');
+        }
+        setReviews([]);
+        setReviewStats(null);
+        return;
       }
 
       if (reviewsResponse.success && reviewsResponse.data) {
         setReviews(reviewsResponse.data.reviews || []);
       } else {
-        throw new Error('리뷰 목록을 불러올 수 없습니다.');
+        // API 에러를 사용자에게 알기 쉽게 표시
+        if (reviewsResponse.message?.includes('does not exist') || reviewsResponse.message?.includes('relation')) {
+          setError('리뷰 기능이 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
+        } else {
+          setError(reviewsResponse.message || '리뷰 목록을 불러올 수 없습니다.');
+        }
+        setReviews([]);
       }
     } catch (err: any) {
       console.error('리뷰 로딩 실패:', err);
-      setError('리뷰를 불러오는 중 오류가 발생했습니다.');
+
+      // 네트워크 오류 vs 서버 오류 구분
+      if (err.code === 'ERR_NETWORK') {
+        setError('네트워크 연결을 확인해주세요.');
+      } else if (err.response?.status === 500) {
+        setError('리뷰 기능이 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setError('리뷰를 불러오는 중 오류가 발생했습니다.');
+      }
       setReviews([]);
       setReviewStats(null);
     } finally {

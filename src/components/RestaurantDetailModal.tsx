@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { Restaurant } from '../types';
 import { ApiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import RestaurantComments from './RestaurantComments';
 import RestaurantReviews from './RestaurantReviews';
 
@@ -92,6 +93,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
   onClose,
   restaurant
 }) => {
+  const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [restaurantDetail, setRestaurantDetail] = useState<RestaurantDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -508,7 +510,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
             <TabPanel value={tabValue} index={2}>
               <RestaurantReviews
                 restaurantId={restaurant?.id || ''}
-                userId={undefined} // TODO: 로그인 사용자 ID 연결
+                userId={user?.id}
                 onReviewCountChange={(count) => {
                   // TODO: 리뷰 수 업데이트
                 }}
@@ -522,7 +524,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
             <TabPanel value={tabValue} index={3}>
               <RestaurantComments
                 restaurantId={restaurant?.id || ''}
-                userId={undefined} // TODO: 로그인 사용자 ID 연결
+                userId={user?.id}
                 onCommentCountChange={(count) => {
                   // TODO: 댓글 수 업데이트
                 }}

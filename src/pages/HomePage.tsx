@@ -59,14 +59,18 @@ const HomePage: React.FC = () => {
     setSearchFilters(filters);
     setRestaurantsLoading(true);
 
-    // 검색 결과 섹션으로 부드럽게 스크롤
-    setTimeout(() => {
-      document.getElementById('search-results-section')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+    // 검색 결과 섹션으로 부드럽게 스크롤 (검색어가 있을 때만)
+    if (filters.search || filters.categoryId) {
+      setTimeout(() => {
+        document.getElementById('search-results-section')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        setRestaurantsLoading(false);
+      }, 300);
+    } else {
       setRestaurantsLoading(false);
-    }, 300);
+    }
   }, []);
 
   const handleTabChange = (tab: string) => {
