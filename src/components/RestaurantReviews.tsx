@@ -18,7 +18,6 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Grid,
   Divider
 } from '@mui/material';
 import {
@@ -290,25 +289,23 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       {/* 리뷰 통계 */}
       {reviewStats && (
         <Paper sx={{ p: 4, mb: 4, border: '1px solid #f0f0f0', borderRadius: 2 }}>
-          <Grid container spacing={4}>
-            <Grid item size={{ xs: 12, md: 4 }}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h2" sx={{ fontWeight: 300, mb: 1 }}>
-                  {reviewStats.average_rating.toFixed(1)}
-                </Typography>
-                <Rating
-                  value={reviewStats.average_rating}
-                  precision={0.1}
-                  readOnly
-                  size="large"
-                  sx={{ mb: 1 }}
-                />
-                <Typography variant="body2" color="text.secondary">
-                  {reviewStats.total_reviews}개의 리뷰
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item size={{ xs: 12, md: 8 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            <Box sx={{ flex: '1 1 200px', textAlign: 'center' }}>
+              <Typography variant="h2" sx={{ fontWeight: 300, mb: 1 }}>
+                {reviewStats.average_rating.toFixed(1)}
+              </Typography>
+              <Rating
+                value={reviewStats.average_rating}
+                precision={0.1}
+                readOnly
+                size="large"
+                sx={{ mb: 1 }}
+              />
+              <Typography variant="body2" color="text.secondary">
+                {reviewStats.total_reviews}개의 리뷰
+              </Typography>
+            </Box>
+            <Box sx={{ flex: '2 1 300px' }}>
               <Box sx={{ ml: 2 }}>
                 {[5, 4, 3, 2, 1].map((rating) => (
                   <Box key={rating} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -335,8 +332,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
                   </Box>
                 ))}
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
 
           <Divider sx={{ my: 3 }} />
 

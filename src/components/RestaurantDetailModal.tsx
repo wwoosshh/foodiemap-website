@@ -7,7 +7,6 @@ import {
   IconButton,
   Tabs,
   Tab,
-  Grid,
   Chip,
   Rating,
   Button,
@@ -366,9 +365,9 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
           <Box sx={{ px: 3 }}>
             {/* 정보 탭 */}
             <TabPanel value={tabValue} index={0}>
-              <Grid container spacing={3}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
                 {/* 기본 정보 */}
-                <Grid item size={{ xs: 12, md: 6 }}>
+                <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
                   <Card sx={{ mb: 2 }}>
                     <CardContent>
                       <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
@@ -431,10 +430,10 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
 
                 {/* 영업시간 */}
-                <Grid item size={{ xs: 12, md: 6 }}>
+                <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
                   {restaurantDetail?.business_hours && (
                     <Card sx={{ mb: 2 }}>
                       <CardContent>
@@ -446,11 +445,11 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                       </CardContent>
                     </Card>
                   )}
-                </Grid>
+                </Box>
 
                 {/* 찾아가는 방법 */}
                 {restaurantDetail?.directions && (
-                  <Grid item xs={12}>
+                  <Box>
                     <Card>
                       <CardContent>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
@@ -467,18 +466,17 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                         )}
                       </CardContent>
                     </Card>
-                  </Grid>
+                  </Box>
                 )}
-              </Grid>
+              </Box>
             </TabPanel>
 
             {/* 메뉴 탭 */}
             <TabPanel value={tabValue} index={1}>
               {restaurantDetail?.menu_info ? (
-                <Grid container spacing={2}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 2 }}>
                   {restaurantDetail.menu_info.map((menu, index) => (
-                    <Grid item size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-                      <Card>
+                    <Card key={index}>
                         <CardContent>
                           <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                             {menu.name}
@@ -495,9 +493,9 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                           </Typography>
                         </CardContent>
                       </Card>
-                    </Grid>
+                    </Box>
                   ))}
-                </Grid>
+                </Box>
               ) : (
                 <Box sx={{ textAlign: 'center', py: 6 }}>
                   <Typography variant="h6" color="text.secondary">
