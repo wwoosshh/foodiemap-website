@@ -477,23 +477,22 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 2 }}>
                   {restaurantDetail.menu_info.map((menu, index) => (
                     <Card key={index}>
-                        <CardContent>
-                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                            {menu.name}
-                          </Typography>
-                          <Typography
-                            variant="h6"
-                            color="primary"
-                            sx={{ fontWeight: 600, mb: 1 }}
-                          >
-                            {menu.price.toLocaleString()}원
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {menu.description}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Box>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                          {menu.name}
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          color="primary"
+                          sx={{ fontWeight: 600, mb: 1 }}
+                        >
+                          {menu.price.toLocaleString()}원
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {menu.description}
+                        </Typography>
+                      </CardContent>
+                    </Card>
                   ))}
                 </Box>
               ) : (
