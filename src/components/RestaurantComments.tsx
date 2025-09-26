@@ -109,8 +109,15 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !userId) return;
 
+    // 프론트엔드 검증
+    if (newComment.trim().length < 1 || newComment.trim().length > 1000) {
+      setError('댓글은 1자 이상 1000자 이하로 작성해주세요.');
+      return;
+    }
+
     try {
       setSubmitting(true);
+      setError(''); // 기존 오류 메시지 초기화
 
       const response = await ApiService.createComment({
         restaurant_id: restaurantId,
@@ -126,7 +133,8 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       }
     } catch (err: any) {
       console.error('댓글 작성 실패:', err);
-      setError('댓글 작성 중 오류가 발생했습니다.');
+      // 사용자 친화적인 에러 메시지 사용
+      setError(err.userMessage || err.response?.data?.message || '댓글 작성 중 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -136,8 +144,15 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const handleSubmitReply = async (commentId: string) => {
     if (!replyContent.trim() || !userId) return;
 
+    // 프론트엔드 검증
+    if (replyContent.trim().length < 1 || replyContent.trim().length > 1000) {
+      setError('답글은 1자 이상 1000자 이하로 작성해주세요.');
+      return;
+    }
+
     try {
       setSubmitting(true);
+      setError(''); // 기존 오류 메시지 초기화
 
       const response = await ApiService.createComment({
         restaurant_id: restaurantId,
@@ -155,7 +170,8 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       }
     } catch (err: any) {
       console.error('답글 작성 실패:', err);
-      setError('답글 작성 중 오류가 발생했습니다.');
+      // 사용자 친화적인 에러 메시지 사용
+      setError(err.userMessage || err.response?.data?.message || '답글 작성 중 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -293,6 +309,8 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
             placeholder="답글을 작성해주세요..."
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
+            error={replyContent.length > 1000}
+            helperText={`${replyContent.length}/1000자${replyContent.length > 1000 ? ' (글자 수가 초과되었습니다)' : ''}`}
             size="small"
             sx={{ mb: 2 }}
           />
@@ -309,7 +327,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
             <Button
               size="small"
               variant="contained"
-              disabled={!replyContent.trim() || submitting}
+              disabled={!replyContent.trim() || submitting || replyContent.length > 1000}
               onClick={() => handleSubmitReply(comment.id)}
             >
               답글 작성
@@ -358,12 +376,14 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
             placeholder="이 맛집에 대한 경험을 공유해주세요..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
+            error={newComment.length > 1000}
+            helperText={`${newComment.length}/1000자${newComment.length > 1000 ? ' (글자 수가 초과되었습니다)' : ''}`}
             sx={{ mb: 2 }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               variant="contained"
-              disabled={!newComment.trim() || submitting}
+              disabled={!newComment.trim() || submitting || newComment.length > 1000}
               onClick={handleSubmitComment}
               sx={{
                 px: 3,

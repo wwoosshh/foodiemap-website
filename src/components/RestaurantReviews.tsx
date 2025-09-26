@@ -163,16 +163,46 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   const handleSubmitReview = async () => {
     if (!newReview.title.trim() || !newReview.content.trim() || !userId) return;
 
+    // 프론트엔드 검증
+    const title = newReview.title.trim();
+    const content = newReview.content.trim();
+    const rating = newReview.rating;
+
+    if (title.length < 1 || title.length > 100) {
+      setError('리뷰 제목은 1자 이상 100자 이하로 작성해주세요.');
+      return;
+    }
+
+    if (content.length < 10 || content.length > 2000) {
+      setError('리뷰 내용은 10자 이상 2000자 이하로 작성해주세요.');
+      return;
+    }
+
+    if (rating < 1 || rating > 5) {
+      setError('평점은 1점부터 5점까지 선택해주세요.');
+      return;
+    }
+
+    // 중복 리뷰 확인 (새 리뷰 작성 시에만)
+    if (!editingReview) {
+      const userHasReview = reviews.some(review => review.user_id === userId);
+      if (userHasReview) {
+        setError('이미 이 맛집에 리뷰를 작성하셨습니다. 기존 리뷰를 수정하거나 삭제 후 다시 작성해주세요.');
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
+      setError(''); // 기존 오류 메시지 초기화
 
       let response;
       if (editingReview) {
         // 리뷰 수정
         response = await ApiService.updateReview(editingReview.id, {
           rating: newReview.rating,
-          title: newReview.title.trim(),
-          content: newReview.content.trim(),
+          title: title,
+          content: content,
           images: newReview.images,
           tags: newReview.tags
         });
@@ -181,8 +211,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
         response = await ApiService.createReview({
           restaurant_id: restaurantId,
           rating: newReview.rating,
-          title: newReview.title.trim(),
-          content: newReview.content.trim(),
+          title: title,
+          content: content,
           images: newReview.images,
           tags: newReview.tags
         });
@@ -197,7 +227,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       }
     } catch (err: any) {
       console.error('리뷰 저장 실패:', err);
-      setError('리뷰 저장 중 오류가 발생했습니다.');
+      // 사용자 친화적인 에러 메시지 사용
+      setError(err.userMessage || err.response?.data?.message || '리뷰 저장 중 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -206,6 +237,13 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   // 도움이 돼요 토글
   const handleToggleHelpful = async (reviewId: string) => {
     if (!userId) return;
+
+    // 자신의 리뷰인지 확인
+    const review = reviews.find(r => r.id === reviewId);
+    if (review && review.user_id === userId) {
+      setError('본인이 작성한 리뷰에는 도움이 돼요를 누를 수 없습니다.');
+      return;
+    }
 
     try {
       const response = await ApiService.toggleReviewHelpful(reviewId);
@@ -218,7 +256,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       }
     } catch (err: any) {
       console.error('도움이 돼요 토글 실패:', err);
-      // 사용자에게는 별도 오류 표시 안함 (도움이 돼요는 부가 기능)
+      // 사용자 친화적인 에러 메시지 사용
+      setError(err.userMessage || err.response?.data?.message || '도움이 돼요 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -489,10 +528,12 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
                   size="small"
                   startIcon={review.is_helpful ? <ThumbUp /> : <ThumbUpOffAlt />}
                   onClick={() => handleToggleHelpful(review.id)}
+                  disabled={review.user_id === userId || !userId}
                   sx={{
                     color: review.is_helpful ? '#1976d2' : '#666',
                     fontSize: '0.85rem',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    opacity: (review.user_id === userId || !userId) ? 0.5 : 1
                   }}
                 >
                   도움이 돼요 {review.helpful_count}
@@ -544,6 +585,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
             label="제목"
             value={newReview.title}
             onChange={(e) => setNewReview(prev => ({ ...prev, title: e.target.value }))}
+            error={newReview.title.length > 100}
+            helperText={`${newReview.title.length}/100자${newReview.title.length > 100 ? ' (글자 수가 초과되었습니다)' : ''}`}
             sx={{ mb: 3 }}
           />
 
@@ -555,6 +598,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
             placeholder="음식의 맛, 서비스, 분위기 등에 대해 자세히 써주세요..."
             value={newReview.content}
             onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
+            error={(newReview.content.length < 10 && newReview.content.length > 0) || newReview.content.length > 2000}
+            helperText={`${newReview.content.length}/2000자 (최소 10자 이상)${newReview.content.length > 2000 ? ' (글자 수가 초과되었습니다)' : newReview.content.length < 10 && newReview.content.length > 0 ? ' (10자 이상 입력해주세요)' : ''}`}
             sx={{ mb: 3 }}
           />
 
@@ -580,7 +625,14 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
           <Button
             variant="contained"
             onClick={handleSubmitReview}
-            disabled={!newReview.title.trim() || !newReview.content.trim() || submitting}
+            disabled={
+              !newReview.title.trim() ||
+              !newReview.content.trim() ||
+              newReview.title.length > 100 ||
+              newReview.content.length < 10 ||
+              newReview.content.length > 2000 ||
+              submitting
+            }
           >
             {editingReview ? '수정' : '작성'} 완료
           </Button>

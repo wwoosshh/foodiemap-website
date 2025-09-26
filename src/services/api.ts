@@ -27,6 +27,58 @@ api.interceptors.request.use(
   }
 );
 
+// 사용자 친화적인 에러 메시지 매핑
+const getErrorMessage = (error: any): string => {
+  const response = error.response;
+  const data = response?.data;
+
+  // 백엔드에서 전달한 구체적인 메시지가 있는 경우
+  if (data?.message) {
+    // 특정 검증 오류들을 사용자 친화적으로 변환
+    const message = data.message;
+
+    if (message.includes('자신의 리뷰에는 도움이 돼요를 누를 수 없습니다')) {
+      return '본인이 작성한 리뷰에는 도움이 돼요를 누를 수 없습니다.';
+    }
+    if (message.includes('이미 이 맛집에 대한 리뷰를 작성하셨습니다')) {
+      return '이미 이 맛집에 리뷰를 작성하셨습니다. 기존 리뷰를 수정하거나 삭제 후 다시 작성해주세요.';
+    }
+    if (message.includes('내용은 10-2000자여야 합니다')) {
+      return '리뷰 내용은 10자 이상 2000자 이하로 작성해주세요.';
+    }
+    if (message.includes('제목은 1-100자여야 합니다')) {
+      return '리뷰 제목은 1자 이상 100자 이하로 작성해주세요.';
+    }
+    if (message.includes('댓글 내용은 1-1000자여야 합니다')) {
+      return '댓글은 1자 이상 1000자 이하로 작성해주세요.';
+    }
+    if (message.includes('평점은 1-5 사이의 정수여야 합니다')) {
+      return '평점은 1점부터 5점까지 선택해주세요.';
+    }
+
+    // 기본적으로 백엔드 메시지를 그대로 사용
+    return message;
+  }
+
+  // HTTP 상태 코드별 기본 메시지
+  switch (response?.status) {
+    case 400:
+      return '입력하신 정보를 다시 확인해주세요.';
+    case 401:
+      return '로그인이 필요한 서비스입니다.';
+    case 403:
+      return '이 작업을 수행할 권한이 없습니다.';
+    case 404:
+      return '요청하신 정보를 찾을 수 없습니다.';
+    case 409:
+      return '이미 처리된 요청입니다. 페이지를 새로고침해주세요.';
+    case 500:
+      return '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    default:
+      return '알 수 없는 오류가 발생했습니다.';
+  }
+};
+
 // Response interceptor - 에러 처리
 api.interceptors.response.use(
   (response) => response,
@@ -36,6 +88,10 @@ api.interceptors.response.use(
     // CORS 에러 처리
     if (error.code === 'ERR_NETWORK') {
       console.error('Network error - possible CORS issue');
+      error.userMessage = '네트워크 연결을 확인해주세요.';
+    } else {
+      // 사용자 친화적인 에러 메시지 추가
+      error.userMessage = getErrorMessage(error);
     }
 
     if (error.response?.status === 401) {
