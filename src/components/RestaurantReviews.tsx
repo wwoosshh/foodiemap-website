@@ -18,7 +18,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Grid2 as Grid,
+  Grid,
   Divider
 } from '@mui/material';
 import {
@@ -291,7 +291,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       {reviewStats && (
         <Paper sx={{ p: 4, mb: 4, border: '1px solid #f0f0f0', borderRadius: 2 }}>
           <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
+            <Grid item size={{ xs: 12, md: 4 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h2" sx={{ fontWeight: 300, mb: 1 }}>
                   {reviewStats.average_rating.toFixed(1)}
@@ -308,7 +308,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} md={8}>
+            <Grid item size={{ xs: 12, md: 8 }}>
               <Box sx={{ ml: 2 }}>
                 {[5, 4, 3, 2, 1].map((rating) => (
                   <Box key={rating} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

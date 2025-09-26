@@ -7,7 +7,7 @@ import {
   IconButton,
   Tabs,
   Tab,
-  Grid2 as Grid,
+  Grid,
   Chip,
   Rating,
   Button,
@@ -368,7 +368,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
             <TabPanel value={tabValue} index={0}>
               <Grid container spacing={3}>
                 {/* 기본 정보 */}
-                <Grid item xs={12} md={6}>
+                <Grid item size={{ xs: 12, md: 6 }}>
                   <Card sx={{ mb: 2 }}>
                     <CardContent>
                       <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
@@ -434,7 +434,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                 </Grid>
 
                 {/* 영업시간 */}
-                <Grid item xs={12} md={6}>
+                <Grid item size={{ xs: 12, md: 6 }}>
                   {restaurantDetail?.business_hours && (
                     <Card sx={{ mb: 2 }}>
                       <CardContent>
@@ -477,7 +477,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               {restaurantDetail?.menu_info ? (
                 <Grid container spacing={2}>
                   {restaurantDetail.menu_info.map((menu, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Grid item size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                       <Card>
                         <CardContent>
                           <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
