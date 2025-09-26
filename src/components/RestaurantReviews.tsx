@@ -18,7 +18,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Grid,
+  Grid2 as Grid,
   Divider
 } from '@mui/material';
 import {

@@ -7,7 +7,7 @@ import {
   IconButton,
   Tabs,
   Tab,
-  Grid,
+  Grid2 as Grid,
   Chip,
   Rating,
   Button,
