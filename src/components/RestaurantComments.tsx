@@ -11,14 +11,19 @@ import {
   Chip,
   IconButton,
   Menu,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   MoreVert,
   Reply,
   ThumbUp,
   ThumbUpOffAlt,
-  Person
+  Person,
+  Delete
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -59,6 +64,9 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const [replyContent, setReplyContent] = useState('');
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedComment, setSelectedComment] = useState<string | null>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
 
   // 댓글 로딩
   const loadComments = useCallback(async () => {
@@ -217,6 +225,54 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const handleMenuClose = () => {
     setMenuAnchor(null);
     setSelectedComment(null);
+  };
+
+  // 댓글 삭제
+  const handleDeleteComment = async () => {
+    if (!selectedComment) return;
+
+    try {
+      const response = await ApiService.deleteComment(selectedComment);
+      if (response.success) {
+        await loadComments();
+        handleMenuClose();
+      } else {
+        setError(response.message || '댓글 삭제에 실패했습니다.');
+      }
+    } catch (err: any) {
+      console.error('댓글 삭제 오류:', err);
+      setError(err.userMessage || '댓글 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 댓글 신고
+  const handleReportComment = async () => {
+    if (!selectedComment || !reportReason.trim()) return;
+
+    try {
+      const response = await ApiService.reportComment(selectedComment, {
+        reason: reportReason,
+        details: reportDetails.trim() || undefined
+      });
+
+      if (response.success) {
+        setReportDialogOpen(false);
+        setReportReason('');
+        setReportDetails('');
+        handleMenuClose();
+        alert('신고가 접수되었습니다. 빠른 시일 내에 검토하겠습니다.');
+      } else {
+        setError(response.message || '신고 접수에 실패했습니다.');
+      }
+    } catch (err: any) {
+      console.error('댓글 신고 오류:', err);
+      setError(err.userMessage || '신고 접수 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleOpenReportDialog = () => {
+    setReportDialogOpen(true);
+    handleMenuClose();
   };
 
   const formatDate = (dateString: string) => {
@@ -453,11 +509,70 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
           sx: { minWidth: 120 }
         }}
       >
-        <MenuItem onClick={handleMenuClose}>신고하기</MenuItem>
-        {selectedComment && userId && (
-          <MenuItem onClick={handleMenuClose}>삭제하기</MenuItem>
+        <MenuItem onClick={handleOpenReportDialog}>신고하기</MenuItem>
+        {selectedComment && userId && comments.find(c => c.id === selectedComment)?.user_id === userId && (
+          <MenuItem onClick={handleDeleteComment}>
+            <Delete fontSize="small" sx={{ mr: 1 }} />
+            삭제하기
+          </MenuItem>
         )}
       </Menu>
+
+      {/* 신고 다이얼로그 */}
+      <Dialog
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        aria-labelledby="comment-report-dialog-title"
+      >
+        <DialogTitle id="comment-report-dialog-title">
+          댓글 신고하기
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            부적절한 내용의 댓글을 신고해주세요. 신고 내용은 검토 후 조치됩니다.
+          </Typography>
+          <TextField
+            select
+            fullWidth
+            label="신고 사유"
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="spam">스팸/광고</MenuItem>
+            <MenuItem value="inappropriate">부적절한 내용</MenuItem>
+            <MenuItem value="fake">허위 정보</MenuItem>
+            <MenuItem value="harassment">욕설/비방</MenuItem>
+            <MenuItem value="other">기타</MenuItem>
+          </TextField>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="상세 설명 (선택사항)"
+            placeholder="신고 사유에 대한 추가 설명을 입력해주세요..."
+            value={reportDetails}
+            onChange={(e) => setReportDetails(e.target.value)}
+            inputProps={{ maxLength: 500 }}
+            helperText={`${reportDetails.length}/500자`}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReportDialogOpen(false)}>
+            취소
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleReportComment}
+            disabled={!reportReason.trim()}
+          >
+            신고하기
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

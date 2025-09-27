@@ -193,6 +193,15 @@ export class ApiService {
     return response.data;
   }
 
+  // 댓글 신고
+  static async reportComment(commentId: string, data: {
+    reason: string;
+    details?: string;
+  }): Promise<ApiResponse<{ report_id: string }>> {
+    const response = await api.post(`/api/comments/${commentId}/report`, data);
+    return response.data;
+  }
+
   // === 리뷰 API ===
 
   // 맛집 리뷰 목록 조회
@@ -264,6 +273,15 @@ export class ApiService {
   // 리뷰 삭제
   static async deleteReview(reviewId: string): Promise<ApiResponse<{ review_id: string }>> {
     const response = await api.delete(`/api/reviews/${reviewId}`);
+    return response.data;
+  }
+
+  // 리뷰 신고
+  static async reportReview(reviewId: string, data: {
+    reason: string;
+    details?: string;
+  }): Promise<ApiResponse<{ report_id: string }>> {
+    const response = await api.post(`/api/reviews/${reviewId}/report`, data);
     return response.data;
   }
 

@@ -84,6 +84,9 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedReview, setSelectedReview] = useState<string | null>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
 
   // 리뷰 작성 폼 상태
   const [newReview, setNewReview] = useState({
@@ -316,6 +319,55 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   const handleMenuClose = () => {
     setMenuAnchor(null);
     setSelectedReview(null);
+  };
+
+  // 리뷰 삭제
+  const handleDeleteReview = async () => {
+    if (!selectedReview) return;
+
+    try {
+      const response = await ApiService.deleteReview(selectedReview);
+      if (response.success) {
+        await loadReviews();
+        handleMenuClose();
+      } else {
+        setError(response.message || '리뷰 삭제에 실패했습니다.');
+      }
+    } catch (err: any) {
+      console.error('리뷰 삭제 오류:', err);
+      setError(err.userMessage || '리뷰 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 리뷰 신고
+  const handleReportReview = async () => {
+    if (!selectedReview || !reportReason.trim()) return;
+
+    try {
+      const response = await ApiService.reportReview(selectedReview, {
+        reason: reportReason,
+        details: reportDetails.trim() || undefined
+      });
+
+      if (response.success) {
+        setReportDialogOpen(false);
+        setReportReason('');
+        setReportDetails('');
+        handleMenuClose();
+        // 성공 메시지 표시를 위해 성공 피드백 대신 alert 사용
+        alert('신고가 접수되었습니다. 빠른 시일 내에 검토하겠습니다.');
+      } else {
+        setError(response.message || '신고 접수에 실패했습니다.');
+      }
+    } catch (err: any) {
+      console.error('리뷰 신고 오류:', err);
+      setError(err.userMessage || '신고 접수 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleOpenReportDialog = () => {
+    setReportDialogOpen(true);
+    handleMenuClose();
   };
 
   const formatDate = (dateString: string) => {
@@ -668,14 +720,70 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
           sx: { minWidth: 120 }
         }}
       >
-        <MenuItem onClick={handleMenuClose}>신고하기</MenuItem>
-        {selectedReview && userId && (
-          <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleOpenReportDialog}>신고하기</MenuItem>
+        {selectedReview && userId && reviews.find(r => r.id === selectedReview)?.user_id === userId && (
+          <MenuItem onClick={handleDeleteReview}>
             <Delete fontSize="small" sx={{ mr: 1 }} />
             삭제하기
           </MenuItem>
         )}
       </Menu>
+
+      {/* 신고 다이얼로그 */}
+      <Dialog
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        aria-labelledby="report-dialog-title"
+      >
+        <DialogTitle id="report-dialog-title">
+          리뷰 신고하기
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            부적절한 내용의 리뷰를 신고해주세요. 신고 내용은 검토 후 조치됩니다.
+          </Typography>
+          <TextField
+            select
+            fullWidth
+            label="신고 사유"
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="spam">스팸/광고</MenuItem>
+            <MenuItem value="inappropriate">부적절한 내용</MenuItem>
+            <MenuItem value="fake">허위 정보</MenuItem>
+            <MenuItem value="harassment">욕설/비방</MenuItem>
+            <MenuItem value="other">기타</MenuItem>
+          </TextField>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="상세 설명 (선택사항)"
+            placeholder="신고 사유에 대한 추가 설명을 입력해주세요..."
+            value={reportDetails}
+            onChange={(e) => setReportDetails(e.target.value)}
+            inputProps={{ maxLength: 500 }}
+            helperText={`${reportDetails.length}/500자`}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReportDialogOpen(false)}>
+            취소
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleReportReview}
+            disabled={!reportReason.trim()}
+          >
+            신고하기
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
