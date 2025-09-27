@@ -247,32 +247,48 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
 
   // 댓글 신고
   const handleReportComment = async () => {
-    if (!selectedComment || !reportReason.trim()) return;
+    console.log('댓글 신고 시작:', { selectedComment, reportReason, reportDetails });
+
+    if (!selectedComment || !reportReason.trim()) {
+      console.log('필수 값 누락:', { selectedComment, reportReason: reportReason.trim() });
+      return;
+    }
 
     try {
+      console.log('댓글 신고 API 호출 중...');
       const response = await ApiService.reportComment(selectedComment, {
         reason: reportReason,
         details: reportDetails.trim() || undefined
       });
 
+      console.log('댓글 신고 API 응답:', response);
+
       if (response.success) {
         setReportDialogOpen(false);
         setReportReason('');
         setReportDetails('');
-        handleMenuClose();
+        setSelectedComment(null); // selectedComment 초기화 추가
         alert('신고가 접수되었습니다. 빠른 시일 내에 검토하겠습니다.');
       } else {
+        console.error('댓글 신고 실패:', response.message);
         setError(response.message || '신고 접수에 실패했습니다.');
       }
     } catch (err: any) {
       console.error('댓글 신고 오류:', err);
-      setError(err.userMessage || '신고 접수 중 오류가 발생했습니다.');
+      setError(err.userMessage || err.response?.data?.message || '신고 접수 중 오류가 발생했습니다.');
     }
   };
 
   const handleOpenReportDialog = () => {
+    console.log('댓글 신고 다이얼로그 열기:', selectedComment);
     setReportDialogOpen(true);
     handleMenuClose();
+  };
+
+  const handleCloseReportDialog = () => {
+    setReportDialogOpen(false);
+    setReportReason('');
+    setReportDetails('');
   };
 
   const formatDate = (dateString: string) => {
@@ -521,10 +537,12 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       {/* 신고 다이얼로그 */}
       <Dialog
         open={reportDialogOpen}
-        onClose={() => setReportDialogOpen(false)}
+        onClose={handleCloseReportDialog}
         maxWidth="sm"
         fullWidth
         aria-labelledby="comment-report-dialog-title"
+        disableEscapeKeyDown={false}
+        keepMounted={false}
       >
         <DialogTitle id="comment-report-dialog-title">
           댓글 신고하기
@@ -540,6 +558,10 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
             value={reportReason}
             onChange={(e) => setReportReason(e.target.value)}
             sx={{ mb: 2 }}
+            id="comment-report-reason-select"
+            SelectProps={{
+              native: false,
+            }}
           >
             <MenuItem value="spam">스팸/광고</MenuItem>
             <MenuItem value="inappropriate">부적절한 내용</MenuItem>
@@ -557,10 +579,11 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
             onChange={(e) => setReportDetails(e.target.value)}
             inputProps={{ maxLength: 500 }}
             helperText={`${reportDetails.length}/500자`}
+            id="comment-report-details-input"
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setReportDialogOpen(false)}>
+          <Button onClick={handleCloseReportDialog}>
             취소
           </Button>
           <Button
