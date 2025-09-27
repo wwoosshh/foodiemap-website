@@ -378,6 +378,17 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
 
   const handleOpenReportDialog = () => {
     console.log('신고 다이얼로그 열기:', selectedReview);
+
+    // 프론트엔드에서 본인 글 신고 방지
+    if (selectedReview && userId) {
+      const selectedReviewData = reviews.find(r => r.id === selectedReview);
+      if (selectedReviewData?.user_id === userId) {
+        setError('본인이 작성한 리뷰는 신고할 수 없습니다.');
+        handleMenuCloseOnly();
+        return;
+      }
+    }
+
     setReportingReviewId(selectedReview); // 신고할 리뷰 ID 저장
     setReportDialogOpen(true);
     handleMenuCloseOnly(); // 메뉴만 닫고 selectedReview는 유지
@@ -741,7 +752,17 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
           sx: { minWidth: 120 }
         }}
       >
-        <MenuItem onClick={handleOpenReportDialog}>신고하기</MenuItem>
+        {/* 본인 글이 아닌 경우에만 신고 메뉴 표시 */}
+        {selectedReview && userId && reviews.find(r => r.id === selectedReview)?.user_id !== userId && (
+          <MenuItem onClick={handleOpenReportDialog}>신고하기</MenuItem>
+        )}
+        {/* 비로그인 사용자에게도 신고 메뉴 표시 */}
+        {!userId && (
+          <MenuItem onClick={() => {
+            setError('리뷰 신고는 로그인 후 가능합니다.');
+            handleMenuCloseOnly();
+          }}>신고하기</MenuItem>
+        )}
         {selectedReview && userId && reviews.find(r => r.id === selectedReview)?.user_id === userId && (
           <MenuItem onClick={handleDeleteReview}>
             <Delete fontSize="small" sx={{ mr: 1 }} />

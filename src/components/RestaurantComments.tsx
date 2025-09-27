@@ -284,6 +284,17 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
 
   const handleOpenReportDialog = () => {
     console.log('댓글 신고 다이얼로그 열기:', selectedComment);
+
+    // 프론트엔드에서 본인 글 신고 방지
+    if (selectedComment && userId) {
+      const selectedCommentData = comments.find(c => c.id === selectedComment);
+      if (selectedCommentData?.user_id === userId) {
+        setError('본인이 작성한 댓글은 신고할 수 없습니다.');
+        handleMenuCloseOnly();
+        return;
+      }
+    }
+
     setReportingCommentId(selectedComment); // 신고할 댓글 ID 저장
     setReportDialogOpen(true);
     handleMenuCloseOnly(); // 메뉴만 닫고 selectedComment는 유지
@@ -531,7 +542,17 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
           sx: { minWidth: 120 }
         }}
       >
-        <MenuItem onClick={handleOpenReportDialog}>신고하기</MenuItem>
+        {/* 본인 글이 아닌 경우에만 신고 메뉴 표시 */}
+        {selectedComment && userId && comments.find(c => c.id === selectedComment)?.user_id !== userId && (
+          <MenuItem onClick={handleOpenReportDialog}>신고하기</MenuItem>
+        )}
+        {/* 비로그인 사용자에게도 신고 메뉴 표시 */}
+        {!userId && (
+          <MenuItem onClick={() => {
+            setError('댓글 신고는 로그인 후 가능합니다.');
+            handleMenuCloseOnly();
+          }}>신고하기</MenuItem>
+        )}
         {selectedComment && userId && comments.find(c => c.id === selectedComment)?.user_id === userId && (
           <MenuItem onClick={handleDeleteComment}>
             <Delete fontSize="small" sx={{ mr: 1 }} />
