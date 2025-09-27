@@ -32,6 +32,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ApiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface Review {
   id: string;
@@ -73,6 +74,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   onReviewCountChange,
   onRatingChange
 }) => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -266,20 +268,10 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       return;
     }
 
-    // AuthContext에서 user 정보 가져오기
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (!user.email_verified) {
-          setError('리뷰 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
-          return;
-        }
-      } catch (error) {
-        console.error('사용자 정보 파싱 실패:', error);
-        setError('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
-        return;
-      }
+    // AuthContext에서 user 정보 사용
+    if (user && !user.email_verified) {
+      setError('리뷰 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
+      return;
     }
 
     if (review) {

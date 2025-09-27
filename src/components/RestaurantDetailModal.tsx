@@ -178,7 +178,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
       return;
     }
 
-    // 이메일 인증 확인
+    // 이메일 인증 확인 (AuthContext의 user 정보 사용)
     if (!user.email_verified) {
       alert('즐겨찾기 기능은 이메일 인증 후 이용가능합니다.');
       return;

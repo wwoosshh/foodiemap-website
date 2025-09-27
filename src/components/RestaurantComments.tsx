@@ -23,6 +23,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ApiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface Comment {
   id: string;
@@ -48,6 +49,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   userId,
   onCommentCountChange
 }) => {
+  const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -108,20 +110,10 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !userId) return;
 
-    // 이메일 인증 확인
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (!user.email_verified) {
-          setError('댓글 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
-          return;
-        }
-      } catch (error) {
-        console.error('사용자 정보 파싱 실패:', error);
-        setError('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
-        return;
-      }
+    // 이메일 인증 확인 (AuthContext의 user 정보 사용)
+    if (user && !user.email_verified) {
+      setError('댓글 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
+      return;
     }
 
     // 프론트엔드 검증
@@ -159,20 +151,10 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const handleSubmitReply = async (commentId: string) => {
     if (!replyContent.trim() || !userId) return;
 
-    // 이메일 인증 확인
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (!user.email_verified) {
-          setError('답글 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
-          return;
-        }
-      } catch (error) {
-        console.error('사용자 정보 파싱 실패:', error);
-        setError('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
-        return;
-      }
+    // 이메일 인증 확인 (AuthContext의 user 정보 사용)
+    if (user && !user.email_verified) {
+      setError('답글 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
+      return;
     }
 
     // 프론트엔드 검증
