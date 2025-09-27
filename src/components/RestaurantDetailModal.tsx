@@ -109,7 +109,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
     try {
       const response = await ApiService.getRestaurantDetails(restaurantId);
 
-      if (response.success && response.data.restaurant.restaurant_details?.[0]) {
+      if (response.success && response.data?.restaurant.restaurant_details?.[0]) {
         const details = response.data.restaurant.restaurant_details[0];
         setRestaurantDetail({
           id: details.id,
