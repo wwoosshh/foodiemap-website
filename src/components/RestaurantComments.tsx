@@ -67,6 +67,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
+  const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
 
   // 댓글 로딩
   const loadComments = useCallback(async () => {
@@ -227,6 +228,11 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
     setSelectedComment(null);
   };
 
+  const handleMenuCloseOnly = () => {
+    setMenuAnchor(null);
+    // selectedComment는 초기화하지 않음
+  };
+
   // 댓글 삭제
   const handleDeleteComment = async () => {
     if (!selectedComment) return;
@@ -247,16 +253,16 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
 
   // 댓글 신고
   const handleReportComment = async () => {
-    console.log('댓글 신고 시작:', { selectedComment, reportReason, reportDetails });
+    console.log('댓글 신고 시작:', { reportingCommentId, reportReason, reportDetails });
 
-    if (!selectedComment || !reportReason.trim()) {
-      console.log('필수 값 누락:', { selectedComment, reportReason: reportReason.trim() });
+    if (!reportingCommentId || !reportReason.trim()) {
+      console.log('필수 값 누락:', { reportingCommentId, reportReason: reportReason.trim() });
       return;
     }
 
     try {
       console.log('댓글 신고 API 호출 중...');
-      const response = await ApiService.reportComment(selectedComment, {
+      const response = await ApiService.reportComment(reportingCommentId, {
         reason: reportReason,
         details: reportDetails.trim() || undefined
       });
@@ -264,10 +270,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       console.log('댓글 신고 API 응답:', response);
 
       if (response.success) {
-        setReportDialogOpen(false);
-        setReportReason('');
-        setReportDetails('');
-        setSelectedComment(null); // selectedComment 초기화 추가
+        handleCloseReportDialog();
         alert('신고가 접수되었습니다. 빠른 시일 내에 검토하겠습니다.');
       } else {
         console.error('댓글 신고 실패:', response.message);
@@ -281,14 +284,17 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
 
   const handleOpenReportDialog = () => {
     console.log('댓글 신고 다이얼로그 열기:', selectedComment);
+    setReportingCommentId(selectedComment); // 신고할 댓글 ID 저장
     setReportDialogOpen(true);
-    handleMenuClose();
+    handleMenuCloseOnly(); // 메뉴만 닫고 selectedComment는 유지
   };
 
   const handleCloseReportDialog = () => {
     setReportDialogOpen(false);
     setReportReason('');
     setReportDetails('');
+    setReportingCommentId(null);
+    setSelectedComment(null); // 이제 선택 초기화
   };
 
   const formatDate = (dateString: string) => {

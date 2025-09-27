@@ -87,6 +87,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
+  const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
 
   // 리뷰 작성 폼 상태
   const [newReview, setNewReview] = useState({
@@ -321,6 +322,11 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     setSelectedReview(null);
   };
 
+  const handleMenuCloseOnly = () => {
+    setMenuAnchor(null);
+    // selectedReview는 초기화하지 않음
+  };
+
   // 리뷰 삭제
   const handleDeleteReview = async () => {
     if (!selectedReview) return;
@@ -341,16 +347,16 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
 
   // 리뷰 신고
   const handleReportReview = async () => {
-    console.log('신고 시작:', { selectedReview, reportReason, reportDetails });
+    console.log('신고 시작:', { reportingReviewId, reportReason, reportDetails });
 
-    if (!selectedReview || !reportReason.trim()) {
-      console.log('필수 값 누락:', { selectedReview, reportReason: reportReason.trim() });
+    if (!reportingReviewId || !reportReason.trim()) {
+      console.log('필수 값 누락:', { reportingReviewId, reportReason: reportReason.trim() });
       return;
     }
 
     try {
       console.log('신고 API 호출 중...');
-      const response = await ApiService.reportReview(selectedReview, {
+      const response = await ApiService.reportReview(reportingReviewId, {
         reason: reportReason,
         details: reportDetails.trim() || undefined
       });
@@ -358,10 +364,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       console.log('신고 API 응답:', response);
 
       if (response.success) {
-        setReportDialogOpen(false);
-        setReportReason('');
-        setReportDetails('');
-        setSelectedReview(null); // selectedReview 초기화 추가
+        handleCloseReportDialog();
         alert('신고가 접수되었습니다. 빠른 시일 내에 검토하겠습니다.');
       } else {
         console.error('신고 실패:', response.message);
@@ -375,14 +378,17 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
 
   const handleOpenReportDialog = () => {
     console.log('신고 다이얼로그 열기:', selectedReview);
+    setReportingReviewId(selectedReview); // 신고할 리뷰 ID 저장
     setReportDialogOpen(true);
-    handleMenuClose();
+    handleMenuCloseOnly(); // 메뉴만 닫고 selectedReview는 유지
   };
 
   const handleCloseReportDialog = () => {
     setReportDialogOpen(false);
     setReportReason('');
     setReportDetails('');
+    setReportingReviewId(null);
+    setSelectedReview(null); // 이제 선택 초기화
   };
 
   const formatDate = (dateString: string) => {
