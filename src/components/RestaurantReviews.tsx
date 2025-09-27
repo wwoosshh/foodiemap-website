@@ -260,6 +260,28 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   };
 
   const handleOpenWriteDialog = (review?: Review) => {
+    // 이메일 인증 확인
+    if (!userId) {
+      setError('리뷰 작성은 로그인 후 가능합니다.');
+      return;
+    }
+
+    // AuthContext에서 user 정보 가져오기
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (!user.email_verified) {
+          setError('리뷰 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
+          return;
+        }
+      } catch (error) {
+        console.error('사용자 정보 파싱 실패:', error);
+        setError('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+    }
+
     if (review) {
       setEditingReview(review);
       setNewReview({
@@ -559,14 +581,18 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
+        aria-labelledby="review-dialog-title"
+        aria-describedby="review-dialog-description"
         PaperProps={{
-          sx: { borderRadius: 2 }
+          sx: { borderRadius: 2 },
+          'aria-modal': true,
+          role: 'dialog'
         }}
       >
-        <DialogTitle sx={{ pb: 1 }}>
+        <DialogTitle id="review-dialog-title" sx={{ pb: 1 }}>
           {editingReview ? '리뷰 수정' : '리뷰 작성'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent id="review-dialog-description">
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               별점
@@ -575,6 +601,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
               value={newReview.rating}
               onChange={(_, value) => setNewReview(prev => ({ ...prev, rating: value || 1 }))}
               size="large"
+              aria-label="리뷰 별점 선택"
             />
           </Box>
 
@@ -586,6 +613,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
             error={newReview.title.length > 100}
             helperText={`${newReview.title.length}/100자${newReview.title.length > 100 ? ' (글자 수가 초과되었습니다)' : ''}`}
             sx={{ mb: 3 }}
+            aria-label="리뷰 제목 입력"
           />
 
           <TextField
@@ -599,6 +627,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
             error={(newReview.content.length < 10 && newReview.content.length > 0) || newReview.content.length > 2000}
             helperText={`${newReview.content.length}/2000자 (최소 10자 이상)${newReview.content.length > 2000 ? ' (글자 수가 초과되었습니다)' : newReview.content.length < 10 && newReview.content.length > 0 ? ' (10자 이상 입력해주세요)' : ''}`}
             sx={{ mb: 3 }}
+            aria-label="리뷰 내용 입력"
           />
 
           <Box sx={{ mb: 2 }}>
@@ -607,9 +636,10 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
               variant="outlined"
               component="label"
               sx={{ mr: 2 }}
+              aria-label="리뷰 사진 업로드"
             >
               사진 추가
-              <input type="file" hidden multiple accept="image/*" />
+              <input type="file" hidden multiple accept="image/*" aria-label="이미지 파일 선택" />
             </Button>
             <Typography variant="caption" color="text.secondary">
               최대 5장까지 업로드 가능

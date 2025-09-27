@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { Restaurant } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { ApiService } from '../services/api';
 import RestaurantComments from './RestaurantComments';
 import RestaurantReviews from './RestaurantReviews';
 
@@ -98,50 +99,107 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
   useEffect(() => {
     if (restaurant && open) {
       loadRestaurantDetail(restaurant.id);
+      if (user?.id) {
+        loadFavoriteStatus(restaurant.id);
+      }
     }
-  }, [restaurant, open]);
+  }, [restaurant, open, user]);
 
   const loadRestaurantDetail = async (restaurantId: string) => {
     try {
-      // TODO: API 연동 구현 필요
-      // const response = await ApiService.getRestaurantDetail(restaurantId);
-      // setRestaurantDetail(response.data);
+      const response = await ApiService.getRestaurantDetails(restaurantId);
 
-      // 임시 더미 데이터
-      setRestaurantDetail({
-        id: 'detail-1',
-        restaurant_id: restaurantId,
-        road_address: '서울특별시 강남구 테헤란로 123 (역삼동)',
-        business_hours: {
-          mon: '11:00-22:00',
-          tue: '11:00-22:00',
-          wed: '11:00-22:00',
-          thu: '11:00-22:00',
-          fri: '11:00-23:00',
-          sat: '11:00-23:00',
-          sun: '12:00-21:00'
-        },
-        menu_info: [
-          { name: '대표메뉴 1', price: 15000, description: '맛있는 대표메뉴입니다.' },
-          { name: '인기메뉴 2', price: 12000, description: '많은 분들이 좋아하는 메뉴입니다.' },
-          { name: '추천메뉴 3', price: 18000, description: '셰프가 추천하는 특별한 메뉴입니다.' }
-        ],
-        price_range: '10,000-20,000원',
-        signature_menu: ['대표메뉴 1', '인기메뉴 2'],
-        wifi_available: true,
-        delivery_available: true,
-        takeout_available: true,
-        reservation_available: true,
-        directions: '지하철 2호선 강남역 1번 출구에서 도보 5분',
-        nearby_landmarks: '강남역, 교보타워',
-        total_views: 1234,
-        total_favorites: 89,
-        total_comments: 45,
-        total_reviews: 67,
-        average_rating: 4.5
-      });
+      if (response.success && response.data.restaurant.restaurant_details?.[0]) {
+        const details = response.data.restaurant.restaurant_details[0];
+        setRestaurantDetail({
+          id: details.id,
+          restaurant_id: restaurantId,
+          road_address: details.road_address,
+          business_hours: details.business_hours,
+          menu_info: details.menu_info,
+          price_range: details.price_range,
+          signature_menu: details.signature_menu,
+          gallery_images: details.gallery_images,
+          website_url: details.website_url,
+          wifi_available: details.wifi_available,
+          delivery_available: details.delivery_available,
+          takeout_available: details.takeout_available,
+          reservation_available: details.reservation_available,
+          directions: details.directions,
+          nearby_landmarks: details.nearby_landmarks,
+          total_views: details.total_views || 0,
+          total_favorites: details.total_favorites || 0,
+          total_comments: details.total_comments || 0,
+          total_reviews: details.total_reviews || 0,
+          average_rating: details.average_rating || 0
+        });
+      } else {
+        // API 응답에 상세 정보가 없는 경우 기본값 설정
+        setRestaurantDetail({
+          id: '',
+          restaurant_id: restaurantId,
+          total_views: 0,
+          total_favorites: 0,
+          total_comments: 0,
+          total_reviews: 0,
+          average_rating: 0
+        });
+      }
     } catch (error) {
       console.error('맛집 상세 정보 로딩 실패:', error);
+      // 오류 시에도 기본값 설정
+      setRestaurantDetail({
+        id: '',
+        restaurant_id: restaurantId,
+        total_views: 0,
+        total_favorites: 0,
+        total_comments: 0,
+        total_reviews: 0,
+        average_rating: 0
+      });
+    }
+  };
+
+  const loadFavoriteStatus = async (restaurantId: string) => {
+    try {
+      const response = await ApiService.getFavoriteStatus(restaurantId);
+      if (response.success && response.data) {
+        setIsFavorited(response.data.is_favorited);
+      }
+    } catch (error) {
+      console.error('즐겨찾기 상태 로딩 실패:', error);
+      // 에러가 발생해도 즐겨찾기 버튼은 표시 (기본값 false)
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user?.id || !restaurant?.id) {
+      alert('로그인 후 이용해주세요.');
+      return;
+    }
+
+    // 이메일 인증 확인
+    if (!user.email_verified) {
+      alert('즐겨찾기 기능은 이메일 인증 후 이용가능합니다.');
+      return;
+    }
+
+    try {
+      if (isFavorited) {
+        const response = await ApiService.removeFromFavorites(restaurant.id);
+        if (response.success) {
+          setIsFavorited(false);
+        }
+      } else {
+        const response = await ApiService.addToFavorites(restaurant.id);
+        if (response.success) {
+          setIsFavorited(true);
+        }
+      }
+    } catch (error: any) {
+      console.error('즐겨찾기 토글 실패:', error);
+      const errorMessage = error.userMessage || error.response?.data?.message || '즐겨찾기 처리 중 오류가 발생했습니다.';
+      alert(errorMessage);
     }
   };
 
@@ -254,11 +312,14 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
           {/* 액션 버튼들 */}
           <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 1 }}>
             <IconButton
-              onClick={() => setIsFavorited(!isFavorited)}
+              onClick={handleToggleFavorite}
+              disabled={!user?.id}
               sx={{
                 backgroundColor: 'rgba(255,255,255,0.9)',
-                '&:hover': { backgroundColor: 'rgba(255,255,255,1)' }
+                '&:hover': { backgroundColor: 'rgba(255,255,255,1)' },
+                opacity: !user?.id ? 0.5 : 1
               }}
+              aria-label={isFavorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
             >
               {isFavorited ? <Bookmark sx={{ color: '#ff6b6b' }} /> : <BookmarkBorder />}
             </IconButton>

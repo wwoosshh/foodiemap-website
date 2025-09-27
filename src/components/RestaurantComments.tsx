@@ -108,6 +108,22 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !userId) return;
 
+    // 이메일 인증 확인
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (!user.email_verified) {
+          setError('댓글 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
+          return;
+        }
+      } catch (error) {
+        console.error('사용자 정보 파싱 실패:', error);
+        setError('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+    }
+
     // 프론트엔드 검증
     if (newComment.trim().length < 1 || newComment.trim().length > 1000) {
       setError('댓글은 1자 이상 1000자 이하로 작성해주세요.');
@@ -142,6 +158,22 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   // 답글 작성
   const handleSubmitReply = async (commentId: string) => {
     if (!replyContent.trim() || !userId) return;
+
+    // 이메일 인증 확인
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (!user.email_verified) {
+          setError('답글 작성은 이메일 인증 후 가능합니다. 이메일을 확인하고 인증을 완료해주세요.');
+          return;
+        }
+      } catch (error) {
+        console.error('사용자 정보 파싱 실패:', error);
+        setError('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+    }
 
     // 프론트엔드 검증
     if (replyContent.trim().length < 1 || replyContent.trim().length > 1000) {

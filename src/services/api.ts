@@ -266,6 +266,40 @@ export class ApiService {
     const response = await api.delete(`/api/reviews/${reviewId}`);
     return response.data;
   }
+
+  // === 맛집 상세 정보 API ===
+
+  // 맛집 상세 정보 조회 (조회수 증가 포함)
+  static async getRestaurantDetails(restaurantId: string): Promise<ApiResponse<{ restaurant: any }>> {
+    const response = await api.get(`/api/restaurants/${restaurantId}/details`);
+    return response.data;
+  }
+
+  // === 즐겨찾기 API ===
+
+  // 즐겨찾기 추가
+  static async addToFavorites(restaurantId: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/restaurants/${restaurantId}/favorite`);
+    return response.data;
+  }
+
+  // 즐겨찾기 제거
+  static async removeFromFavorites(restaurantId: string): Promise<ApiResponse<any>> {
+    const response = await api.delete(`/api/restaurants/${restaurantId}/favorite`);
+    return response.data;
+  }
+
+  // 즐겨찾기 상태 확인
+  static async getFavoriteStatus(restaurantId: string): Promise<ApiResponse<{ is_favorited: boolean }>> {
+    const response = await api.get(`/api/restaurants/${restaurantId}/favorite/status`);
+    return response.data;
+  }
+
+  // 사용자 즐겨찾기 목록 조회
+  static async getUserFavorites(): Promise<ApiResponse<{ favorites: any[] }>> {
+    const response = await api.get('/api/restaurants/favorites/my');
+    return response.data;
+  }
 }
 
 export default api;
