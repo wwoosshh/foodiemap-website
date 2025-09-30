@@ -77,6 +77,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
       setLoading(true);
       const response = await ApiService.getRestaurantCompleteData(restaurantId);
       if (response.success && response.data) {
+        console.log('🔍 즐겨찾기 상태:', response.data.userInfo?.isFavorited);
         setRestaurantCompleteData(response.data);
       }
     } catch (error) {
@@ -90,6 +91,10 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
     if (restaurant && open) {
       // 상세페이지 진입시마다 항상 새로운 데이터 로드
       loadRestaurantCompleteData(restaurant.id);
+    } else if (!open) {
+      // 모달이 닫힐 때 상태 초기화
+      setRestaurantCompleteData(null);
+      setTabValue(0);
     }
   }, [restaurant, open]);
 
@@ -101,11 +106,14 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
     }
 
     const currentStatus = restaurantCompleteData?.userInfo?.isFavorited || false;
+    console.log('❤️ 현재 즐겨찾기 상태:', currentStatus);
 
     try {
       if (currentStatus) {
+        console.log('🗑️ 즐겨찾기 제거 시도...');
         const response = await ApiService.removeFromFavorites(restaurant.id);
         if (response.success) {
+          console.log('✅ 즐겨찾기 제거 성공');
           // 상태 업데이트: 즐겨찾기 제거
           setRestaurantCompleteData((prev: any) => ({
             ...prev,
@@ -116,8 +124,10 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
           }));
         }
       } else {
+        console.log('➕ 즐겨찾기 추가 시도...');
         const response = await ApiService.addToFavorites(restaurant.id);
         if (response.success) {
+          console.log('✅ 즐겨찾기 추가 성공');
           // 상태 업데이트: 즐겨찾기 추가
           setRestaurantCompleteData((prev: any) => ({
             ...prev,
@@ -129,7 +139,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
         }
       }
     } catch (error: any) {
-      console.error('즐겨찾기 토글 실패:', error);
+      console.error('❌ 즐겨찾기 토글 실패:', error);
       const errorMessage = error.userMessage || error.response?.data?.message || '즐겨찾기 처리 중 오류가 발생했습니다.';
       alert(errorMessage);
     }
