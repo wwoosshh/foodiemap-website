@@ -17,6 +17,7 @@ import {
   Email as EmailIcon,
   CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
+import { ApiService } from '../services/api';
 
 interface EmailVerificationModalProps {
   open: boolean;
@@ -74,17 +75,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     setError('');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/verification/verify-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, code }),
-      });
+      const response = await ApiService.verifyEmail(email, code);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         setSuccess(true);
         setError('');
 
@@ -94,11 +87,11 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           onClose();
         }, 2000);
       } else {
-        setError(data.message || '인증에 실패했습니다. 코드를 확인해주세요.');
+        setError(response.message || '인증에 실패했습니다. 코드를 확인해주세요.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('인증 오류:', err);
-      setError('인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setError(err.userMessage || err.response?.data?.message || '인증 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
@@ -110,28 +103,20 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     setError('');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/verification/resend-email-verification`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await ApiService.resendEmailVerification(email);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         setTimer(300); // 타이머 리셋
         setCanResend(false);
         setCode('');
         setError('');
         alert('새로운 인증 코드가 발송되었습니다.');
       } else {
-        setError(data.message || '재발송에 실패했습니다.');
+        setError(response.message || '재발송에 실패했습니다.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('재발송 오류:', err);
-      setError('재발송 중 오류가 발생했습니다.');
+      setError(err.userMessage || err.response?.data?.message || '재발송 중 오류가 발생했습니다.');
     } finally {
       setResending(false);
     }
