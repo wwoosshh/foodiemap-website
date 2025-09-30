@@ -12,36 +12,15 @@ import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
 
-const FeaturedRestaurants: React.FC = () => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [loading, setLoading] = useState(true);
+interface FeaturedRestaurantsProps {
+  restaurants: Restaurant[];
+}
+
+const FeaturedRestaurants: React.FC<FeaturedRestaurantsProps> = ({ restaurants }) => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  useEffect(() => {
-    const loadFeaturedRestaurants = async () => {
-      try {
-        setLoading(true);
-        // 평점 높은 순으로 3개 가져오기
-        const response = await ApiService.getPublicRestaurants({ limit: 3 });
-
-        if (response.success && response.data) {
-          const restaurantList = response.data.restaurants || [];
-          // 평점 높은 순으로 정렬
-          const sortedRestaurants = restaurantList
-            .sort((a, b) => b.rating - a.rating)
-            .slice(0, 3);
-          setRestaurants(sortedRestaurants);
-        }
-      } catch (error) {
-        console.error('Featured restaurants 로딩 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFeaturedRestaurants();
-  }, []);
+  const loading = false; // props로 받으므로 로딩 없음
 
   if (loading) {
     return (

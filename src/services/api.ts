@@ -151,6 +151,73 @@ export class ApiService {
     return response.data;
   }
 
+  // === 홈페이지 통합 데이터 API ===
+
+  // 홈페이지용 모든 데이터 한 번에 조회
+  static async getHomeData(): Promise<ApiResponse<{
+    banners: Banner[];
+    categories: any[];
+    featuredRestaurants: Restaurant[];
+    restaurants: Restaurant[];
+  }>> {
+    const response = await api.get('/api/home/data');
+    return response.data;
+  }
+
+  // === 맛집 상세정보 통합 데이터 API ===
+
+  // 맛집 상세정보 모든 데이터 한 번에 조회 (정보, 메뉴, 리뷰, 댓글, 지도 등)
+  static async getRestaurantCompleteData(restaurantId: string): Promise<ApiResponse<{
+    restaurant: any;
+    reviews: {
+      items: any[];
+      stats: any;
+      total: number;
+      hasMore: boolean;
+    };
+    comments: {
+      items: any[];
+      total: number;
+      hasMore: boolean;
+    };
+    menus: any[];
+    userInfo: {
+      isFavorited: boolean;
+      canReview: boolean;
+      canComment: boolean;
+    } | null;
+    mapInfo: {
+      latitude: number;
+      longitude: number;
+      address: string;
+    } | null;
+  }>> {
+    const response = await api.get(`/api/restaurant-details/${restaurantId}/complete`);
+    return response.data;
+  }
+
+  // 추가 리뷰 로드 (페이지네이션)
+  static async getMoreReviews(restaurantId: string, offset: number, limit: number = 10): Promise<ApiResponse<{
+    reviews: any[];
+    hasMore: boolean;
+  }>> {
+    const response = await api.get(`/api/restaurant-details/${restaurantId}/reviews/more`, {
+      params: { offset, limit }
+    });
+    return response.data;
+  }
+
+  // 추가 댓글 로드 (페이지네이션)
+  static async getMoreComments(restaurantId: string, offset: number, limit: number = 20): Promise<ApiResponse<{
+    comments: any[];
+    hasMore: boolean;
+  }>> {
+    const response = await api.get(`/api/restaurant-details/${restaurantId}/comments/more`, {
+      params: { offset, limit }
+    });
+    return response.data;
+  }
+
   // === 댓글 API ===
 
   // 맛집 댓글 목록 조회

@@ -25,8 +25,14 @@ const HomePage: React.FC = () => {
   const [currentTab, setCurrentTab] = useState('home');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [bannersLoading, setBannersLoading] = useState(true);
+  // 홈페이지 통합 데이터 상태
+  const [homeData, setHomeData] = useState<{
+    banners: Banner[];
+    categories: any[];
+    featuredRestaurants: any[];
+    restaurants: any[];
+  } | null>(null);
+  const [homeDataLoading, setHomeDataLoading] = useState(true);
 
   // 검색 필터 상태
   const [searchFilters, setSearchFilters] = useState<{
@@ -35,23 +41,23 @@ const HomePage: React.FC = () => {
   }>({});
   const [restaurantsLoading, setRestaurantsLoading] = useState(false);
 
-  // 배너 데이터 로드
+  // 홈페이지 통합 데이터 로드
   useEffect(() => {
-    const loadBanners = async () => {
+    const loadHomeData = async () => {
       try {
-        setBannersLoading(true);
-        const response = await ApiService.getPublicBanners();
+        setHomeDataLoading(true);
+        const response = await ApiService.getHomeData();
         if (response.success && response.data) {
-          setBanners(response.data.banners || []);
+          setHomeData(response.data);
         }
       } catch (error) {
-        console.error('배너 로드 실패:', error);
+        console.error('홈페이지 데이터 로드 실패:', error);
       } finally {
-        setBannersLoading(false);
+        setHomeDataLoading(false);
       }
     };
 
-    loadBanners();
+    loadHomeData();
   }, []);
 
   // 검색 필터 변경 핸들러
@@ -244,9 +250,9 @@ const HomePage: React.FC = () => {
         </Box>
 
         {/* 광고 배너 캐러셀 */}
-        {!bannersLoading && banners.length > 0 && (
+        {!homeDataLoading && homeData?.banners && homeData.banners.length > 0 && (
           <BannerCarousel
-            banners={banners}
+            banners={homeData.banners}
             height={350}
             autoPlay={true}
             autoPlayInterval={6000}
@@ -255,22 +261,30 @@ const HomePage: React.FC = () => {
       </Container>
 
       {/* Featured Restaurants */}
-      <FeaturedRestaurants />
+      {!homeDataLoading && homeData?.featuredRestaurants && (
+        <FeaturedRestaurants restaurants={homeData.featuredRestaurants} />
+      )}
 
       {/* Restaurant Search */}
-      <RestaurantSearch
-        onSearchChange={handleSearchChange}
-        loading={restaurantsLoading}
-      />
+      {!homeDataLoading && homeData?.categories && (
+        <RestaurantSearch
+          categories={homeData.categories}
+          onSearchChange={handleSearchChange}
+          loading={restaurantsLoading}
+        />
+      )}
 
       {/* Search Results */}
       <Container maxWidth="lg" id="search-results-section">
-        <RestaurantGrid
-          categoryId={searchFilters.categoryId}
-          search={searchFilters.search}
-          limit={12}
-          showTitle={false}
-        />
+        {!homeDataLoading && homeData?.restaurants && (
+          <RestaurantGrid
+            restaurants={homeData.restaurants}
+            categoryId={searchFilters.categoryId}
+            search={searchFilters.search}
+            limit={12}
+            showTitle={false}
+          />
+        )}
       </Container>
 
       {/* CTA Section */}

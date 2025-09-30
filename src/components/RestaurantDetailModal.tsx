@@ -15,6 +15,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Button,
+  CircularProgress,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -92,104 +94,65 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
-  const [restaurantDetail, setRestaurantDetail] = useState<RestaurantDetail | null>(null);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [restaurantCompleteData, setRestaurantCompleteData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
+
+  // 맛집 전체 데이터를 로드하는 함수 (캐싱 없이 항상 새로운 데이터)
+  const loadRestaurantCompleteData = async (restaurantId: string) => {
+    try {
+      setLoading(true);
+      const response = await ApiService.getRestaurantCompleteData(restaurantId);
+      if (response.success && response.data) {
+        setRestaurantCompleteData(response.data);
+      }
+    } catch (error) {
+      console.error('맛집 상세 데이터 로드 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (restaurant && open) {
-      loadRestaurantDetail(restaurant.id);
-      if (user?.id) {
-        loadFavoriteStatus(restaurant.id);
-      }
+      // 상세페이지 진입시마다 항상 새로운 데이터 로드
+      loadRestaurantCompleteData(restaurant.id);
     }
-  }, [restaurant, open, user]);
+  }, [restaurant, open]);
 
-  const loadRestaurantDetail = async (restaurantId: string) => {
-    try {
-      const response = await ApiService.getRestaurantDetails(restaurantId);
-
-      if (response.success && response.data?.restaurant.restaurant_details?.[0]) {
-        const details = response.data.restaurant.restaurant_details[0];
-        setRestaurantDetail({
-          id: details.id,
-          restaurant_id: restaurantId,
-          road_address: details.road_address,
-          business_hours: details.business_hours,
-          menu_info: details.menu_info,
-          price_range: details.price_range,
-          signature_menu: details.signature_menu,
-          gallery_images: details.gallery_images,
-          website_url: details.website_url,
-          wifi_available: details.wifi_available,
-          delivery_available: details.delivery_available,
-          takeout_available: details.takeout_available,
-          reservation_available: details.reservation_available,
-          directions: details.directions,
-          nearby_landmarks: details.nearby_landmarks,
-          total_views: details.total_views || 0,
-          total_favorites: details.total_favorites || 0,
-          total_comments: details.total_comments || 0,
-          total_reviews: details.total_reviews || 0,
-          average_rating: details.average_rating || 0
-        });
-      } else {
-        // API 응답에 상세 정보가 없는 경우 기본값 설정
-        setRestaurantDetail({
-          id: '',
-          restaurant_id: restaurantId,
-          total_views: 0,
-          total_favorites: 0,
-          total_comments: 0,
-          total_reviews: 0,
-          average_rating: 0
-        });
-      }
-    } catch (error) {
-      console.error('맛집 상세 정보 로딩 실패:', error);
-      // 오류 시에도 기본값 설정
-      setRestaurantDetail({
-        id: '',
-        restaurant_id: restaurantId,
-        total_views: 0,
-        total_favorites: 0,
-        total_comments: 0,
-        total_reviews: 0,
-        average_rating: 0
-      });
-    }
-  };
-
-  const loadFavoriteStatus = async (restaurantId: string) => {
-    try {
-      const response = await ApiService.getFavoriteStatus(restaurantId);
-      if (response.success && response.data) {
-        setIsFavorited(response.data.is_favorited);
-      }
-    } catch (error) {
-      console.error('즐겨찾기 상태 로딩 실패:', error);
-      // 에러가 발생해도 즐겨찾기 버튼은 표시 (기본값 false)
-    }
-  };
-
+  // 새로운 통합 데이터에서 즐겨찾기 토글 처리
   const handleToggleFavorite = async () => {
     if (!user?.id || !restaurant?.id) {
       alert('로그인 후 이용해주세요.');
       return;
     }
 
-    // 이메일 인증 요구사항 제거 - 로그인만 되어있으면 즐겨찾기 사용 가능
+    const currentStatus = restaurantCompleteData?.userInfo?.isFavorited || false;
 
     try {
-      if (isFavorited) {
+      if (currentStatus) {
         const response = await ApiService.removeFromFavorites(restaurant.id);
         if (response.success) {
-          setIsFavorited(false);
+          // 상태 업데이트: 즐겨찾기 제거
+          setRestaurantCompleteData((prev: any) => ({
+            ...prev,
+            userInfo: {
+              ...prev.userInfo,
+              isFavorited: false
+            }
+          }));
         }
       } else {
         const response = await ApiService.addToFavorites(restaurant.id);
         if (response.success) {
-          setIsFavorited(true);
+          // 상태 업데이트: 즐겨찾기 추가
+          setRestaurantCompleteData((prev: any) => ({
+            ...prev,
+            userInfo: {
+              ...prev.userInfo,
+              isFavorited: true
+            }
+          }));
         }
       }
     } catch (error: any) {
@@ -198,6 +161,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
       alert(errorMessage);
     }
   };
+
 
   const handleImageError = (imageUrl: string) => {
     setImageError(prev => ({
@@ -252,6 +216,36 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
   );
 
   if (!restaurant) return null;
+
+  // 로딩 중일 때 스피너 표시
+  if (loading || !restaurantCompleteData) {
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            maxHeight: '90vh',
+            margin: { xs: 1, sm: 2 }
+          }
+        }}
+      >
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 400
+        }}>
+          <CircularProgress size={60} />
+        </Box>
+      </Dialog>
+    );
+  }
+
+  const { restaurant: detailRestaurant, reviews, comments, menus, userInfo, mapInfo } = restaurantCompleteData;
 
   return (
     <Dialog
@@ -315,9 +309,9 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                 '&:hover': { backgroundColor: 'rgba(255,255,255,1)' },
                 opacity: !user?.id ? 0.5 : 1
               }}
-              aria-label={isFavorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
+              aria-label={userInfo?.isFavorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
             >
-              {isFavorited ? <Bookmark sx={{ color: '#ff6b6b' }} /> : <BookmarkBorder />}
+              {userInfo?.isFavorited ? <Bookmark sx={{ color: '#ff6b6b' }} /> : <BookmarkBorder />}
             </IconButton>
             <IconButton
               sx={{
@@ -560,11 +554,10 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <RestaurantReviews
                 restaurantId={restaurant?.id || ''}
                 userId={user?.id}
-                onReviewCountChange={(count) => {
-                  // TODO: 리뷰 수 업데이트
-                }}
-                onRatingChange={(rating) => {
-                  // TODO: 평점 업데이트
+                reviews={reviews}
+                onDataChange={() => {
+                  // 리뷰 데이터 변경 시 전체 데이터 다시 로드
+                  loadRestaurantCompleteData(restaurant.id);
                 }}
               />
             </TabPanel>
@@ -574,8 +567,10 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <RestaurantComments
                 restaurantId={restaurant?.id || ''}
                 userId={user?.id}
-                onCommentCountChange={(count) => {
-                  // TODO: 댓글 수 업데이트
+                comments={comments}
+                onDataChange={() => {
+                  // 댓글 데이터 변경 시 전체 데이터 다시 로드
+                  loadRestaurantCompleteData(restaurant.id);
                 }}
               />
             </TabPanel>

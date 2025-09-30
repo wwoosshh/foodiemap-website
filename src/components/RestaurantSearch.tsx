@@ -13,34 +13,16 @@ import { ApiService } from '../services/api';
 import { Category } from '../types';
 
 interface RestaurantSearchProps {
+  categories: Category[];
   onSearchChange: (filters: { search?: string; categoryId?: number }) => void;
   loading?: boolean;
 }
 
-const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ onSearchChange, loading = false }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
+const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearchChange, loading = false }) => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
   const [searchText, setSearchText] = useState('');
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-  // 카테고리 데이터 로드
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const response = await ApiService.getPublicCategories();
-        if (response.success && response.data) {
-          setCategories(response.data?.categories || []);
-        }
-      } catch (error) {
-        console.error('카테고리 로드 실패:', error);
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    loadCategories();
-  }, []);
+  const categoriesLoading = false; // props로 받으므로 로딩 없음
 
   // 카테고리 한국어 -> 영어 매핑
   const getCategoryEnglishName = (koreanName: string): string => {

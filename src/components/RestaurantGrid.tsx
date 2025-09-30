@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -14,6 +14,7 @@ import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
 
 interface RestaurantGridProps {
+  restaurants: Restaurant[];
   categoryId?: number;
   search?: string;
   limit?: number;
@@ -22,48 +23,48 @@ interface RestaurantGridProps {
 }
 
 const RestaurantGrid: React.FC<RestaurantGridProps> = ({
+  restaurants: initialRestaurants,
   categoryId,
   search,
   limit = 12,
   title = "Restaurants",
   showTitle = true
 }) => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(initialRestaurants);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  const loadRestaurants = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
+  // 필터링된 맛집 목록 계산
+  const filteredRestaurants = useMemo(() => {
+    let filtered = restaurants;
 
-      const response = await ApiService.getPublicRestaurants({
-        limit,
-        category_id: categoryId,
-        search: search,
-      });
-
-      if (response.success && response.data) {
-        // PaginationData 구조에서 restaurants 배열 추출
-        const restaurantList = response.data.restaurants || response.data.items || [];
-        setRestaurants(restaurantList);
-      } else {
-        throw new Error(response.message || '맛집 데이터를 불러올 수 없습니다.');
-      }
-    } catch (err: any) {
-      console.error('맛집 데이터 로딩 실패:', err);
-      setError(err.message || '맛집 데이터를 불러오는 중 오류가 발생했습니다.');
-      setRestaurants([]);
-    } finally {
-      setLoading(false);
+    // 카테고리 필터링
+    if (categoryId) {
+      filtered = filtered.filter(restaurant =>
+        restaurant.categories?.id === categoryId
+      );
     }
-  }, [limit, categoryId, search]);
 
+    // 검색어 필터링
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(restaurant =>
+        restaurant.name.toLowerCase().includes(searchLower) ||
+        restaurant.address.toLowerCase().includes(searchLower) ||
+        restaurant.description?.toLowerCase().includes(searchLower) ||
+        restaurant.categories?.name.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filtered.slice(0, limit);
+  }, [restaurants, categoryId, search, limit]);
+
+  // props로 받은 restaurants가 변경될 때 로컬 state 업데이트
   useEffect(() => {
-    loadRestaurants();
-  }, [loadRestaurants]);
+    setRestaurants(initialRestaurants);
+  }, [initialRestaurants]);
 
   // 빈 상태를 위한 메시지 컴포넌트
   const renderEmptyState = () => (
@@ -185,10 +186,10 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
           mt: 2
         }}
       >
-        {restaurants.length === 0 && !loading ? (
+        {filteredRestaurants.length === 0 && !loading ? (
           renderEmptyState()
         ) : (
-          restaurants.map((restaurant) => (
+          filteredRestaurants.map((restaurant) => (
             <Card
               key={restaurant.id}
               sx={{
@@ -347,7 +348,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
       </Box>
 
       {/* 더보기 버튼 */}
-      {restaurants.length >= limit && (
+      {filteredRestaurants.length >= limit && (
         <Box sx={{ textAlign: 'center', mt: 4 }}>
           <Button
             variant="outlined"
