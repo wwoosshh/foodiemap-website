@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -9,7 +9,6 @@ import {
   Alert,
   Button,
 } from '@mui/material';
-import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
 
@@ -31,8 +30,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   showTitle = true
 }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>(initialRestaurants);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const loading = false;
+  const [error] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 

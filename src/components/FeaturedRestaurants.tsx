@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -8,7 +8,6 @@ import {
   Container,
   Skeleton,
 } from '@mui/material';
-import { ApiService } from '../services/api';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
 

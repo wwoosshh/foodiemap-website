@@ -9,7 +9,6 @@ import {
   Chip,
 } from '@mui/material';
 import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material';
-import { ApiService } from '../services/api';
 import { Category } from '../types';
 
 interface RestaurantSearchProps {

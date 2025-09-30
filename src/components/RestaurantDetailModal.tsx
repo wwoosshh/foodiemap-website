@@ -15,7 +15,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Button,
   CircularProgress,
 } from '@mui/material';
 import {
@@ -60,32 +59,6 @@ interface RestaurantDetailModalProps {
   restaurant: Restaurant | null;
 }
 
-interface RestaurantDetail {
-  id: string;
-  restaurant_id: string;
-  road_address?: string;
-  business_hours?: Record<string, string>;
-  menu_info?: Array<{
-    name: string;
-    price: number;
-    description: string;
-  }>;
-  price_range?: string;
-  signature_menu?: string[];
-  gallery_images?: string[];
-  website_url?: string;
-  wifi_available?: boolean;
-  delivery_available?: boolean;
-  takeout_available?: boolean;
-  reservation_available?: boolean;
-  directions?: string;
-  nearby_landmarks?: string;
-  total_views?: number;
-  total_favorites?: number;
-  total_comments?: number;
-  total_reviews?: number;
-  average_rating?: number;
-}
 
 const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
   open,
@@ -245,7 +218,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
     );
   }
 
-  const { restaurant: detailRestaurant, reviews, comments, menus, userInfo, mapInfo } = restaurantCompleteData;
+  const { restaurant: detailRestaurant, reviews, comments, menus, userInfo } = restaurantCompleteData;
 
   return (
     <Dialog
@@ -373,9 +346,9 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <Typography variant="body2">
                 리뷰 {restaurant.review_count}개
               </Typography>
-              {restaurantDetail && (
+              {detailRestaurant && (
                 <Typography variant="body2">
-                  조회 {restaurantDetail.total_views}회
+                  조회 {detailRestaurant.view_count || 0}회
                 </Typography>
               )}
             </Box>
@@ -426,7 +399,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                           </ListItemIcon>
                           <ListItemText
                             primary="주소"
-                            secondary={restaurantDetail?.road_address || restaurant.address}
+                            secondary={detailRestaurant?.address || restaurant.address}
                           />
                         </ListItem>
 
@@ -440,14 +413,14 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                           />
                         </ListItem>
 
-                        {restaurantDetail?.price_range && (
+                        {detailRestaurant?.price_range && (
                           <ListItem sx={{ px: 0 }}>
                             <ListItemIcon sx={{ minWidth: 36 }}>
                               <RestaurantIcon sx={{ color: '#666' }} />
                             </ListItemIcon>
                             <ListItemText
                               primary="가격대"
-                              secondary={restaurantDetail.price_range}
+                              secondary={detailRestaurant.price_range}
                             />
                           </ListItem>
                         )}
@@ -459,16 +432,16 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                           편의시설
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                          {restaurantDetail?.wifi_available && (
+                          {detailRestaurant?.wifi_available && (
                             <Chip icon={<Wifi />} label="무선인터넷" size="small" variant="outlined" />
                           )}
-                          {restaurantDetail?.delivery_available && (
+                          {detailRestaurant?.delivery_available && (
                             <Chip icon={<LocalShipping />} label="배달" size="small" variant="outlined" />
                           )}
-                          {restaurantDetail?.takeout_available && (
+                          {detailRestaurant?.takeout_available && (
                             <Chip label="포장" size="small" variant="outlined" />
                           )}
-                          {restaurantDetail?.reservation_available && (
+                          {detailRestaurant?.reservation_available && (
                             <Chip label="예약가능" size="small" variant="outlined" />
                           )}
                         </Box>
@@ -479,21 +452,21 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
 
                 {/* 영업시간 */}
                 <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
-                  {restaurantDetail?.business_hours && (
+                  {detailRestaurant?.business_hours && (
                     <Card sx={{ mb: 2 }}>
                       <CardContent>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           <AccessTime sx={{ mr: 1, verticalAlign: 'middle' }} />
                           영업시간
                         </Typography>
-                        {formatBusinessHours(restaurantDetail.business_hours)}
+                        {formatBusinessHours(detailRestaurant.business_hours)}
                       </CardContent>
                     </Card>
                   )}
                 </Box>
 
                 {/* 찾아가는 방법 */}
-                {restaurantDetail?.directions && (
+                {detailRestaurant?.directions && (
                   <Box>
                     <Card>
                       <CardContent>
@@ -502,11 +475,11 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                           찾아가는 방법
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 2 }}>
-                          {restaurantDetail.directions}
+                          {detailRestaurant.directions}
                         </Typography>
-                        {restaurantDetail.nearby_landmarks && (
+                        {detailRestaurant.nearby_landmarks && (
                           <Typography variant="body2" color="text.secondary">
-                            <strong>주변 랜드마크:</strong> {restaurantDetail.nearby_landmarks}
+                            <strong>주변 랜드마크:</strong> {detailRestaurant.nearby_landmarks}
                           </Typography>
                         )}
                       </CardContent>
@@ -518,9 +491,9 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
 
             {/* 메뉴 탭 */}
             <TabPanel value={tabValue} index={1}>
-              {restaurantDetail?.menu_info ? (
+              {menus && menus.length > 0 ? (
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 2 }}>
-                  {restaurantDetail.menu_info.map((menu, index) => (
+                  {menus.map((menu: any, index: number) => (
                     <Card key={index}>
                       <CardContent>
                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
@@ -554,9 +527,12 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <RestaurantReviews
                 restaurantId={restaurant?.id || ''}
                 userId={user?.id}
-                reviews={reviews}
-                onDataChange={() => {
+                onReviewCountChange={(count) => {
                   // 리뷰 데이터 변경 시 전체 데이터 다시 로드
+                  loadRestaurantCompleteData(restaurant.id);
+                }}
+                onRatingChange={(rating) => {
+                  // 평점 변경 시 전체 데이터 다시 로드
                   loadRestaurantCompleteData(restaurant.id);
                 }}
               />
@@ -567,8 +543,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <RestaurantComments
                 restaurantId={restaurant?.id || ''}
                 userId={user?.id}
-                comments={comments}
-                onDataChange={() => {
+                onCommentCountChange={(count) => {
                   // 댓글 데이터 변경 시 전체 데이터 다시 로드
                   loadRestaurantCompleteData(restaurant.id);
                 }}
