@@ -218,7 +218,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
     );
   }
 
-  const { restaurant: detailRestaurant, reviews, comments, menus, userInfo } = restaurantCompleteData;
+  const { restaurant: detailRestaurant, menus, userInfo } = restaurantCompleteData;
 
   return (
     <Dialog
