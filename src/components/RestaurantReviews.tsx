@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -13,7 +13,6 @@ import {
   DialogActions,
   Chip,
   LinearProgress,
-  Skeleton,
   Alert,
   IconButton,
   Menu,
@@ -106,15 +105,6 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     setReviews(initialReviews);
     setReviewStats(initialStats);
   }, [initialReviews, initialStats]);
-
-  // 부모 컴포넌트에 변경사항 알림
-  const loadReviews = useCallback(async () => {
-    // 리뷰 목록 갱신은 부모 컴포넌트에서 처리
-    if (reviewStats) {
-      onReviewCountChange?.(reviewStats.total_reviews);
-      onRatingChange?.(reviewStats.average_rating);
-    }
-  }, [reviewStats, onReviewCountChange, onRatingChange]);
 
   // 리뷰 작성/수정
   const handleSubmitReview = async () => {

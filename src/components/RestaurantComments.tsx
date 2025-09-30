@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -7,7 +7,6 @@ import {
   Button,
   TextField,
   Alert,
-  Skeleton,
   Chip,
   IconButton,
   Menu,
@@ -58,7 +57,6 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
 }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>(initialComments);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -75,13 +73,6 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   useEffect(() => {
     setComments(initialComments);
   }, [initialComments]);
-
-  // 부모 컴포넌트에 변경사항 알림
-  const loadComments = useCallback(async () => {
-    // 댓글 목록 갱신은 부모 컴포넌트에서 처리
-    const totalComments = comments.length + comments.reduce((acc: number, comment: any) => acc + (comment.replies?.length || 0), 0);
-    onCommentCountChange?.(totalComments);
-  }, [comments, onCommentCountChange]);
 
   // 댓글 작성
   const handleSubmitComment = async () => {
