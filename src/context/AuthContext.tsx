@@ -97,7 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(user || null);
 
         // 회원가입 후 자동으로 이메일 인증 모달 표시
-        if (!user.email_verified) {
+        if (user && !user.email_verified) {
           setShowEmailVerification(true);
         }
 
