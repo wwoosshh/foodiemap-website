@@ -6,8 +6,11 @@ import { CssBaseline } from '@mui/material';
 // Pages
 import HomePage from './pages/HomePage';
 
+// Components
+import EmailVerificationModal from './components/EmailVerificationModal';
+
 // Context
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // 미니멀 블랙&화이트 테마
 const theme = createTheme({
@@ -65,22 +68,58 @@ const theme = createTheme({
   },
 });
 
+// 이메일 인증 모달을 포함한 앱 컨텐츠
+const AppContent = () => {
+  const { user, showEmailVerification, setShowEmailVerification, refreshUser } = useAuth();
+
+  const handleVerificationSuccess = () => {
+    // 인증 완료 후 사용자 정보 업데이트
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        parsedUser.email_verified = true;
+        localStorage.setItem('user_data', JSON.stringify(parsedUser));
+        refreshUser();
+      } catch (error) {
+        console.error('Failed to update user data:', error);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Router>
+        <Routes>
+          {/* 홈페이지 - 사용자 전용 */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/restaurants" element={<HomePage />} />
+          <Route path="/map" element={<HomePage />} />
+
+          {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+
+      {/* 이메일 인증 모달 */}
+      {user && !user.email_verified && (
+        <EmailVerificationModal
+          open={showEmailVerification}
+          onClose={() => setShowEmailVerification(false)}
+          email={user.email}
+          onVerificationSuccess={handleVerificationSuccess}
+        />
+      )}
+    </>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <Router>
-          <Routes>
-            {/* 홈페이지 - 사용자 전용 */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/restaurants" element={<HomePage />} />
-            <Route path="/map" element={<HomePage />} />
-
-            {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
+        <AppContent />
       </AuthProvider>
     </ThemeProvider>
   );

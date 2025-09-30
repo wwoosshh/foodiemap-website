@@ -9,8 +9,12 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Alert,
+  AlertTitle,
+  IconButton,
+  Collapse,
 } from '@mui/material';
-import { Person, Logout } from '@mui/icons-material';
+import { Person, Logout, Email as EmailIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';
@@ -21,10 +25,11 @@ import { ApiService } from '../services/api';
 import { Banner } from '../types';
 
 const HomePage: React.FC = () => {
-  const { user, logout: userLogout } = useAuth();
+  const { user, logout: userLogout, setShowEmailVerification } = useAuth();
   const [currentTab, setCurrentTab] = useState('home');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const [showVerificationBanner, setShowVerificationBanner] = useState(true);
   // 홈페이지 통합 데이터 상태
   const [homeData, setHomeData] = useState<{
     banners: Banner[];
@@ -201,6 +206,44 @@ const HomePage: React.FC = () => {
           </Toolbar>
         </Container>
       </AppBar>
+
+      {/* 이메일 미인증 배너 */}
+      {user && !user.email_verified && (
+        <Collapse in={showVerificationBanner}>
+          <Alert
+            severity="warning"
+            icon={<EmailIcon />}
+            sx={{
+              borderRadius: 0,
+              borderBottom: '1px solid',
+              borderColor: 'warning.light',
+            }}
+            action={
+              <>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => setShowEmailVerification(true)}
+                  sx={{ mr: 1, fontWeight: 600 }}
+                >
+                  지금 인증하기
+                </Button>
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => setShowVerificationBanner(false)}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              </>
+            }
+          >
+            <AlertTitle sx={{ fontWeight: 600 }}>이메일 인증이 필요합니다</AlertTitle>
+            리뷰와 댓글을 작성하려면 이메일 인증을 완료해주세요. <strong>{user.email}</strong>로 발송된 인증 코드를 확인하세요.
+          </Alert>
+        </Collapse>
+      )}
 
       {/* Elegant Site Header */}
       <Container maxWidth="lg">

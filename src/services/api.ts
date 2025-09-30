@@ -385,6 +385,26 @@ export class ApiService {
     const response = await api.get('/api/restaurants/favorites/my');
     return response.data;
   }
+
+  // ==================== 이메일 인증 ====================
+
+  // 이메일 인증 코드 발송
+  static async sendEmailVerification(email: string): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/verification/send-email-verification', { email });
+    return response.data;
+  }
+
+  // 이메일 인증 코드 확인
+  static async verifyEmail(email: string, code: string): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/verification/verify-email', { email, code });
+    return response.data;
+  }
+
+  // 이메일 인증 코드 재발송
+  static async resendEmailVerification(email: string): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/verification/resend-email-verification', { email });
+    return response.data;
+  }
 }
 
 export default api;

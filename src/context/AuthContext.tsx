@@ -5,6 +5,8 @@ import { ApiService } from '../services/api';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  showEmailVerification: boolean;
+  setShowEmailVerification: (show: boolean) => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: {
     email: string;
@@ -13,6 +15,7 @@ interface AuthContextType {
     phone?: string;
   }) => Promise<boolean>;
   logout: () => void;
+  refreshUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +35,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('user_token');
@@ -92,6 +96,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('user_data', JSON.stringify(user));
         setUser(user || null);
 
+        // 회원가입 후 자동으로 이메일 인증 모달 표시
+        if (!user.email_verified) {
+          setShowEmailVerification(true);
+        }
+
         return true;
       }
       return false;
@@ -107,14 +116,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user_token');
     localStorage.removeItem('user_data');
     setUser(null);
+    setShowEmailVerification(false);
+  };
+
+  // 사용자 정보 새로고침
+  const refreshUser = () => {
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Failed to refresh user data:', error);
+      }
+    }
   };
 
   const value: AuthContextType = {
     user,
     isLoading,
+    showEmailVerification,
+    setShowEmailVerification,
     login,
     register,
     logout,
+    refreshUser,
   };
 
   return (
