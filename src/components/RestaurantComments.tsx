@@ -46,17 +46,19 @@ interface Comment {
 interface RestaurantCommentsProps {
   restaurantId: string;
   userId?: string;
+  initialComments?: Comment[];
   onCommentCountChange?: (count: number) => void;
 }
 
 const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   restaurantId,
   userId,
+  initialComments = [],
   onCommentCountChange
 }) => {
   const { user } = useAuth();
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -69,51 +71,17 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
   const [reportDetails, setReportDetails] = useState('');
   const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
 
-  // 댓글 로딩
-  const loadComments = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await ApiService.getRestaurantComments(restaurantId, {
-        limit: 50,
-        offset: 0
-      });
-
-      if (response.success && response.data) {
-        const commentData = response.data.comments || [];
-        setComments(commentData);
-        const totalComments = commentData.length + commentData.reduce((acc: number, comment: any) => acc + (comment.replies?.length || 0), 0);
-        onCommentCountChange?.(totalComments);
-      } else {
-        // API 에러를 사용자에게 알기 쉽게 표시
-        if (response.message?.includes('does not exist') || response.message?.includes('relation')) {
-          setError('댓글 기능이 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
-        } else {
-          setError(response.message || '댓글 데이터를 불러올 수 없습니다.');
-        }
-        setComments([]);
-      }
-    } catch (err: any) {
-      console.error('댓글 로딩 실패:', err);
-
-      // 네트워크 오류 vs 서버 오류 구분
-      if (err.code === 'ERR_NETWORK') {
-        setError('네트워크 연결을 확인해주세요.');
-      } else if (err.response?.status === 500) {
-        setError('댓글 기능이 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.');
-      } else {
-        setError('댓글을 불러오는 중 오류가 발생했습니다.');
-      }
-      setComments([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [restaurantId, onCommentCountChange]);
-
+  // 초기 데이터 동기화
   useEffect(() => {
-    loadComments();
-  }, [loadComments]);
+    setComments(initialComments);
+  }, [initialComments]);
+
+  // 부모 컴포넌트에 변경사항 알림
+  const loadComments = useCallback(async () => {
+    // 댓글 목록 갱신은 부모 컴포넌트에서 처리
+    const totalComments = comments.length + comments.reduce((acc: number, comment: any) => acc + (comment.replies?.length || 0), 0);
+    onCommentCountChange?.(totalComments);
+  }, [comments, onCommentCountChange]);
 
   // 댓글 작성
   const handleSubmitComment = async () => {
@@ -141,8 +109,8 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       });
 
       if (response.success && response.data) {
-        // 댓글 목록 다시 로드
-        await loadComments();
+        // 댓글 목록 다시 로드 - 부모에게 알림
+        onCommentCountChange?.(0); // 부모가 전체 데이터를 다시 로드하도록 트리거
         setNewComment('');
       } else {
         throw new Error(response.message || '댓글 작성에 실패했습니다.');
@@ -183,8 +151,8 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       });
 
       if (response.success && response.data) {
-        // 댓글 목록 다시 로드
-        await loadComments();
+        // 댓글 목록 다시 로드 - 부모에게 알림
+        onCommentCountChange?.(0);
         setReplyContent('');
         setReplyTo(null);
       } else {
@@ -207,8 +175,8 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
       const response = await ApiService.toggleCommentLike(commentId);
 
       if (response.success && response.data) {
-        // 댓글 목록 다시 로드하여 정확한 상태 반영
-        await loadComments();
+        // 부모 컴포넌트가 데이터를 다시 로드하도록 트리거
+        onCommentCountChange?.(0);
       } else {
         throw new Error(response.message || '좋아요 처리에 실패했습니다.');
       }
@@ -240,7 +208,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
     try {
       const response = await ApiService.deleteComment(selectedComment);
       if (response.success) {
-        await loadComments();
+        onCommentCountChange?.(0); // 부모가 전체 데이터를 다시 로드하도록 트리거
         handleMenuClose();
       } else {
         setError(response.message || '댓글 삭제에 실패했습니다.');
@@ -440,25 +408,7 @@ const RestaurantComments: React.FC<RestaurantCommentsProps> = ({
     </Paper>
   );
 
-  if (loading) {
-    return (
-      <Box>
-        {[1, 2, 3].map((index) => (
-          <Paper key={index} sx={{ p: 3, mb: 2, border: '1px solid #f0f0f0' }}>
-            <Box sx={{ display: 'flex', mb: 2 }}>
-              <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
-              <Box sx={{ flex: 1 }}>
-                <Skeleton variant="text" width="30%" height={20} />
-                <Skeleton variant="text" width="20%" height={16} />
-              </Box>
-            </Box>
-            <Skeleton variant="text" width="100%" height={20} />
-            <Skeleton variant="text" width="80%" height={20} />
-          </Paper>
-        ))}
-      </Box>
-    );
-  }
+  // 초기 로딩 상태 제거 - 부모에서 데이터를 받기 때문에
 
   return (
     <Box>

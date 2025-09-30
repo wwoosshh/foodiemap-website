@@ -527,6 +527,8 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <RestaurantReviews
                 restaurantId={restaurant?.id || ''}
                 userId={user?.id}
+                initialReviews={restaurantCompleteData?.reviews?.items || []}
+                initialStats={restaurantCompleteData?.reviews?.stats || null}
                 onReviewCountChange={(count) => {
                   // 리뷰 데이터 변경 시 전체 데이터 다시 로드
                   loadRestaurantCompleteData(restaurant.id);
@@ -543,6 +545,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <RestaurantComments
                 restaurantId={restaurant?.id || ''}
                 userId={user?.id}
+                initialComments={restaurantCompleteData?.comments?.items || []}
                 onCommentCountChange={(count) => {
                   // 댓글 데이터 변경 시 전체 데이터 다시 로드
                   loadRestaurantCompleteData(restaurant.id);

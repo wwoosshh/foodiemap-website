@@ -64,6 +64,8 @@ interface ReviewStats {
 interface RestaurantReviewsProps {
   restaurantId: string;
   userId?: string;
+  initialReviews?: Review[];
+  initialStats?: ReviewStats | null;
   onReviewCountChange?: (count: number) => void;
   onRatingChange?: (rating: number) => void;
 }
@@ -71,13 +73,14 @@ interface RestaurantReviewsProps {
 const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
   restaurantId,
   userId,
+  initialReviews = [],
+  initialStats = null,
   onReviewCountChange,
   onRatingChange
 }) => {
   const { user } = useAuth();
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(initialStats);
   const [error, setError] = useState('');
   const [writeDialogOpen, setWriteDialogOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
@@ -98,70 +101,20 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     tags: [] as string[]
   });
 
-  // 리뷰 데이터 로딩
-  const loadReviews = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      // 리뷰 통계와 리뷰 목록을 동시에 로드
-      const [statsResponse, reviewsResponse] = await Promise.all([
-        ApiService.getRestaurantReviewStats(restaurantId),
-        ApiService.getRestaurantReviews(restaurantId, {
-          limit: 20,
-          offset: 0,
-          sort: 'newest'
-        })
-      ]);
-
-      if (statsResponse.success && statsResponse.data) {
-        setReviewStats(statsResponse.data);
-        onReviewCountChange?.(statsResponse.data.total_reviews);
-        onRatingChange?.(statsResponse.data.average_rating);
-      } else {
-        // API 에러를 사용자에게 알기 쉽게 표시
-        if (statsResponse.message?.includes('does not exist') || statsResponse.message?.includes('relation')) {
-          setError('리뷰 기능이 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
-        } else {
-          setError(statsResponse.message || '리뷰 통계를 불러올 수 없습니다.');
-        }
-        setReviews([]);
-        setReviewStats(null);
-        return;
-      }
-
-      if (reviewsResponse.success && reviewsResponse.data) {
-        setReviews(reviewsResponse.data.reviews || []);
-      } else {
-        // API 에러를 사용자에게 알기 쉽게 표시
-        if (reviewsResponse.message?.includes('does not exist') || reviewsResponse.message?.includes('relation')) {
-          setError('리뷰 기능이 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
-        } else {
-          setError(reviewsResponse.message || '리뷰 목록을 불러올 수 없습니다.');
-        }
-        setReviews([]);
-      }
-    } catch (err: any) {
-      console.error('리뷰 로딩 실패:', err);
-
-      // 네트워크 오류 vs 서버 오류 구분
-      if (err.code === 'ERR_NETWORK') {
-        setError('네트워크 연결을 확인해주세요.');
-      } else if (err.response?.status === 500) {
-        setError('리뷰 기능이 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.');
-      } else {
-        setError('리뷰를 불러오는 중 오류가 발생했습니다.');
-      }
-      setReviews([]);
-      setReviewStats(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [restaurantId, onReviewCountChange, onRatingChange]);
-
+  // 초기 데이터 동기화
   useEffect(() => {
-    loadReviews();
-  }, [loadReviews]);
+    setReviews(initialReviews);
+    setReviewStats(initialStats);
+  }, [initialReviews, initialStats]);
+
+  // 부모 컴포넌트에 변경사항 알림
+  const loadReviews = useCallback(async () => {
+    // 리뷰 목록 갱신은 부모 컴포넌트에서 처리
+    if (reviewStats) {
+      onReviewCountChange?.(reviewStats.total_reviews);
+      onRatingChange?.(reviewStats.average_rating);
+    }
+  }, [reviewStats, onReviewCountChange, onRatingChange]);
 
   // 리뷰 작성/수정
   const handleSubmitReview = async () => {
@@ -223,8 +176,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       }
 
       if (response.success && response.data) {
-        // 리뷰 목록과 통계 다시 로드
-        await loadReviews();
+        // 리뷰 목록과 통계 다시 로드 - 부모에게 알림
+        onReviewCountChange?.(0); // 부모가 전체 데이터를 다시 로드하도록 트리거
         handleCloseDialog();
       } else {
         throw new Error(response.message || '리뷰 저장에 실패했습니다.');
@@ -253,8 +206,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       const response = await ApiService.toggleReviewHelpful(reviewId);
 
       if (response.success && response.data) {
-        // 리뷰 목록 다시 로드하여 정확한 상태 반영
-        await loadReviews();
+        // 부모 컴포넌트가 데이터를 다시 로드하도록 트리거
+        onReviewCountChange?.(0);
       } else {
         throw new Error(response.message || '도움이 돼요 처리에 실패했습니다.');
       }
@@ -334,7 +287,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     try {
       const response = await ApiService.deleteReview(selectedReview);
       if (response.success) {
-        await loadReviews();
+        onReviewCountChange?.(0); // 부모가 전체 데이터를 다시 로드하도록 트리거
         handleMenuClose();
       } else {
         setError(response.message || '리뷰 삭제에 실패했습니다.');
@@ -414,26 +367,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     return (count / reviewStats.total_reviews) * 100;
   };
 
-  if (loading) {
-    return (
-      <Box>
-        <Skeleton variant="rectangular" width="100%" height={200} sx={{ mb: 3, borderRadius: 2 }} />
-        {[1, 2, 3].map((index) => (
-          <Paper key={index} sx={{ p: 3, mb: 2, border: '1px solid #f0f0f0' }}>
-            <Box sx={{ display: 'flex', mb: 2 }}>
-              <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
-              <Box sx={{ flex: 1 }}>
-                <Skeleton variant="text" width="30%" height={20} />
-                <Skeleton variant="text" width="20%" height={16} />
-              </Box>
-            </Box>
-            <Skeleton variant="text" width="100%" height={20} />
-            <Skeleton variant="text" width="80%" height={20} />
-          </Paper>
-        ))}
-      </Box>
-    );
-  }
+  // 초기 로딩 상태 제거 - 부모에서 데이터를 받기 때문에
 
   return (
     <Box>
