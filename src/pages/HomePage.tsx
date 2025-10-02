@@ -105,14 +105,6 @@ const HomePage: React.FC = () => {
       ...filters,
       page: 1 // 필터 변경 시 페이지를 1로 리셋
     }));
-
-    // 검색 결과 섹션으로 부드럽게 스크롤
-    setTimeout(() => {
-      document.getElementById('restaurants-section')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }, 100);
   }, []);
 
   // 페이지 변경 핸들러
@@ -439,66 +431,8 @@ const HomePage: React.FC = () => {
         </Box>
       </Container>
 
-      {/* CTA Section */}
-      <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#1a1a1a', borderRadius: 0, mt: 6 }}>
-        <Typography
-          variant="h3"
-          component="h2"
-          sx={{
-            color: 'white',
-            fontWeight: 300,
-            letterSpacing: 3,
-            fontSize: { xs: '1.8rem', md: '2.2rem' },
-            mb: 2,
-            textTransform: 'uppercase',
-            fontFamily: '"Times New Roman", serif'
-          }}
-        >
-          Join the Experience
-        </Typography>
-        <Box sx={{ width: 50, height: 1, backgroundColor: 'white', mx: 'auto', mb: 3 }} />
-        <Typography
-          variant="body1"
-          sx={{
-            color: '#ccc',
-            mb: 4,
-            fontSize: '1rem',
-            letterSpacing: 1,
-            fontWeight: 300,
-            fontStyle: 'italic',
-            maxWidth: '400px',
-            mx: 'auto'
-          }}
-        >
-          Begin your culinary journey with carefully curated dining experiences
-        </Typography>
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={handleSignUp}
-          sx={{
-            color: 'white',
-            borderColor: 'white',
-            px: 4,
-            py: 1.5,
-            fontSize: '1rem',
-            fontWeight: 400,
-            letterSpacing: 2,
-            textTransform: 'uppercase',
-            borderRadius: 0,
-            '&:hover': {
-              backgroundColor: 'white',
-              color: '#1a1a1a',
-              borderColor: 'white'
-            }
-          }}
-        >
-          Register Now
-        </Button>
-      </Box>
-
       {/* Footer */}
-      <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 3, mt: 6 }}>
+      <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 3, mt: 8 }}>
         <Container maxWidth="lg">
           <Typography variant="body2" align="center">
             © 2024 Cube. All rights reserved.

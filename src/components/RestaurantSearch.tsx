@@ -7,6 +7,7 @@ import {
   Button,
   InputAdornment,
   Chip,
+  IconButton,
 } from '@mui/material';
 import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material';
 import { Category } from '../types';
@@ -20,6 +21,7 @@ interface RestaurantSearchProps {
 const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearchChange, loading = false }) => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
   const [searchText, setSearchText] = useState('');
+  const [appliedSearchText, setAppliedSearchText] = useState('');
   const [sortOption, setSortOption] = useState<string>('created_at_desc');
 
   const categoriesLoading = false; // props로 받으므로 로딩 없음
@@ -41,25 +43,37 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
     return mapping[koreanName] || koreanName;
   };
 
-  // 검색 조건 변경 시 부모 컴포넌트에 알림
+  // 검색 조건 변경 시 부모 컴포넌트에 알림 (카테고리, 정렬만 즉시 반영)
   useEffect(() => {
     onSearchChange({
-      search: searchText || undefined,
+      search: appliedSearchText || undefined,
       categoryId: selectedCategoryId,
       sort: sortOption
     });
-  }, [searchText, selectedCategoryId, sortOption, onSearchChange]);
+  }, [appliedSearchText, selectedCategoryId, sortOption, onSearchChange]);
 
   const handleCategorySelect = (categoryId: number) => {
     setSelectedCategoryId(selectedCategoryId === categoryId ? undefined : categoryId);
   };
 
+  const handleSearchSubmit = () => {
+    setAppliedSearchText(searchText);
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  };
+
   const handleSearchClear = () => {
     setSearchText('');
+    setAppliedSearchText('');
   };
 
   const handleResetFilters = () => {
     setSearchText('');
+    setAppliedSearchText('');
     setSelectedCategoryId(undefined);
     setSortOption('created_at_desc');
   };
@@ -99,11 +113,12 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
       </Typography>
 
       {/* 검색 입력 */}
-      <Box sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+      <Box sx={{ mb: 4, maxWidth: 600, mx: 'auto', display: 'flex', gap: 1 }}>
         <TextField
           fullWidth
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
+          onKeyPress={handleSearchKeyPress}
           placeholder="Search restaurants, cuisine, or location..."
           disabled={loading}
           InputProps={{
@@ -114,13 +129,14 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
             ),
             endAdornment: searchText && (
               <InputAdornment position="end">
-                <Button
+                <IconButton
                   onClick={handleSearchClear}
-                  sx={{ minWidth: 'auto', p: 0.5, color: '#666' }}
+                  sx={{ p: 0.5, color: '#666' }}
                   disabled={loading}
+                  size="small"
                 >
                   <ClearIcon fontSize="small" />
-                </Button>
+                </IconButton>
               </InputAdornment>
             ),
             sx: {
@@ -147,6 +163,26 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
             }
           }}
         />
+        <Button
+          variant="contained"
+          onClick={handleSearchSubmit}
+          disabled={loading}
+          sx={{
+            minWidth: '120px',
+            px: 3,
+            borderRadius: 0,
+            backgroundColor: '#1a1a1a',
+            color: 'white',
+            fontWeight: 500,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            '&:hover': {
+              backgroundColor: '#333'
+            }
+          }}
+        >
+          Search
+        </Button>
       </Box>
 
       {/* 정렬 옵션 */}
@@ -252,7 +288,7 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
       </Box>
 
       {/* 필터 리셋 버튼 */}
-      {(searchText || selectedCategoryId || sortOption !== 'created_at_desc') && (
+      {(appliedSearchText || selectedCategoryId || sortOption !== 'created_at_desc') && (
         <Box sx={{ textAlign: 'center' }}>
           <Button
             onClick={handleResetFilters}
