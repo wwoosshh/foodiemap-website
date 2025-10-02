@@ -59,7 +59,7 @@ const AuthCallbackPage: React.FC = () => {
               localStorage.setItem('user_data', JSON.stringify(user));
 
               // 사용자 정보를 AuthContext에 설정
-              setUser(user);
+              setUser(user || null);
 
               console.log('백엔드 DB에 사용자 저장 완료:', user);
 
