@@ -9,6 +9,39 @@ import {
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
 
+// 카테고리별 기본 아이콘 매핑
+const getCategoryIcon = (categoryName?: string): string => {
+  const iconMap: Record<string, string> = {
+    '한식': '🍚',
+    '중식': '🥢',
+    '일식': '🍣',
+    '양식': '🍝',
+    '분식': '🌮',
+    '치킨': '🍗',
+    '피자': '🍕',
+    '카페': '☕',
+    '디저트': '🧁',
+    '기타': '🍽️'
+  };
+  return categoryName ? (iconMap[categoryName] || '🍽️') : '🍽️';
+};
+
+// 대체 이미지 생성 함수
+const generateFallbackImage = (restaurantName: string, categoryName?: string): string => {
+  const icon = getCategoryIcon(categoryName);
+  return `data:image/svg+xml,${encodeURIComponent(`
+    <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+      <text x="50%" y="40%" font-family="Arial" font-size="80" text-anchor="middle" fill="#ddd">
+        ${icon}
+      </text>
+      <text x="50%" y="60%" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#999">
+        ${restaurantName}
+      </text>
+    </svg>
+  `)}`;
+};
+
 interface RestaurantGridProps {
   restaurants: Restaurant[];
   limit?: number;
@@ -24,6 +57,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
 }) => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   // 빈 상태를 위한 메시지 컴포넌트
   const renderEmptyState = () => (
@@ -56,6 +90,20 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   const handleRestaurantClick = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
     setDetailModalOpen(true);
+  };
+
+  const handleImageError = (restaurantId: string) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [restaurantId]: true
+    }));
+  };
+
+  const getImageSrc = (restaurant: Restaurant): string => {
+    if (imageErrors[restaurant.id] || !restaurant.images || restaurant.images.length === 0) {
+      return generateFallbackImage(restaurant.name, restaurant.categories?.name);
+    }
+    return restaurant.images[0];
   };
 
   // 표시할 맛집 목록
@@ -121,16 +169,14 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
               <CardMedia
                 component="img"
                 height="240"
-                image={restaurant.images?.[0] || '/api/placeholder/600/400'}
+                image={getImageSrc(restaurant)}
                 alt={restaurant.name}
                 sx={{
                   objectFit: 'cover',
                   backgroundColor: '#f8f8f8',
                   borderBottom: '1px solid #f0f0f0'
                 }}
-                onError={(e: any) => {
-                  e.target.src = '/api/placeholder/600/400';
-                }}
+                onError={() => handleImageError(restaurant.id)}
               />
               <CardContent sx={{ p: 3, pb: 3 }}>
                 {/* 카테고리 */}
