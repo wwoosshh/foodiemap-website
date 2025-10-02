@@ -71,9 +71,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('User login failed:', error);
-      return false;
+      // 에러 메시지를 상위로 전달
+      throw new Error(error.userMessage || error.response?.data?.message || '로그인에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -105,9 +106,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('User registration failed:', error);
-      return false;
+      // 에러 메시지를 상위로 전달
+      throw new Error(error.userMessage || error.response?.data?.message || '회원가입에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }

@@ -79,13 +79,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       return;
     }
 
-    const success = await login(loginData.email, loginData.password);
-    if (success) {
-      onClose();
-      // 로그인 성공 시 폼 초기화
-      setLoginData({ email: '', password: '' });
-    } else {
-      setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+    try {
+      const success = await login(loginData.email, loginData.password);
+      if (success) {
+        onClose();
+        // 로그인 성공 시 폼 초기화
+        setLoginData({ email: '', password: '' });
+      } else {
+        setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+      }
+    } catch (error: any) {
+      setError(error.message || '로그인에 실패했습니다.');
     }
   };
 
@@ -103,19 +107,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       return;
     }
 
-    const success = await register({
-      email: registerData.email,
-      password: registerData.password,
-      name: registerData.name,
-      phone: registerData.phone || undefined,
-    });
+    try {
+      const success = await register({
+        email: registerData.email,
+        password: registerData.password,
+        name: registerData.name,
+        phone: registerData.phone || undefined,
+      });
 
-    if (success) {
-      onClose();
-      // 회원가입 성공 시 폼 초기화
-      setRegisterData({ email: '', password: '', name: '', phone: '' });
-    } else {
-      setError('회원가입에 실패했습니다. 다시 시도해주세요.');
+      if (success) {
+        onClose();
+        // 회원가입 성공 시 폼 초기화
+        setRegisterData({ email: '', password: '', name: '', phone: '' });
+      } else {
+        setError('회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (error: any) {
+      setError(error.message || '회원가입에 실패했습니다.');
     }
   };
 
