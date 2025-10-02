@@ -13,13 +13,13 @@ import {
   AlertTitle,
   IconButton,
   Collapse,
+  CircularProgress,
 } from '@mui/material';
 import { Person, Logout, Email as EmailIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RestaurantGrid from '../components/RestaurantGrid';
 import BannerCarousel from '../components/BannerCarousel';
-import FeaturedRestaurants from '../components/FeaturedRestaurants';
 import RestaurantSearch from '../components/RestaurantSearch';
 import { ApiService } from '../services/api';
 import { Banner } from '../types';
@@ -30,30 +30,37 @@ const HomePage: React.FC = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [showVerificationBanner, setShowVerificationBanner] = useState(true);
-  // 홈페이지 통합 데이터 상태
-  const [homeData, setHomeData] = useState<{
-    banners: Banner[];
-    categories: any[];
-    featuredRestaurants: any[];
-    restaurants: any[];
-  } | null>(null);
+
+  // 기본 데이터 (배너, 카테고리)
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [homeDataLoading, setHomeDataLoading] = useState(true);
+
+  // 맛집 목록 (서버에서 실시간으로 가져오기)
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [pagination, setPagination] = useState<any>(null);
+  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
 
   // 검색 필터 상태
   const [searchFilters, setSearchFilters] = useState<{
     search?: string;
     categoryId?: number;
-  }>({});
-  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
+    sort?: string;
+    page?: number;
+  }>({
+    sort: 'created_at_desc',
+    page: 1
+  });
 
-  // 홈페이지 통합 데이터 로드
+  // 배너와 카테고리 로드 (한 번만)
   useEffect(() => {
     const loadHomeData = async () => {
       try {
         setHomeDataLoading(true);
         const response = await ApiService.getHomeData();
         if (response.success && response.data) {
-          setHomeData(response.data);
+          setBanners(response.data.banners || []);
+          setCategories(response.data.categories || []);
         }
       } catch (error) {
         console.error('홈페이지 데이터 로드 실패:', error);
@@ -65,23 +72,63 @@ const HomePage: React.FC = () => {
     loadHomeData();
   }, []);
 
-  // 검색 필터 변경 핸들러
-  const handleSearchChange = useCallback((filters: { search?: string; categoryId?: number }) => {
-    setSearchFilters(filters);
-    setRestaurantsLoading(true);
-
-    // 검색 결과 섹션으로 부드럽게 스크롤 (검색어가 있을 때만)
-    if (filters.search || filters.categoryId) {
-      setTimeout(() => {
-        document.getElementById('search-results-section')?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
+  // 맛집 목록 로드 (필터 변경 시마다)
+  useEffect(() => {
+    const loadRestaurants = async () => {
+      try {
+        setRestaurantsLoading(true);
+        const response = await ApiService.getRestaurants({
+          page: searchFilters.page || 1,
+          limit: 20,
+          category_id: searchFilters.categoryId,
+          search: searchFilters.search,
+          sort: searchFilters.sort as any
         });
+
+        if (response.success && response.data) {
+          setRestaurants(response.data.restaurants || []);
+          setPagination(response.data.pagination);
+        }
+      } catch (error) {
+        console.error('맛집 목록 로드 실패:', error);
+      } finally {
         setRestaurantsLoading(false);
-      }, 300);
-    } else {
-      setRestaurantsLoading(false);
-    }
+      }
+    };
+
+    loadRestaurants();
+  }, [searchFilters]);
+
+  // 검색 필터 변경 핸들러
+  const handleSearchChange = useCallback((filters: { search?: string; categoryId?: number; sort?: string }) => {
+    setSearchFilters(prev => ({
+      ...filters,
+      page: 1 // 필터 변경 시 페이지를 1로 리셋
+    }));
+
+    // 검색 결과 섹션으로 부드럽게 스크롤
+    setTimeout(() => {
+      document.getElementById('restaurants-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
+  }, []);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = useCallback((newPage: number) => {
+    setSearchFilters(prev => ({
+      ...prev,
+      page: newPage
+    }));
+
+    // 목록 상단으로 스크롤
+    setTimeout(() => {
+      document.getElementById('restaurants-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
   }, []);
 
   const handleTabChange = (tab: string) => {
@@ -93,7 +140,6 @@ const HomePage: React.FC = () => {
         behavior: 'smooth'
       });
     } else if (tab === 'map') {
-      // TODO: 지도 섹션 구현 후 스크롤
       console.log('지도 섹션으로 이동');
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -123,9 +169,6 @@ const HomePage: React.FC = () => {
     handleUserMenuClose();
   };
 
-
-
-  // 현재 로그인된 사용자
   const currentUser = user;
 
   return (
@@ -240,7 +283,7 @@ const HomePage: React.FC = () => {
             }
           >
             <AlertTitle sx={{ fontWeight: 600 }}>이메일 인증이 필요합니다</AlertTitle>
-            리뷰와 댓글을 작성하려면 이메일 인증을 완료해주세요. <strong>{user.email}</strong>로 발송된 인증 코드를 확인하세요.
+            리뷰를 작성하려면 이메일 인증을 완료해주세요. <strong>{user.email}</strong>로 발송된 인증 코드를 확인하세요.
           </Alert>
         </Collapse>
       )}
@@ -293,9 +336,9 @@ const HomePage: React.FC = () => {
         </Box>
 
         {/* 광고 배너 캐러셀 */}
-        {!homeDataLoading && homeData?.banners && homeData.banners.length > 0 && (
+        {!homeDataLoading && banners && banners.length > 0 && (
           <BannerCarousel
-            banners={homeData.banners}
+            banners={banners}
             height={350}
             autoPlay={true}
             autoPlayInterval={6000}
@@ -303,90 +346,156 @@ const HomePage: React.FC = () => {
         )}
       </Container>
 
-      {/* Featured Restaurants */}
-      {!homeDataLoading && homeData?.featuredRestaurants && (
-        <FeaturedRestaurants restaurants={homeData.featuredRestaurants} />
-      )}
-
       {/* Restaurant Search */}
-      {!homeDataLoading && homeData?.categories && (
+      {!homeDataLoading && categories && (
         <RestaurantSearch
-          categories={homeData.categories}
+          categories={categories}
           onSearchChange={handleSearchChange}
           loading={restaurantsLoading}
         />
       )}
 
-      {/* Search Results */}
-      <Container maxWidth="lg" id="search-results-section">
-        {!homeDataLoading && homeData?.restaurants && (
-          <RestaurantGrid
-            restaurants={homeData.restaurants}
-            categoryId={searchFilters.categoryId}
-            search={searchFilters.search}
-            limit={12}
-            showTitle={false}
-          />
-        )}
-      </Container>
-
-      {/* CTA Section */}
-      <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#1a1a1a', borderRadius: 0, mt: 6 }}>
+      {/* Restaurants List */}
+      <Container maxWidth="lg" id="restaurants-section">
+        <Box sx={{ py: 4 }}>
           <Typography
             variant="h3"
             component="h2"
+            align="center"
             sx={{
-              color: 'white',
               fontWeight: 300,
-              letterSpacing: 3,
-              fontSize: { xs: '1.8rem', md: '2.2rem' },
-              mb: 2,
+              letterSpacing: 4,
+              fontSize: { xs: '1.8rem', md: '2.5rem' },
+              color: '#1a1a1a',
+              mb: 1,
               textTransform: 'uppercase',
               fontFamily: '"Times New Roman", serif'
             }}
           >
-            Join the Experience
+            Restaurants
           </Typography>
-          <Box sx={{ width: 50, height: 1, backgroundColor: 'white', mx: 'auto', mb: 3 }} />
-          <Typography
-            variant="body1"
-            sx={{
-              color: '#ccc',
-              mb: 4,
-              fontSize: '1rem',
-              letterSpacing: 1,
-              fontWeight: 300,
-              fontStyle: 'italic',
-              maxWidth: '400px',
-              mx: 'auto'
-            }}
-          >
-            Begin your culinary journey with carefully curated dining experiences
-          </Typography>
-          <Button
-            variant="outlined"
-            size="large"
-            onClick={handleSignUp}
-            sx={{
-              color: 'white',
-              borderColor: 'white',
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 400,
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-              borderRadius: 0,
-              '&:hover': {
-                backgroundColor: 'white',
-                color: '#1a1a1a',
-                borderColor: 'white'
-              }
-            }}
-          >
-            Register Now
-          </Button>
+          <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 4 }} />
+
+          {/* 로딩 상태 */}
+          {restaurantsLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress size={60} sx={{ color: '#1a1a1a' }} />
+            </Box>
+          )}
+
+          {/* 맛집 그리드 */}
+          {!restaurantsLoading && (
+            <>
+              <RestaurantGrid
+                restaurants={restaurants}
+                limit={20}
+                showTitle={false}
+              />
+
+              {/* 페이지네이션 */}
+              {pagination && pagination.totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 4 }}>
+                  <Button
+                    variant="outlined"
+                    disabled={!pagination.hasPrev}
+                    onClick={() => handlePageChange(searchFilters.page! - 1)}
+                    sx={{
+                      borderRadius: 0,
+                      borderColor: '#e0e0e0',
+                      color: '#666',
+                      '&:hover': {
+                        borderColor: '#1a1a1a',
+                        backgroundColor: '#f5f5f5'
+                      }
+                    }}
+                  >
+                    Previous
+                  </Button>
+                  <Box sx={{ display: 'flex', alignItems: 'center', px: 3 }}>
+                    <Typography variant="body2" sx={{ color: '#666', letterSpacing: 1 }}>
+                      Page {pagination.page} of {pagination.totalPages}
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    disabled={!pagination.hasNext}
+                    onClick={() => handlePageChange(searchFilters.page! + 1)}
+                    sx={{
+                      borderRadius: 0,
+                      borderColor: '#e0e0e0',
+                      color: '#666',
+                      '&:hover': {
+                        borderColor: '#1a1a1a',
+                        backgroundColor: '#f5f5f5'
+                      }
+                    }}
+                  >
+                    Next
+                  </Button>
+                </Box>
+              )}
+            </>
+          )}
         </Box>
+      </Container>
+
+      {/* CTA Section */}
+      <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#1a1a1a', borderRadius: 0, mt: 6 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          sx={{
+            color: 'white',
+            fontWeight: 300,
+            letterSpacing: 3,
+            fontSize: { xs: '1.8rem', md: '2.2rem' },
+            mb: 2,
+            textTransform: 'uppercase',
+            fontFamily: '"Times New Roman", serif'
+          }}
+        >
+          Join the Experience
+        </Typography>
+        <Box sx={{ width: 50, height: 1, backgroundColor: 'white', mx: 'auto', mb: 3 }} />
+        <Typography
+          variant="body1"
+          sx={{
+            color: '#ccc',
+            mb: 4,
+            fontSize: '1rem',
+            letterSpacing: 1,
+            fontWeight: 300,
+            fontStyle: 'italic',
+            maxWidth: '400px',
+            mx: 'auto'
+          }}
+        >
+          Begin your culinary journey with carefully curated dining experiences
+        </Typography>
+        <Button
+          variant="outlined"
+          size="large"
+          onClick={handleSignUp}
+          sx={{
+            color: 'white',
+            borderColor: 'white',
+            px: 4,
+            py: 1.5,
+            fontSize: '1rem',
+            fontWeight: 400,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            borderRadius: 0,
+            '&:hover': {
+              backgroundColor: 'white',
+              color: '#1a1a1a',
+              borderColor: 'white'
+            }
+          }}
+        >
+          Register Now
+        </Button>
+      </Box>
 
       {/* Footer */}
       <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 3, mt: 6 }}>

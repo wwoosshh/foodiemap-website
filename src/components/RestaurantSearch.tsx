@@ -13,13 +13,14 @@ import { Category } from '../types';
 
 interface RestaurantSearchProps {
   categories: Category[];
-  onSearchChange: (filters: { search?: string; categoryId?: number }) => void;
+  onSearchChange: (filters: { search?: string; categoryId?: number; sort?: string }) => void;
   loading?: boolean;
 }
 
 const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearchChange, loading = false }) => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
   const [searchText, setSearchText] = useState('');
+  const [sortOption, setSortOption] = useState<string>('created_at_desc');
 
   const categoriesLoading = false; // props로 받으므로 로딩 없음
 
@@ -44,9 +45,10 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
   useEffect(() => {
     onSearchChange({
       search: searchText || undefined,
-      categoryId: selectedCategoryId
+      categoryId: selectedCategoryId,
+      sort: sortOption
     });
-  }, [searchText, selectedCategoryId, onSearchChange]);
+  }, [searchText, selectedCategoryId, sortOption, onSearchChange]);
 
   const handleCategorySelect = (categoryId: number) => {
     setSelectedCategoryId(selectedCategoryId === categoryId ? undefined : categoryId);
@@ -59,6 +61,7 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
   const handleResetFilters = () => {
     setSearchText('');
     setSelectedCategoryId(undefined);
+    setSortOption('created_at_desc');
   };
 
   return (
@@ -146,6 +149,59 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
         />
       </Box>
 
+      {/* 정렬 옵션 */}
+      <Box sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            mb: 2,
+            color: '#666',
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            textAlign: 'center'
+          }}
+        >
+          Sort By
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1.5 }}>
+          {[
+            { value: 'created_at_desc', label: 'Latest' },
+            { value: 'view_count_desc', label: 'Most Viewed' },
+            { value: 'review_count_desc', label: 'Most Reviewed' },
+            { value: 'rating_desc', label: 'Highest Rated' },
+            { value: 'favorite_count_desc', label: 'Most Favorited' }
+          ].map((option) => (
+            <Chip
+              key={option.value}
+              label={option.label}
+              onClick={() => setSortOption(option.value)}
+              disabled={loading}
+              variant={sortOption === option.value ? 'filled' : 'outlined'}
+              sx={{
+                px: 2,
+                py: 0.5,
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                letterSpacing: 0.5,
+                borderRadius: 0,
+                borderColor: '#e0e0e0',
+                color: sortOption === option.value ? 'white' : '#666',
+                backgroundColor: sortOption === option.value ? '#1a1a1a' : 'transparent',
+                '&:hover': {
+                  backgroundColor: sortOption === option.value ? '#333' : '#f5f5f5',
+                  borderColor: '#bdbdbd'
+                },
+                '&.Mui-disabled': {
+                  opacity: 0.6
+                }
+              }}
+            />
+          ))}
+        </Box>
+      </Box>
+
       {/* 카테고리 필터 */}
       <Box sx={{ mb: 4 }}>
         <Typography
@@ -196,7 +252,7 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
       </Box>
 
       {/* 필터 리셋 버튼 */}
-      {(searchText || selectedCategoryId) && (
+      {(searchText || selectedCategoryId || sortOption !== 'created_at_desc') && (
         <Box sx={{ textAlign: 'center' }}>
           <Button
             onClick={handleResetFilters}

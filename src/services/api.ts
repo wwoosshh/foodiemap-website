@@ -130,6 +130,33 @@ export class ApiService {
     return response.data;
   }
 
+  // 맛집 목록 조회 (정렬 및 검색 기능 포함)
+  static async getRestaurants(params: {
+    page?: number;
+    limit?: number;
+    category_id?: number;
+    search?: string;
+    sort?: 'view_count_desc' | 'review_count_desc' | 'rating_desc' | 'created_at_desc' | 'favorite_count_desc';
+  } = {}): Promise<ApiResponse<{
+    restaurants: Restaurant[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+    filters: {
+      categoryId: number | null;
+      search: string | null;
+      sort: string;
+    };
+  }>> {
+    const response = await api.get('/api/restaurants', { params });
+    return response.data;
+  }
+
   // 공개 배너 목록 조회 (로그인 불필요)
   static async getPublicBanners(): Promise<ApiResponse<{ banners: Banner[] }>> {
     const response = await api.get('/api/banners');
