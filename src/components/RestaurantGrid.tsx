@@ -167,9 +167,9 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                   {restaurant.name}
                 </Typography>
 
-                {/* 평점 및 리뷰 수 */}
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                {/* 평점, 리뷰 수, 조회수 */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box
                       sx={{
                         width: 4,
@@ -199,6 +199,16 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                     }}
                   >
                     {restaurant.review_count} Reviews
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#666',
+                      fontSize: '0.85rem',
+                      fontWeight: 400
+                    }}
+                  >
+                    • {restaurant.view_count || 0} Views
                   </Typography>
                 </Box>
 

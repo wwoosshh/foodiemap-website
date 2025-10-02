@@ -360,6 +360,11 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
                   조회 {detailRestaurant.view_count || 0}회
                 </Typography>
               )}
+              {detailRestaurant && (
+                <Typography variant="body2">
+                  즐겨찾기 {detailRestaurant.favorite_count || 0}개
+                </Typography>
+              )}
             </Box>
             <Typography variant="body1" sx={{ opacity: 0.9 }}>
               {restaurant.address}

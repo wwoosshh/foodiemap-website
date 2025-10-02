@@ -142,10 +142,6 @@ const HomePage: React.FC = () => {
     setLoginModalOpen(true);
   };
 
-  const handleSignUp = () => {
-    setLoginModalOpen(true);
-  };
-
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchor(event.currentTarget);
   };
