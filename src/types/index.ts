@@ -20,6 +20,8 @@ export interface Restaurant {
   category_id: number;
   rating: number;
   review_count: number;
+  view_count?: number;
+  favorite_count?: number;
   images: string[];
   created_at: string;
   categories?: {
