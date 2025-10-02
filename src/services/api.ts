@@ -119,6 +119,20 @@ export class ApiService {
     return response.data;
   }
 
+  // 소셜 로그인 (Google, Kakao, Naver)
+  static async socialLogin(data: {
+    social_id: string;
+    auth_provider: 'google' | 'kakao' | 'naver';
+    email: string;
+    name: string;
+    phone?: string;
+    avatar_url?: string;
+    social_data?: any;
+  }): Promise<ApiResponse<AuthData>> {
+    const response = await api.post('/api/auth/social-login', data);
+    return response.data;
+  }
+
   // 공개 맛집 목록 조회 (로그인 불필요)
   static async getPublicRestaurants(params: {
     page?: number;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { ApiService } from '../services/api';
 
 const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,30 +33,49 @@ const AuthCallbackPage: React.FC = () => {
         }
 
         if (data.session) {
-          const user = data.session.user;
-          console.log('Google 로그인 성공:', user);
+          const supabaseUser = data.session.user;
+          console.log('Google 로그인 성공:', supabaseUser);
 
           // Supabase access token을 로컬 스토리지에 저장
           localStorage.setItem('supabase_token', data.session.access_token);
 
-          // 사용자 정보를 AuthContext에 설정
-          setUser({
-            id: user.id,
-            email: user.email || '',
-            name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '사용자',
-            phone: user.user_metadata?.phone || undefined,
-            avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || undefined,
-            email_verified: user.email_confirmed_at ? true : false,
-            created_at: user.created_at || new Date().toISOString()
-          });
+          // 백엔드에 소셜 로그인 사용자 생성/조회 API 호출
+          try {
+            const response = await ApiService.socialLogin({
+              social_id: supabaseUser.id,
+              auth_provider: 'google',
+              email: supabaseUser.email || '',
+              name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || '사용자',
+              phone: supabaseUser.user_metadata?.phone || undefined,
+              avatar_url: supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture || undefined,
+              social_data: supabaseUser.user_metadata
+            });
 
-          // 기존 백엔드와 동기화 (선택사항)
-          // TODO: 백엔드에 소셜 로그인 사용자 생성/업데이트 API 호출
+            if (response.success && response.data) {
+              const { user, token } = response.data;
 
-          // 홈으로 리다이렉트
-          setTimeout(() => {
-            navigate('/');
-          }, 1000);
+              // 백엔드 JWT 토큰과 사용자 정보 저장
+              localStorage.setItem('user_token', token);
+              localStorage.setItem('user_data', JSON.stringify(user));
+
+              // 사용자 정보를 AuthContext에 설정
+              setUser(user);
+
+              console.log('백엔드 DB에 사용자 저장 완료:', user);
+
+              // 홈으로 리다이렉트
+              setTimeout(() => {
+                navigate('/');
+              }, 1000);
+            } else {
+              setError('사용자 정보 저장 중 오류가 발생했습니다.');
+              setTimeout(() => navigate('/'), 2000);
+            }
+          } catch (apiError: any) {
+            console.error('백엔드 API 호출 오류:', apiError);
+            setError(apiError.userMessage || '사용자 정보 처리 중 오류가 발생했습니다.');
+            setTimeout(() => navigate('/'), 2000);
+          }
         } else {
           setError('로그인 세션을 찾을 수 없습니다.');
           setTimeout(() => navigate('/'), 2000);
