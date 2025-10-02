@@ -34,6 +34,7 @@ import { Restaurant } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { ApiService } from '../services/api';
 import RestaurantReviews from './RestaurantReviews';
+import NaverMap from './NaverMap';
 
 // 카테고리별 기본 아이콘 매핑
 const getCategoryIcon = (categoryName: string): string => {
@@ -555,14 +556,23 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
 
             {/* 지도 탭 */}
             <TabPanel value={tabValue} index={3}>
-              <Box sx={{ textAlign: 'center', py: 6 }}>
-                <Typography variant="h6" color="text.secondary">
-                  네이버 지도 연동 예정
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  맛집 위치를 지도에서 확인할 수 있습니다
-                </Typography>
-              </Box>
+              {restaurantCompleteData?.mapInfo?.latitude && restaurantCompleteData?.mapInfo?.longitude ? (
+                <NaverMap
+                  latitude={restaurantCompleteData.mapInfo.latitude}
+                  longitude={restaurantCompleteData.mapInfo.longitude}
+                  restaurantName={restaurant.name}
+                  address={restaurantCompleteData.mapInfo.address || restaurant.address}
+                />
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Typography variant="h6" color="text.secondary">
+                    위치 정보가 없습니다
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    이 맛집의 위치 정보가 등록되지 않았습니다
+                  </Typography>
+                </Box>
+              )}
             </TabPanel>
           </Box>
         </DialogContent>
