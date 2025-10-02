@@ -4,6 +4,7 @@ import { ApiService } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
+  setUser: (user: User | null) => void;
   isLoading: boolean;
   showEmailVerification: boolean;
   setShowEmailVerification: (show: boolean) => void;
@@ -134,6 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    setUser,
     isLoading,
     showEmailVerification,
     setShowEmailVerification,
