@@ -33,7 +33,6 @@ import {
 import { Restaurant } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { ApiService } from '../services/api';
-import RestaurantComments from './RestaurantComments';
 import RestaurantReviews from './RestaurantReviews';
 
 // 카테고리별 기본 아이콘 매핑
@@ -385,7 +384,6 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               <Tab label="정보" />
               <Tab label="메뉴" />
               <Tab label="리뷰" />
-              <Tab label="댓글" />
               <Tab label="지도" />
             </Tabs>
           </Box>
@@ -550,21 +548,8 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
               />
             </TabPanel>
 
-            {/* 댓글 탭 */}
-            <TabPanel value={tabValue} index={3}>
-              <RestaurantComments
-                restaurantId={restaurant?.id || ''}
-                userId={user?.id}
-                initialComments={restaurantCompleteData?.comments?.items || []}
-                onCommentCountChange={(count) => {
-                  // 댓글 데이터 변경 시 전체 데이터 다시 로드
-                  loadRestaurantCompleteData(restaurant.id);
-                }}
-              />
-            </TabPanel>
-
             {/* 지도 탭 */}
-            <TabPanel value={tabValue} index={4}>
+            <TabPanel value={tabValue} index={3}>
               <Box sx={{ textAlign: 'center', py: 6 }}>
                 <Typography variant="h6" color="text.secondary">
                   네이버 지도 연동 예정

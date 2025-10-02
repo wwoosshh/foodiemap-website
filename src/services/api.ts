@@ -49,9 +49,6 @@ const getErrorMessage = (error: any): string => {
     if (message.includes('제목은 1-100자여야 합니다')) {
       return '리뷰 제목은 1자 이상 100자 이하로 작성해주세요.';
     }
-    if (message.includes('댓글 내용은 1-1000자여야 합니다')) {
-      return '댓글은 1자 이상 1000자 이하로 작성해주세요.';
-    }
     if (message.includes('평점은 1-5 사이의 정수여야 합니다')) {
       return '평점은 1점부터 5점까지 선택해주세요.';
     }
@@ -166,7 +163,7 @@ export class ApiService {
 
   // === 맛집 상세정보 통합 데이터 API ===
 
-  // 맛집 상세정보 모든 데이터 한 번에 조회 (정보, 메뉴, 리뷰, 댓글, 지도 등)
+  // 맛집 상세정보 모든 데이터 한 번에 조회 (정보, 메뉴, 리뷰, 지도 등)
   static async getRestaurantCompleteData(restaurantId: string): Promise<ApiResponse<{
     restaurant: any;
     reviews: {
@@ -175,16 +172,10 @@ export class ApiService {
       total: number;
       hasMore: boolean;
     };
-    comments: {
-      items: any[];
-      total: number;
-      hasMore: boolean;
-    };
     menus: any[];
     userInfo: {
       isFavorited: boolean;
       canReview: boolean;
-      canComment: boolean;
     } | null;
     mapInfo: {
       latitude: number;
@@ -204,68 +195,6 @@ export class ApiService {
     const response = await api.get(`/api/restaurant-details/${restaurantId}/reviews/more`, {
       params: { offset, limit }
     });
-    return response.data;
-  }
-
-  // 추가 댓글 로드 (페이지네이션)
-  static async getMoreComments(restaurantId: string, offset: number, limit: number = 20): Promise<ApiResponse<{
-    comments: any[];
-    hasMore: boolean;
-  }>> {
-    const response = await api.get(`/api/restaurant-details/${restaurantId}/comments/more`, {
-      params: { offset, limit }
-    });
-    return response.data;
-  }
-
-  // === 댓글 API ===
-
-  // 맛집 댓글 목록 조회
-  static async getRestaurantComments(restaurantId: string, params: {
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<ApiResponse<{
-    comments: any[];
-    total: number;
-    limit: number;
-    offset: number;
-  }>> {
-    const response = await api.get(`/api/comments/${restaurantId}`, { params });
-    return response.data;
-  }
-
-  // 댓글 작성
-  static async createComment(data: {
-    restaurant_id: string;
-    content: string;
-    parent_id?: string;
-  }): Promise<ApiResponse<any>> {
-    const response = await api.post('/api/comments', data);
-    return response.data;
-  }
-
-  // 댓글 좋아요 토글
-  static async toggleCommentLike(commentId: string): Promise<ApiResponse<{
-    comment_id: string;
-    is_liked: boolean;
-    likes_count: number;
-  }>> {
-    const response = await api.post(`/api/comments/${commentId}/like`);
-    return response.data;
-  }
-
-  // 댓글 삭제
-  static async deleteComment(commentId: string): Promise<ApiResponse<{ comment_id: string }>> {
-    const response = await api.delete(`/api/comments/${commentId}`);
-    return response.data;
-  }
-
-  // 댓글 신고
-  static async reportComment(commentId: string, data: {
-    reason: string;
-    details?: string;
-  }): Promise<ApiResponse<{ report_id: string }>> {
-    const response = await api.post(`/api/comments/${commentId}/report`, data);
     return response.data;
   }
 
