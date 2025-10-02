@@ -45,7 +45,8 @@ const AuthCallbackPage: React.FC = () => {
             name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '사용자',
             phone: user.user_metadata?.phone || undefined,
             avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || undefined,
-            email_verified: user.email_confirmed_at ? true : false
+            email_verified: user.email_confirmed_at ? true : false,
+            created_at: user.created_at || new Date().toISOString()
           });
 
           // 기존 백엔드와 동기화 (선택사항)
