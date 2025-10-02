@@ -5,6 +5,7 @@ import { CssBaseline } from '@mui/material';
 
 // Pages
 import HomePage from './pages/HomePage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 
 // Components
 import EmailVerificationModal from './components/EmailVerificationModal';
@@ -95,6 +96,9 @@ const AppContent = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/restaurants" element={<HomePage />} />
           <Route path="/map" element={<HomePage />} />
+
+          {/* OAuth 콜백 */}
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
           {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
           <Route path="*" element={<Navigate to="/" replace />} />
