@@ -104,9 +104,14 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
       <Box
         sx={{
           flex: 1,
+          minHeight: 0,
           overflow: 'auto',
+          overflowX: 'hidden',
           px: { xs: 2, md: 3 },
-          pb: 4
+          pb: 4,
+          transform: 'translateZ(0)',
+          WebkitOverflowScrolling: 'touch',
+          position: 'relative',
         }}
       >
         <RestaurantGrid

@@ -41,6 +41,8 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
         alignItems: 'center',
         justifyContent: 'center',
         p: 4,
+        transform: 'translateZ(0)',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {/* 메인 타이틀 */}

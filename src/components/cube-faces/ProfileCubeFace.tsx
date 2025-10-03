@@ -29,6 +29,8 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          transform: 'translateZ(0)',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         <Container maxWidth="sm">

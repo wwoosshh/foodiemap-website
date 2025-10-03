@@ -38,6 +38,8 @@ const CategoryCubeFace: React.FC<CategoryCubeFaceProps> = ({ onNavigate }) => {
         height: '100%',
         overflow: 'auto',
         backgroundColor: '#FFFFFF',
+        transform: 'translateZ(0)',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
