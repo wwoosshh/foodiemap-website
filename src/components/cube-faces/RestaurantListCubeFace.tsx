@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import RestaurantSearch from '../RestaurantSearch';
 import RestaurantGrid from '../RestaurantGrid';
 import { ApiService } from '../../services/api';
@@ -103,13 +103,15 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
       </Box>
 
       {/* 맛집 그리드 */}
-      <RestaurantGrid
-        restaurants={restaurants}
-        loading={loading}
-        pagination={pagination}
-        onPageChange={handlePageChange}
-        showTitle={false}
-      />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <RestaurantGrid
+          restaurants={restaurants}
+          loading={loading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          showTitle={false}
+        />
+      </Container>
     </Box>
   );
 };
