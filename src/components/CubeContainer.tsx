@@ -97,6 +97,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `translateZ(${cubeDepth}px)`,
+            border: '2px solid #e0e0e0',
+            boxSizing: 'border-box',
           }}
         >
           <HomeCubeFace onNavigate={handleNavigate} />
@@ -111,6 +113,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateX(90deg) translateZ(${cubeDepth}px)`,
+            border: '2px solid #e0e0e0',
+            boxSizing: 'border-box',
           }}
         >
           <CategoryCubeFace onNavigate={handleNavigate} />
@@ -125,6 +129,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateY(90deg) translateZ(${cubeDepth}px)`,
+            border: '2px solid #e0e0e0',
+            boxSizing: 'border-box',
           }}
         >
           <RestaurantListCubeFace initialCategoryId={selectedCategoryId} />
@@ -139,6 +145,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateY(-90deg) translateZ(${cubeDepth}px)`,
+            border: '2px solid #e0e0e0',
+            boxSizing: 'border-box',
           }}
         >
           <ProfileCubeFace onNavigate={handleNavigate} />
@@ -153,6 +161,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateX(-90deg) translateZ(${cubeDepth}px)`,
+            border: '2px solid #e0e0e0',
+            boxSizing: 'border-box',
           }}
         >
           <EventCubeFace onNavigate={handleNavigate} />
@@ -167,6 +177,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateY(180deg) translateZ(${cubeDepth}px)`,
+            border: '2px solid #e0e0e0',
+            boxSizing: 'border-box',
           }}
         >
           <InfoCubeFace onNavigate={handleNavigate} />
