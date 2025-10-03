@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
-  CardMedia,
   Typography,
   CircularProgress,
   Button,
@@ -170,36 +167,40 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
               renderEmptyState()
             ) : (
               displayRestaurants.map((restaurant) => (
-            <Card
+            <Box
               key={restaurant.id}
+              onClick={() => handleRestaurantClick(restaurant)}
               sx={{
                 height: '100%',
                 cursor: 'pointer',
                 borderRadius: 1,
                 border: '1px solid #f0f0f0',
-                boxShadow: 'none',
                 transition: 'all 0.2s ease',
                 backgroundColor: '#ffffff',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
                 '&:hover': {
                   borderColor: '#1a1a1a',
                   boxShadow: '0 0 0 1px #1a1a1a',
                 }
               }}
-              onClick={() => handleRestaurantClick(restaurant)}
             >
-              <CardMedia
+              <Box
                 component="img"
-                height="240"
-                image={getImageSrc(restaurant)}
+                src={getImageSrc(restaurant)}
                 alt={restaurant.name}
+                onError={() => handleImageError(restaurant.id)}
                 sx={{
+                  width: '100%',
+                  height: 240,
                   objectFit: 'cover',
                   backgroundColor: '#f8f8f8',
-                  borderBottom: '1px solid #f0f0f0'
+                  borderBottom: '1px solid #f0f0f0',
+                  flexShrink: 0,
                 }}
-                onError={() => handleImageError(restaurant.id)}
               />
-              <CardContent sx={{ p: 3, pb: 3 }}>
+              <Box sx={{ p: 3, pb: 3 }}>
                 {/* 카테고리 */}
                 {restaurant.categories && (
                   <Typography
@@ -338,8 +339,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                     {restaurant.phone}
                   </Typography>
                 )}
-              </CardContent>
-            </Card>
+              </Box>
+            </Box>
               ))
             )}
           </Box>
