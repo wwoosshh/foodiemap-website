@@ -4,7 +4,6 @@ import {
   Typography,
   CircularProgress,
   Button,
-  Card,
 } from '@mui/material';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
@@ -168,17 +167,19 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
               renderEmptyState()
             ) : (
               displayRestaurants.map((restaurant) => (
-            <Card
+            <Box
               key={restaurant.id}
               onClick={() => handleRestaurantClick(restaurant)}
               sx={{
                 height: '100%',
                 borderRadius: 1,
                 border: '1px solid #f0f0f0',
-                boxShadow: 'none',
+                backgroundColor: '#fff',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
+                overflow: 'hidden',
+                transition: 'all 0.2s',
                 '&:hover': {
                   borderColor: '#1a1a1a',
                   boxShadow: '0 0 0 1px #1a1a1a',
@@ -338,7 +339,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                   </Typography>
                 )}
               </Box>
-            </Card>
+            </Box>
               ))
             )}
           </Box>
