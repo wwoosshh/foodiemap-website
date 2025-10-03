@@ -56,10 +56,10 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
   };
 
   // 큐브 깊이를 화면 크기에 비례하게 설정
-  // 화면의 작은 쪽 기준으로 깊이를 절반으로 설정하여 정육면체에 가깝게
-  const cubeDepth = Math.min(cubeWidth, cubeHeight) / 2;
-  // perspective는 큐브 깊이의 4배로 설정하여 왜곡 최소화
-  const perspectiveValue = cubeDepth * 4;
+  // 화면의 큰 쪽 기준으로 깊이를 설정하여 회전 시 면들이 겹치지 않도록
+  const cubeDepth = Math.max(cubeWidth, cubeHeight) / 2;
+  // perspective는 큐브 깊이의 3배로 설정하여 왜곡 최소화
+  const perspectiveValue = cubeDepth * 3;
 
   return (
     <Box
