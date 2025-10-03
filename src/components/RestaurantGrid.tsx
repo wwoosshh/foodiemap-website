@@ -5,37 +5,40 @@ import {
   CardContent,
   CardMedia,
   Typography,
+  CircularProgress,
+  Button,
 } from '@mui/material';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
 
-// 카테고리별 기본 아이콘 매핑
-const getCategoryIcon = (categoryName?: string): string => {
+// 카테고리별 Material-UI 아이콘 매핑 (이모티콘 대신 커스텀 아이콘 사용)
+const getCategoryIconText = (categoryName?: string): string => {
   const iconMap: Record<string, string> = {
-    '한식': '🍚',
-    '중식': '🥢',
-    '일식': '🍣',
-    '양식': '🍝',
-    '분식': '🌮',
-    '치킨': '🍗',
-    '피자': '🍕',
-    '카페': '☕',
-    '디저트': '🧁',
-    '기타': '🍽️'
+    '한식': 'KR',
+    '중식': 'CH',
+    '일식': 'JP',
+    '양식': 'WS',
+    '분식': 'ST',
+    '치킨': 'CK',
+    '피자': 'PZ',
+    '카페': 'CF',
+    '디저트': 'DS',
+    '기타': 'ETC'
   };
-  return categoryName ? (iconMap[categoryName] || '🍽️') : '🍽️';
+  return categoryName ? (iconMap[categoryName] || 'FD') : 'FD';
 };
 
-// 대체 이미지 생성 함수
+// 대체 이미지 생성 함수 (텍스트 아이콘 사용)
 const generateFallbackImage = (restaurantName: string, categoryName?: string): string => {
-  const icon = getCategoryIcon(categoryName);
+  const iconText = getCategoryIconText(categoryName);
   return `data:image/svg+xml,${encodeURIComponent(`
     <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#f5f5f5"/>
-      <text x="50%" y="40%" font-family="Arial" font-size="80" text-anchor="middle" fill="#ddd">
-        ${icon}
+      <circle cx="300" cy="150" r="50" fill="#e0e0e0"/>
+      <text x="50%" y="38%" font-family="Arial, sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#999">
+        ${iconText}
       </text>
-      <text x="50%" y="60%" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#999">
+      <text x="50%" y="60%" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#666">
         ${restaurantName}
       </text>
     </svg>
@@ -47,13 +50,25 @@ interface RestaurantGridProps {
   limit?: number;
   title?: string;
   showTitle?: boolean;
+  loading?: boolean;
+  pagination?: {
+    page: number;
+    totalPages: number;
+    totalCount: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  onPageChange?: (page: number) => void;
 }
 
 const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   restaurants,
   limit = 20,
   title = "Restaurants",
-  showTitle = true
+  showTitle = true,
+  loading = false,
+  pagination,
+  onPageChange
 }) => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -131,23 +146,30 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
       )}
       {showTitle && <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 6 }} />}
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: 'repeat(1, 1fr)',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(3, 1fr)',
-            lg: 'repeat(4, 1fr)'
-          },
-          gap: 3,
-          mt: 2
-        }}
-      >
-        {displayRestaurants.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          displayRestaurants.map((restaurant) => (
+      {/* 로딩 상태 */}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress size={60} sx={{ color: '#1a1a1a' }} />
+        </Box>
+      ) : (
+        <>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: 'repeat(1, 1fr)',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)'
+              },
+              gap: 3,
+              mt: 2
+            }}
+          >
+            {displayRestaurants.length === 0 ? (
+              renderEmptyState()
+            ) : (
+              displayRestaurants.map((restaurant) => (
             <Card
               key={restaurant.id}
               sx={{
@@ -319,9 +341,54 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                 )}
               </CardContent>
             </Card>
-          ))
-        )}
-      </Box>
+              ))
+            )}
+          </Box>
+
+          {/* 페이지네이션 */}
+          {pagination && pagination.totalPages > 1 && onPageChange && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 4 }}>
+              <Button
+                variant="outlined"
+                disabled={!pagination.hasPrev}
+                onClick={() => onPageChange(pagination.page - 1)}
+                sx={{
+                  borderRadius: 0,
+                  borderColor: '#e0e0e0',
+                  color: '#666',
+                  '&:hover': {
+                    borderColor: '#1a1a1a',
+                    backgroundColor: '#f5f5f5'
+                  }
+                }}
+              >
+                Previous
+              </Button>
+              <Box sx={{ display: 'flex', alignItems: 'center', px: 3 }}>
+                <Typography variant="body2" sx={{ color: '#666', letterSpacing: 1 }}>
+                  Page {pagination.page} of {pagination.totalPages}
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                disabled={!pagination.hasNext}
+                onClick={() => onPageChange(pagination.page + 1)}
+                sx={{
+                  borderRadius: 0,
+                  borderColor: '#e0e0e0',
+                  color: '#666',
+                  '&:hover': {
+                    borderColor: '#1a1a1a',
+                    backgroundColor: '#f5f5f5'
+                  }
+                }}
+              >
+                Next
+              </Button>
+            </Box>
+          )}
+        </>
+      )}
 
       {/* 맛집 상세 모달 */}
       <RestaurantDetailModal

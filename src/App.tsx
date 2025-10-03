@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
 // Pages
-import HomePage from './pages/HomePage';
+import CubeHomePage from './pages/CubeHomePage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 
 // Components
@@ -92,10 +92,8 @@ const AppContent = () => {
     <>
       <Router>
         <Routes>
-          {/* 홈페이지 - 사용자 전용 */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/restaurants" element={<HomePage />} />
-          <Route path="/map" element={<HomePage />} />
+          {/* 메인 페이지 - 3D 큐브 네비게이션 */}
+          <Route path="/" element={<CubeHomePage />} />
 
           {/* OAuth 콜백 */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
