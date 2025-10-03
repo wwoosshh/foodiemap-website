@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
   TextField,
   Button,
   InputAdornment,
@@ -61,24 +60,13 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
   };
 
   return (
-    <Box sx={{ py: { xs: 2, md: 3 }, px: { xs: 2, md: 3 }, backgroundColor: '#fafafa', borderBottom: '1px solid #e0e0e0' }}>
-      <Typography
-        variant="h4"
-        component="h2"
-        align="center"
-        sx={{
-          fontWeight: 300,
-          letterSpacing: 3,
-          fontSize: { xs: '1.3rem', md: '1.8rem' },
-          color: '#1a1a1a',
-          mb: 1,
-          textTransform: 'uppercase',
-          fontFamily: '"Times New Roman", serif'
-        }}
-      >
-        Discover
-      </Typography>
-      <Box sx={{ width: 30, height: 1, backgroundColor: '#000', mx: 'auto', mb: 2 }} />
+    <Box sx={{
+      py: 1.5,
+      px: 2,
+      backgroundColor: '#fafafa',
+      borderBottom: '1px solid #e0e0e0',
+      flexShrink: 0  // 스크롤 시 고정
+    }}>
 
       {/* 검색 및 필터 */}
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>

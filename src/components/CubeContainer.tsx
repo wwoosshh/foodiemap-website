@@ -32,39 +32,22 @@ interface CubeContainerProps {
 const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, selectedCategoryId }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const [rotation, setRotation] = useState<CubeRotation>({ x: 0, y: 0 });
-  const [cubeSize, setCubeSize] = useState(1000);
+  const [cubeWidth, setCubeWidth] = useState(window.innerWidth);
+  const [cubeHeight, setCubeHeight] = useState(window.innerHeight - 64);
 
-  // 화면 크기에 따라 큐브 크기 조정
+  // 화면 크기에 따라 큐브 크기 조정 (화면 전체를 채움)
   useEffect(() => {
-    const calculateCubeSize = () => {
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight - 64; // AppBar 높이 제외
-
-      // 모바일: 화면에 맞춤
-      if (isMobile) {
-        return Math.min(screenWidth, screenHeight);
-      }
-      // 태블릿: 화면의 80%
-      else if (isTablet) {
-        return Math.min(screenWidth * 0.9, screenHeight);
-      }
-      // 데스크탑: 충분히 큰 크기
-      else {
-        return Math.min(screenWidth * 0.8, screenHeight, 1200);
-      }
-    };
-
     const updateSize = () => {
-      setCubeSize(calculateCubeSize());
+      setCubeWidth(window.innerWidth);
+      setCubeHeight(window.innerHeight - 64); // AppBar 높이 제외
     };
 
     updateSize();
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
-  }, [isMobile, isTablet]);
+  }, []);
 
   // 현재 면에 따라 회전 업데이트
   useEffect(() => {
@@ -75,25 +58,26 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     onNavigate(face as CubeFace);
   };
 
-  const cubeHalfSize = cubeSize / 2;
+  // 큐브 깊이는 화면 높이의 절반으로 설정 (3D 효과용)
+  const cubeDepth = cubeHeight / 2;
 
   return (
     <Box
       sx={{
         width: '100%',
         height: '100%',
-        perspective: isMobile ? '800px' : '1200px',
+        perspective: isMobile ? '1000px' : '1500px',
         overflow: 'hidden',
         position: 'relative',
-        backgroundColor: '#000',
+        backgroundColor: '#FFFFFF',
       }}
     >
       {/* 3D 큐브 */}
       <Box
         sx={{
           position: 'absolute',
-          width: `${cubeSize}px`,
-          height: `${cubeSize}px`,
+          width: `${cubeWidth}px`,
+          height: `${cubeHeight}px`,
           left: '50%',
           top: '50%',
           transform: `translate(-50%, -50%) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
@@ -109,8 +93,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             height: '100%',
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
-            transform: `translateZ(${cubeHalfSize}px)`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            transform: `translateZ(${cubeDepth}px)`,
+            overflow: 'hidden',
           }}
         >
           <HomeCubeFace onNavigate={handleNavigate} />
@@ -124,8 +108,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             height: '100%',
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
-            transform: `rotateX(90deg) translateZ(${cubeHalfSize}px)`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            transform: `rotateX(90deg) translateZ(${cubeDepth}px)`,
+            overflow: 'hidden',
           }}
         >
           <CategoryCubeFace onNavigate={handleNavigate} />
@@ -139,8 +123,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             height: '100%',
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
-            transform: `rotateY(90deg) translateZ(${cubeHalfSize}px)`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            transform: `rotateY(90deg) translateZ(${cubeDepth}px)`,
+            overflow: 'hidden',
           }}
         >
           <RestaurantListCubeFace initialCategoryId={selectedCategoryId} />
@@ -154,8 +138,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             height: '100%',
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
-            transform: `rotateY(-90deg) translateZ(${cubeHalfSize}px)`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            transform: `rotateY(-90deg) translateZ(${cubeDepth}px)`,
+            overflow: 'hidden',
           }}
         >
           <ProfileCubeFace onNavigate={handleNavigate} />
@@ -169,8 +153,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             height: '100%',
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
-            transform: `rotateX(-90deg) translateZ(${cubeHalfSize}px)`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            transform: `rotateX(-90deg) translateZ(${cubeDepth}px)`,
+            overflow: 'hidden',
           }}
         >
           <EventCubeFace onNavigate={handleNavigate} />
@@ -184,8 +168,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             height: '100%',
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
-            transform: `rotateY(180deg) translateZ(${cubeHalfSize}px)`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            transform: `rotateY(180deg) translateZ(${cubeDepth}px)`,
+            overflow: 'hidden',
           }}
         >
           <InfoCubeFace onNavigate={handleNavigate} />

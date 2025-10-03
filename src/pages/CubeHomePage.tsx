@@ -66,7 +66,7 @@ const CubeHomePage: React.FC = () => {
     { label: '홈', icon: <Home />, face: 'home' as CubeFace },
     { label: '카테고리', icon: <Category />, face: 'category' as CubeFace },
     { label: '맛집', icon: <Restaurant />, face: 'restaurants' as CubeFace },
-    { label: '마이', icon: <Person />, face: 'profile' as CubeFace },
+    { label: '프로필', icon: <Person />, face: 'profile' as CubeFace },
     { label: '이벤트', icon: <Event />, face: 'event' as CubeFace },
     { label: '정보', icon: <Info />, face: 'info' as CubeFace },
   ];
