@@ -246,84 +246,112 @@ const CubeHomePage: React.FC = () => {
 
         {/* 화살표 네비게이션 - 현재 면에서 상대적으로 회전 */}
         {/* 왼쪽 화살표 - 왼쪽으로 90도 회전 */}
-        <IconButton
+        <Box
           onClick={() => handleNavigate(navigationMap[currentFace].left)}
           sx={{
             position: 'absolute',
-            left: 20,
+            left: 0,
             top: '50%',
             transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            width: '40px',
+            height: '120px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              width: '48px',
             },
             zIndex: 10,
           }}
         >
-          <ArrowBack sx={{ fontSize: 28 }} />
-        </IconButton>
+          <ArrowBack sx={{ fontSize: 20, color: '#666' }} />
+        </Box>
 
         {/* 오른쪽 화살표 - 오른쪽으로 90도 회전 */}
-        <IconButton
+        <Box
           onClick={() => handleNavigate(navigationMap[currentFace].right)}
           sx={{
             position: 'absolute',
-            right: 20,
+            right: 0,
             top: '50%',
             transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            width: '40px',
+            height: '120px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              width: '48px',
             },
             zIndex: 10,
           }}
         >
-          <ArrowForward sx={{ fontSize: 28 }} />
-        </IconButton>
+          <ArrowForward sx={{ fontSize: 20, color: '#666' }} />
+        </Box>
 
         {/* 위쪽 화살표 - 위로 90도 회전 */}
-        <IconButton
+        <Box
           onClick={() => handleNavigate(navigationMap[currentFace].up)}
           sx={{
             position: 'absolute',
             left: '50%',
-            top: 20,
+            top: 0,
             transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            width: '120px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              height: '48px',
             },
             zIndex: 10,
           }}
         >
-          <ArrowUpward sx={{ fontSize: 28 }} />
-        </IconButton>
+          <ArrowUpward sx={{ fontSize: 20, color: '#666' }} />
+        </Box>
 
         {/* 아래쪽 화살표 - 아래로 90도 회전 */}
-        <IconButton
+        <Box
           onClick={() => handleNavigate(navigationMap[currentFace].down)}
           sx={{
             position: 'absolute',
             left: '50%',
-            bottom: 20,
+            bottom: 0,
             transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            width: '120px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              height: '48px',
             },
             zIndex: 10,
           }}
         >
-          <ArrowDownward sx={{ fontSize: 28 }} />
-        </IconButton>
+          <ArrowDownward sx={{ fontSize: 20, color: '#666' }} />
+        </Box>
       </Box>
     </Box>
   );

@@ -67,8 +67,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
   // 현재 면에 따라 회전 업데이트 (최단 경로)
   useEffect(() => {
     const targetRotation = faceRotations[currentFace];
-    const shortestRotation = calculateShortestRotation(rotation, targetRotation);
-    setRotation(shortestRotation);
+    setRotation(prev => calculateShortestRotation(prev, targetRotation));
   }, [currentFace]);
 
   const handleNavigate = (face: string, categoryId?: number) => {
