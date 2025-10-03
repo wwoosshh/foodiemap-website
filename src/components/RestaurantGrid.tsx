@@ -5,7 +5,6 @@ import {
   CircularProgress,
   Button,
   Card,
-  CardActionArea,
 } from '@mui/material';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
@@ -171,35 +170,36 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
               displayRestaurants.map((restaurant) => (
             <Card
               key={restaurant.id}
+              onClick={() => handleRestaurantClick(restaurant)}
               sx={{
                 height: '100%',
                 borderRadius: 1,
                 border: '1px solid #f0f0f0',
                 boxShadow: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
                 '&:hover': {
                   borderColor: '#1a1a1a',
                   boxShadow: '0 0 0 1px #1a1a1a',
                 }
               }}
             >
-              <CardActionArea
-                onClick={() => handleRestaurantClick(restaurant)}
-                sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
-              >
-                <Box
-                  component="img"
-                  src={getImageSrc(restaurant)}
-                  alt={restaurant.name}
-                  onError={() => handleImageError(restaurant.id)}
-                  sx={{
-                    width: '100%',
-                    height: 240,
-                    objectFit: 'cover',
-                    backgroundColor: '#f8f8f8',
-                    borderBottom: '1px solid #f0f0f0',
-                  }}
-                />
-                <Box sx={{ p: 3, pb: 3, width: '100%' }}>
+              <Box
+                component="img"
+                src={getImageSrc(restaurant)}
+                alt={restaurant.name}
+                onError={() => handleImageError(restaurant.id)}
+                sx={{
+                  width: '100%',
+                  height: 240,
+                  objectFit: 'cover',
+                  backgroundColor: '#f8f8f8',
+                  borderBottom: '1px solid #f0f0f0',
+                  pointerEvents: 'none',
+                }}
+              />
+              <Box sx={{ p: 3, pb: 3, width: '100%' }}>
                 {/* 카테고리 */}
                 {restaurant.categories && (
                   <Typography
@@ -339,7 +339,6 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                   </Typography>
                 )}
               </Box>
-              </CardActionArea>
             </Card>
               ))
             )}
