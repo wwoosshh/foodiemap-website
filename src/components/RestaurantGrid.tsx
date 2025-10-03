@@ -125,7 +125,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   const displayRestaurants = restaurants.slice(0, limit);
 
   return (
-    <Box sx={{ py: showTitle ? 6 : 3 }}>
+    <Box sx={{ py: showTitle ? 6 : 3, pointerEvents: 'auto' }}>
       {showTitle && (
         <Typography
           variant="h3"
