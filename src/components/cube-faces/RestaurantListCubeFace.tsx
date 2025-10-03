@@ -86,19 +86,29 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
       sx={{
         width: '100%',
         height: '100%',
-        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
         backgroundColor: '#FFFFFF',
       }}
     >
-      {/* 검색 필터 */}
-      <RestaurantSearch
-        categories={categories}
-        onSearchChange={handleSearchChange}
-        loading={loading}
-      />
+      {/* 검색 필터 - 고정 */}
+      <Box sx={{ flexShrink: 0 }}>
+        <RestaurantSearch
+          categories={categories}
+          onSearchChange={handleSearchChange}
+          loading={loading}
+        />
+      </Box>
 
-      {/* 맛집 그리드 */}
-      <Box sx={{ px: { xs: 2, md: 3 }, pb: 4 }}>
+      {/* 맛집 그리드 - 스크롤 가능 영역 */}
+      <Box
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          px: { xs: 2, md: 3 },
+          pb: 4
+        }}
+      >
         <RestaurantGrid
           restaurants={restaurants}
           loading={loading}
