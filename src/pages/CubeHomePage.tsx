@@ -24,6 +24,10 @@ import {
   Info,
   Logout,
   Menu as MenuIcon,
+  ArrowBack,
+  ArrowForward,
+  ArrowUpward,
+  ArrowDownward,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import CubeContainer from '../components/CubeContainer';
@@ -121,9 +125,12 @@ const CubeHomePage: React.FC = () => {
                   sx={{
                     color: currentFace === item.face ? 'primary.main' : 'text.primary',
                     fontWeight: currentFace === item.face ? 600 : 400,
-                    backgroundColor: currentFace === item.face ? 'primary.light' : 'transparent',
+                    backgroundColor: 'transparent',
+                    border: currentFace === item.face ? '2px solid' : '2px solid transparent',
+                    borderColor: currentFace === item.face ? 'primary.main' : 'transparent',
                     '&:hover': {
-                      backgroundColor: currentFace === item.face ? 'primary.light' : 'rgba(0,0,0,0.04)',
+                      backgroundColor: 'rgba(0,0,0,0.04)',
+                      borderColor: currentFace === item.face ? 'primary.main' : 'rgba(0,0,0,0.12)',
                     },
                   }}
                 >
@@ -195,19 +202,22 @@ const CubeHomePage: React.FC = () => {
                 onClick={() => handleNavigate(item.face)}
                 sx={{
                   cursor: 'pointer',
-                  backgroundColor: currentFace === item.face ? 'primary.light' : 'transparent',
+                  backgroundColor: 'transparent',
+                  borderLeft: currentFace === item.face ? '4px solid' : '4px solid transparent',
+                  borderColor: currentFace === item.face ? 'primary.main' : 'transparent',
                   '&:hover': {
-                    backgroundColor: currentFace === item.face ? 'primary.light' : 'rgba(0,0,0,0.04)',
+                    backgroundColor: 'rgba(0,0,0,0.04)',
                   },
                 }}
               >
-                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', color: currentFace === item.face ? 'primary.main' : 'text.primary' }}>
                   {item.icon}
                 </Box>
                 <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
                     fontWeight: currentFace === item.face ? 600 : 400,
+                    color: currentFace === item.face ? 'primary.main' : 'text.primary',
                   }}
                 />
               </ListItem>
@@ -217,12 +227,93 @@ const CubeHomePage: React.FC = () => {
       </Drawer>
 
       {/* 3D 큐브 컨테이너 */}
-      <Box sx={{ flex: 1, overflow: 'hidden' }}>
+      <Box sx={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <CubeContainer
           currentFace={currentFace}
           onNavigate={handleNavigate}
           selectedCategoryId={selectedCategoryId}
         />
+
+        {/* 화살표 네비게이션 */}
+        {/* 왼쪽 화살표 - 프로필 */}
+        <IconButton
+          onClick={() => handleNavigate('profile')}
+          sx={{
+            position: 'absolute',
+            left: 20,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            },
+            zIndex: 10,
+          }}
+        >
+          <ArrowBack sx={{ fontSize: 28 }} />
+        </IconButton>
+
+        {/* 오른쪽 화살표 - 맛집 */}
+        <IconButton
+          onClick={() => handleNavigate('restaurants')}
+          sx={{
+            position: 'absolute',
+            right: 20,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            },
+            zIndex: 10,
+          }}
+        >
+          <ArrowForward sx={{ fontSize: 28 }} />
+        </IconButton>
+
+        {/* 위쪽 화살표 - 카테고리 */}
+        <IconButton
+          onClick={() => handleNavigate('category')}
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            top: 20,
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            },
+            zIndex: 10,
+          }}
+        >
+          <ArrowUpward sx={{ fontSize: 28 }} />
+        </IconButton>
+
+        {/* 아래쪽 화살표 - 이벤트 */}
+        <IconButton
+          onClick={() => handleNavigate('event')}
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            bottom: 20,
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            },
+            zIndex: 10,
+          }}
+        >
+          <ArrowDownward sx={{ fontSize: 28 }} />
+        </IconButton>
       </Box>
     </Box>
   );
