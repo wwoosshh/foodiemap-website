@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -17,6 +17,9 @@ import {
 import { Close, Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../config/supabase';
+import { initKakao, loginWithKakao } from '../utils/kakao';
+import { loginWithNaver } from '../utils/naver';
+import { ApiService } from '../services/api';
 
 interface LoginModalProps {
   open: boolean;
@@ -46,10 +49,16 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
-  const { login, register, isLoading } = useAuth();
+  const { login, register, isLoading, setUser } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [socialLoading, setSocialLoading] = useState(false);
+
+  // 카카오 SDK 초기화
+  useEffect(() => {
+    initKakao();
+  }, []);
 
   // 로그인 폼 상태
   const [loginData, setLoginData] = useState({
@@ -151,6 +160,60 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
     }
   };
 
+  // 카카오 로그인 핸들러
+  const handleKakaoLogin = async () => {
+    try {
+      setSocialLoading(true);
+      setError('');
+
+      const userData = await loginWithKakao();
+      console.log('카카오 사용자 정보:', userData);
+
+      // 백엔드로 사용자 정보 전송
+      const response = await ApiService.socialLogin(userData);
+
+      if (response.success && response.data) {
+        const { user, token } = response.data;
+        localStorage.setItem('user_token', token);
+        localStorage.setItem('user_data', JSON.stringify(user));
+        setUser(user || null);
+        onClose();
+      }
+    } catch (error: any) {
+      console.error('카카오 로그인 오류:', error);
+      setError(error.userMessage || '카카오 로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSocialLoading(false);
+    }
+  };
+
+  // 네이버 로그인 핸들러
+  const handleNaverLogin = async () => {
+    try {
+      setSocialLoading(true);
+      setError('');
+
+      const userData = await loginWithNaver();
+      console.log('네이버 사용자 정보:', userData);
+
+      // 백엔드로 사용자 정보 전송
+      const response = await ApiService.socialLogin(userData);
+
+      if (response.success && response.data) {
+        const { user, token } = response.data;
+        localStorage.setItem('user_token', token);
+        localStorage.setItem('user_data', JSON.stringify(user));
+        setUser(user || null);
+        onClose();
+      }
+    } catch (error: any) {
+      console.error('네이버 로그인 오류:', error);
+      setError(error.userMessage || '네이버 로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSocialLoading(false);
+    }
+  };
+
   return (
     <Dialog
       open={open}
@@ -205,10 +268,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
               variant="outlined"
               size="large"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
+              disabled={isLoading || socialLoading}
               sx={{
                 mt: 1,
-                mb: 2,
+                mb: 1,
                 py: 1.5,
                 borderColor: '#dadce0',
                 color: '#3c4043',
@@ -232,6 +295,52 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </Box>
               Google로 계속하기
+            </Button>
+
+            {/* 카카오 로그인 버튼 */}
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={handleKakaoLogin}
+              disabled={isLoading || socialLoading}
+              sx={{
+                mb: 1,
+                py: 1.5,
+                backgroundColor: '#FEE500',
+                color: '#000000',
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#FDD835'
+                }
+              }}
+            >
+              카카오로 계속하기
+            </Button>
+
+            {/* 네이버 로그인 버튼 */}
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={handleNaverLogin}
+              disabled={isLoading || socialLoading}
+              sx={{
+                mb: 2,
+                py: 1.5,
+                backgroundColor: '#03C75A',
+                color: '#ffffff',
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#02B350'
+                }
+              }}
+            >
+              네이버로 계속하기
             </Button>
 
             <Divider sx={{ my: 2 }}>
@@ -294,10 +403,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
               variant="outlined"
               size="large"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
+              disabled={isLoading || socialLoading}
               sx={{
                 mt: 1,
-                mb: 2,
+                mb: 1,
                 py: 1.5,
                 borderColor: '#dadce0',
                 color: '#3c4043',
@@ -321,6 +430,52 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </Box>
               Google로 계속하기
+            </Button>
+
+            {/* 카카오 회원가입 버튼 */}
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={handleKakaoLogin}
+              disabled={isLoading || socialLoading}
+              sx={{
+                mb: 1,
+                py: 1.5,
+                backgroundColor: '#FEE500',
+                color: '#000000',
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#FDD835'
+                }
+              }}
+            >
+              카카오로 계속하기
+            </Button>
+
+            {/* 네이버 회원가입 버튼 */}
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={handleNaverLogin}
+              disabled={isLoading || socialLoading}
+              sx={{
+                mb: 2,
+                py: 1.5,
+                backgroundColor: '#03C75A',
+                color: '#ffffff',
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#02B350'
+                }
+              }}
+            >
+              네이버로 계속하기
             </Button>
 
             <Divider sx={{ my: 2 }}>

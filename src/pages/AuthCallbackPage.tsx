@@ -13,9 +13,26 @@ const AuthCallbackPage: React.FC = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // URL에서 해시 파라미터 가져오기
+        // 네이버 로그인 콜백 처리 (팝업 창인 경우)
         const hash = window.location.hash;
+        if (hash && window.opener) {
+          // 팝업 창에서 네이버 토큰을 부모 창으로 전송
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const state = params.get('state');
 
+          if (accessToken) {
+            window.opener.postMessage({
+              type: 'NAVER_LOGIN_SUCCESS',
+              accessToken,
+              state
+            }, window.location.origin);
+            window.close();
+            return;
+          }
+        }
+
+        // URL에서 해시 파라미터 가져오기
         if (!hash) {
           setError('인증 정보가 없습니다.');
           setTimeout(() => navigate('/'), 2000);
