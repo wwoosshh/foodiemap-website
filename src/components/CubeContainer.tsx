@@ -18,9 +18,9 @@ const faceRotations: Record<CubeFace, CubeRotation> = {
   home: { x: 0, y: 0 },           // 앞면
   category: { x: -90, y: 0 },     // 위 - 큐브를 X축으로 -90도 회전
   restaurants: { x: 0, y: -90 },  // 오른쪽 - 큐브를 Y축으로 -90도 회전
-  profile: { x: 0, y: -270 },     // 왼쪽 - 큐브를 Y축으로 -270도 회전 (90도와 동일 위치, info와 90도 차이)
+  profile: { x: 0, y: 90 },       // 왼쪽 - 큐브를 Y축으로 90도 회전
   event: { x: 90, y: 0 },         // 아래 - 큐브를 X축으로 +90도 회전
-  info: { x: 0, y: -180 },        // 뒤 - 큐브를 Y축으로 -180도 회전
+  info: { x: 0, y: 180 },         // 뒤 - 큐브를 Y축으로 180도 회전
 };
 
 interface CubeContainerProps {
@@ -46,9 +46,29 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // 현재 면에 따라 회전 업데이트
+  // 최단 거리로 회전하도록 각도 계산
+  const calculateShortestRotation = (from: CubeRotation, to: CubeRotation): CubeRotation => {
+    const calculateShortestAngle = (fromAngle: number, toAngle: number): number => {
+      let delta = toAngle - fromAngle;
+
+      // 차이가 180도를 넘으면 반대 방향이 더 짧음
+      while (delta > 180) delta -= 360;
+      while (delta < -180) delta += 360;
+
+      return fromAngle + delta;
+    };
+
+    return {
+      x: calculateShortestAngle(from.x, to.x),
+      y: calculateShortestAngle(from.y, to.y),
+    };
+  };
+
+  // 현재 면에 따라 회전 업데이트 (최단 경로)
   useEffect(() => {
-    setRotation(faceRotations[currentFace]);
+    const targetRotation = faceRotations[currentFace];
+    const shortestRotation = calculateShortestRotation(rotation, targetRotation);
+    setRotation(shortestRotation);
   }, [currentFace]);
 
   const handleNavigate = (face: string, categoryId?: number) => {
