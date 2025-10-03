@@ -16,11 +16,11 @@ interface CubeRotation {
 
 const faceRotations: Record<CubeFace, CubeRotation> = {
   home: { x: 0, y: 0 },           // 앞면
-  category: { x: -90, y: 0 },     // 위
-  restaurants: { x: 0, y: 90 },   // 오른쪽
-  profile: { x: 0, y: -90 },      // 왼쪽
-  event: { x: 90, y: 0 },         // 아래
-  info: { x: 0, y: 180 },         // 뒤
+  category: { x: -90, y: 0 },     // 위 - 큐브를 X축으로 -90도 회전
+  restaurants: { x: 0, y: -90 },  // 오른쪽 - 큐브를 Y축으로 -90도 회전 (수정)
+  profile: { x: 0, y: 90 },       // 왼쪽 - 큐브를 Y축으로 +90도 회전 (수정)
+  event: { x: 90, y: 0 },         // 아래 - 큐브를 X축으로 +90도 회전
+  info: { x: 0, y: 180 },         // 뒤 - 큐브를 Y축으로 180도 회전
 };
 
 interface CubeContainerProps {
@@ -55,15 +55,16 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     onNavigate(face as CubeFace);
   };
 
-  // 큐브 깊이를 작게 설정하여 3D 효과는 유지하되 줌 없이 화면에 맞춤
-  const cubeDepth = 50;
+  // 큐브 깊이 최적화: 3D 효과 유지 + 면 분리 + 줌 없음
+  const cubeDepth = 150;
 
   return (
     <Box
       sx={{
         width: '100%',
         height: '100%',
-        perspective: '2000px',
+        perspective: '3000px',
+        perspectiveOrigin: 'center center',
         overflow: 'hidden',
         position: 'relative',
         backgroundColor: '#FFFFFF',
@@ -80,6 +81,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
           transform: `translate(-50%, -50%) translateZ(-${cubeDepth / 2}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           transformStyle: 'preserve-3d',
           transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'transform',
         }}
       >
         {/* 앞면 - 홈 */}
