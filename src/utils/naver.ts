@@ -12,8 +12,8 @@ export const loginWithNaver = (): Promise<any> => {
     const callbackUrl = `${window.location.origin}/auth/callback`;
     const state = Math.random().toString(36).substring(2, 15);
 
-    // 네이버 로그인 URL 생성
-    const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&state=${state}`;
+    // 네이버 로그인 URL 생성 (auth_type=reauthenticate로 매번 로그인 요구)
+    const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&state=${state}&auth_type=reauthenticate`;
 
     // 팝업 창 열기
     const width = 500;

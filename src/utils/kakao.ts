@@ -46,8 +46,8 @@ export const loginWithKakao = (): Promise<any> => {
     const clientId = process.env.REACT_APP_KAKAO_JS_KEY || '361fbd23bff0c10f74b2df82729b0756';
     const redirectUri = `${window.location.origin}/auth/callback`;
 
-    // 카카오 OAuth URL 생성
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+    // 카카오 OAuth URL 생성 (prompt=login으로 매번 로그인 화면 표시)
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&prompt=login`;
 
     // 팝업 창 열기
     const width = 500;
