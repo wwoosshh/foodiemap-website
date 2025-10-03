@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import HomeCubeFace from './cube-faces/HomeCubeFace';
 import CategoryCubeFace from './cube-faces/CategoryCubeFace';
 import RestaurantListCubeFace from './cube-faces/RestaurantListCubeFace';
@@ -30,14 +30,11 @@ interface CubeContainerProps {
 }
 
 const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, selectedCategoryId }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
   const [rotation, setRotation] = useState<CubeRotation>({ x: 0, y: 0 });
   const [cubeWidth, setCubeWidth] = useState(window.innerWidth);
   const [cubeHeight, setCubeHeight] = useState(window.innerHeight - 64);
 
-  // 화면 크기에 따라 큐브 크기 조정 (화면 전체를 채움)
+  // 화면 크기에 따라 큐브 크기 조정
   useEffect(() => {
     const updateSize = () => {
       setCubeWidth(window.innerWidth);
@@ -58,15 +55,15 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     onNavigate(face as CubeFace);
   };
 
-  // 큐브 깊이는 화면 높이의 절반으로 설정 (3D 효과용)
-  const cubeDepth = cubeHeight / 2;
+  // 큐브 깊이를 작게 설정하여 3D 효과는 유지하되 화면에 맞춤
+  const cubeDepth = 300;
 
   return (
     <Box
       sx={{
         width: '100%',
         height: '100%',
-        perspective: isMobile ? '1000px' : '1500px',
+        perspective: '2000px',
         overflow: 'hidden',
         position: 'relative',
         backgroundColor: '#FFFFFF',
