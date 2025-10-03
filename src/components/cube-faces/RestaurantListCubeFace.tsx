@@ -27,12 +27,10 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
 
   // 카테고리 로드 (한 번만)
   useEffect(() => {
-    let isMounted = true;
-
     const loadCategories = async () => {
       try {
         const response = await ApiService.getPublicCategories();
-        if (response.success && response.data && isMounted) {
+        if (response.success && response.data) {
           setCategories(response.data.categories || []);
         }
       } catch (error) {
@@ -41,21 +39,13 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
     };
 
     loadCategories();
-
-    return () => {
-      isMounted = false;
-    };
   }, []); // 빈 배열로 한 번만 실행
 
   // 맛집 목록 로드
   useEffect(() => {
-    let isMounted = true;
-
     const loadRestaurants = async () => {
       try {
-        if (isMounted) {
-          setLoading(true);
-        }
+        setLoading(true);
         const response = await ApiService.getRestaurants({
           page: searchFilters.page || 1,
           limit: 20,
@@ -64,24 +54,18 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
           sort: searchFilters.sort as any,
         });
 
-        if (response.success && response.data && isMounted) {
+        if (response.success && response.data) {
           setRestaurants(response.data.restaurants || []);
           setPagination(response.data.pagination);
         }
       } catch (error) {
         console.error('맛집 목록 로드 실패:', error);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     loadRestaurants();
-
-    return () => {
-      isMounted = false;
-    };
   }, [searchFilters]);
 
   // useCallback으로 메모이제이션하여 무한 루프 방지

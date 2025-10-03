@@ -11,28 +11,20 @@ const CategoryCubeFace: React.FC<CategoryCubeFaceProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-
     const loadCategories = async () => {
       try {
         const response = await ApiService.getPublicCategories();
-        if (response.success && response.data && isMounted) {
+        if (response.success && response.data) {
           setCategories(response.data.categories || []);
         }
       } catch (error) {
         console.error('카테고리 로드 실패:', error);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     loadCategories();
-
-    return () => {
-      isMounted = false;
-    };
   }, []); // 빈 배열로 한 번만 실행
 
   const handleCategoryClick = (categoryId: number) => {
