@@ -17,10 +17,10 @@ interface CubeRotation {
 const faceRotations: Record<CubeFace, CubeRotation> = {
   home: { x: 0, y: 0 },           // 앞면
   category: { x: -90, y: 0 },     // 위 - 큐브를 X축으로 -90도 회전
-  restaurants: { x: 0, y: -90 },  // 오른쪽 - 큐브를 Y축으로 -90도 회전 (수정)
-  profile: { x: 0, y: 90 },       // 왼쪽 - 큐브를 Y축으로 +90도 회전 (수정)
+  restaurants: { x: 0, y: -90 },  // 오른쪽 - 큐브를 Y축으로 -90도 회전
+  profile: { x: 0, y: 90 },       // 왼쪽 - 큐브를 Y축으로 +90도 회전
   event: { x: 90, y: 0 },         // 아래 - 큐브를 X축으로 +90도 회전
-  info: { x: 0, y: 180 },         // 뒤 - 큐브를 Y축으로 180도 회전
+  info: { x: 0, y: -180 },        // 뒤 - 큐브를 Y축으로 -180도 회전 (최단거리 회전)
 };
 
 interface CubeContainerProps {
