@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import RestaurantSearch from '../RestaurantSearch';
 import RestaurantGrid from '../RestaurantGrid';
@@ -25,12 +25,14 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
     categoryId: initialCategoryId,
   });
 
-  // 카테고리 로드
+  // 카테고리 로드 (한 번만)
   useEffect(() => {
+    let isMounted = true;
+
     const loadCategories = async () => {
       try {
         const response = await ApiService.getPublicCategories();
-        if (response.success && response.data) {
+        if (response.success && response.data && isMounted) {
           setCategories(response.data.categories || []);
         }
       } catch (error) {
@@ -39,13 +41,21 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
     };
 
     loadCategories();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // 빈 배열로 한 번만 실행
 
   // 맛집 목록 로드
   useEffect(() => {
+    let isMounted = true;
+
     const loadRestaurants = async () => {
       try {
-        setLoading(true);
+        if (isMounted) {
+          setLoading(true);
+        }
         const response = await ApiService.getRestaurants({
           page: searchFilters.page || 1,
           limit: 20,
@@ -54,31 +64,38 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
           sort: searchFilters.sort as any,
         });
 
-        if (response.success && response.data) {
+        if (response.success && response.data && isMounted) {
           setRestaurants(response.data.restaurants || []);
           setPagination(response.data.pagination);
         }
       } catch (error) {
         console.error('맛집 목록 로드 실패:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadRestaurants();
+
+    return () => {
+      isMounted = false;
+    };
   }, [searchFilters]);
 
-  const handleSearchChange = (filters: { search?: string; categoryId?: number; sort?: string }) => {
+  // useCallback으로 메모이제이션하여 무한 루프 방지
+  const handleSearchChange = useCallback((filters: { search?: string; categoryId?: number; sort?: string }) => {
     setSearchFilters((prev) => ({
       ...prev,
       ...filters,
       page: 1,
     }));
-  };
+  }, []);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setSearchFilters((prev) => ({ ...prev, page }));
-  };
+  }, []);
 
   return (
     <Box

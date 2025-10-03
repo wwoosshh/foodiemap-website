@@ -13,21 +13,29 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadHomeData = async () => {
       try {
         const response = await ApiService.getHomeData();
-        if (response.success && response.data) {
+        if (response.success && response.data && isMounted) {
           setBanners(response.data.banners || []);
         }
       } catch (error) {
         console.error('홈 데이터 로드 실패:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadHomeData();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // 빈 배열로 한 번만 실행
 
   return (
     <Box
