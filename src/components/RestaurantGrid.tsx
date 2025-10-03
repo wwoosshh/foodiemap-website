@@ -163,7 +163,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                 lg: 'repeat(4, 1fr)'
               },
               gap: 3,
-              mt: 2
+              mt: 2,
             }}
           >
             {displayRestaurants.length === 0 ? (
@@ -178,29 +178,14 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                 borderRadius: 1,
                 border: '1px solid #f0f0f0',
                 boxShadow: 'none',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'all 0.2s ease',
                 backgroundColor: '#ffffff',
-                pointerEvents: 'auto',
                 '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                  borderColor: '#e0e0e0'
+                  borderColor: '#1a1a1a',
+                  boxShadow: '0 0 0 1px #1a1a1a',
                 }
               }}
               onClick={() => handleRestaurantClick(restaurant)}
-              onWheel={(e) => {
-                // 스크롤 이벤트를 스크롤 컨테이너로 전파
-                e.stopPropagation();
-                let parent = e.currentTarget.parentElement;
-                while (parent) {
-                  const overflowY = window.getComputedStyle(parent).overflowY;
-                  if (overflowY === 'auto' || overflowY === 'scroll') {
-                    parent.scrollTop += e.deltaY;
-                    break;
-                  }
-                  parent = parent.parentElement;
-                }
-              }}
             >
               <CardMedia
                 component="img"
