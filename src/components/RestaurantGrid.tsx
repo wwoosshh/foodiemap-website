@@ -196,7 +196,6 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                   objectFit: 'cover',
                   backgroundColor: '#f8f8f8',
                   borderBottom: '1px solid #f0f0f0',
-                  pointerEvents: 'none',
                 }}
               />
               <Box sx={{ p: 3, pb: 3, width: '100%' }}>
