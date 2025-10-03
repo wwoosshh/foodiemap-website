@@ -7,11 +7,37 @@ declare global {
 
 // 카카오 SDK 초기화
 export const initKakao = () => {
-  if (typeof window !== 'undefined' && window.Kakao && !window.Kakao.isInitialized()) {
-    const kakaoKey = process.env.REACT_APP_KAKAO_JS_KEY || '361fbd23bff0c10f74b2df82729b0756';
-    window.Kakao.init(kakaoKey);
-    console.log('✅ Kakao SDK initialized:', window.Kakao.isInitialized());
-  }
+  return new Promise<void>((resolve, reject) => {
+    // SDK가 이미 초기화된 경우
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      console.log('✅ Kakao SDK already initialized');
+      resolve();
+      return;
+    }
+
+    // SDK가 로드되지 않은 경우 대기
+    const checkKakaoLoaded = setInterval(() => {
+      if (window.Kakao) {
+        clearInterval(checkKakaoLoaded);
+
+        if (!window.Kakao.isInitialized()) {
+          const kakaoKey = process.env.REACT_APP_KAKAO_JS_KEY || '361fbd23bff0c10f74b2df82729b0756';
+          window.Kakao.init(kakaoKey);
+          console.log('✅ Kakao SDK initialized:', window.Kakao.isInitialized());
+        }
+
+        resolve();
+      }
+    }, 100);
+
+    // 10초 타임아웃
+    setTimeout(() => {
+      clearInterval(checkKakaoLoaded);
+      if (!window.Kakao) {
+        reject(new Error('카카오 SDK 로드 실패'));
+      }
+    }, 10000);
+  });
 };
 
 // 카카오 로그인

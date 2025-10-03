@@ -68,31 +68,25 @@ export const loginWithNaver = (): Promise<any> => {
   });
 };
 
-// 네이버 사용자 정보 가져오기
+// 네이버 사용자 정보 가져오기 (백엔드를 통해 CORS 우회)
 const getNaverUserInfo = async (accessToken: string): Promise<any> => {
   try {
-    const response = await fetch('https://openapi.naver.com/v1/nid/me', {
+    const apiUrl = process.env.REACT_APP_API_URL || 'https://foodiemap-backend.onrender.com';
+    const response = await fetch(`${apiUrl}/api/auth/naver/user-info`, {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ access_token: accessToken })
     });
 
     const data = await response.json();
     console.log('✅ Naver user info:', data);
 
-    if (data.resultcode === '00' && data.response) {
-      const user = data.response;
-      return {
-        social_id: user.id,
-        email: user.email || '',
-        name: user.name || user.nickname || '사용자',
-        phone: user.mobile || user.mobile_e164 || undefined,
-        avatar_url: user.profile_image || undefined,
-        auth_provider: 'naver',
-        social_data: user
-      };
+    if (data.success && data.data) {
+      return data.data;
     } else {
-      throw new Error('네이버 사용자 정보를 가져올 수 없습니다.');
+      throw new Error(data.message || '네이버 사용자 정보를 가져올 수 없습니다.');
     }
   } catch (error) {
     console.error('❌ Naver user info failed:', error);

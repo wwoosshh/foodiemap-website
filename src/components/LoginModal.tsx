@@ -57,7 +57,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
 
   // 카카오 SDK 초기화
   useEffect(() => {
-    initKakao();
+    initKakao().catch((err) => {
+      console.error('카카오 SDK 초기화 실패:', err);
+    });
   }, []);
 
   // 로그인 폼 상태
@@ -165,6 +167,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
     try {
       setSocialLoading(true);
       setError('');
+
+      // 카카오 SDK 준비 확인
+      await initKakao();
 
       const userData = await loginWithKakao();
       console.log('카카오 사용자 정보:', userData);
