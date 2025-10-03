@@ -25,7 +25,7 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
           width: '100%',
           height: '100%',
           overflow: 'auto',
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#FFFFFF',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -74,10 +74,10 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#fafafa',
+        backgroundColor: '#FFFFFF',
       }}
     >
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
         {/* 프로필 헤더 */}
         <Card sx={{ mb: 4 }}>
           <CardContent>

@@ -59,10 +59,10 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#FFFFFF',
       }}
     >
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
         {/* 이벤트 섹션 */}
         <Box sx={{ mb: 6 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>

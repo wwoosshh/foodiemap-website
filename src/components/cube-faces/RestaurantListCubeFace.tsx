@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container } from '@mui/material';
+import { Box } from '@mui/material';
 import RestaurantSearch from '../RestaurantSearch';
 import RestaurantGrid from '../RestaurantGrid';
 import { ApiService } from '../../services/api';
@@ -86,25 +86,26 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#fafafa',
+        backgroundColor: '#FFFFFF',
       }}
     >
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* 검색 필터 */}
-        <RestaurantSearch
-          categories={categories}
-          onSearchChange={handleSearchChange}
-          loading={loading}
-        />
+      {/* 검색 필터 */}
+      <RestaurantSearch
+        categories={categories}
+        onSearchChange={handleSearchChange}
+        loading={loading}
+      />
 
-        {/* 맛집 그리드 */}
+      {/* 맛집 그리드 */}
+      <Box sx={{ px: { xs: 2, md: 3 }, pb: 4 }}>
         <RestaurantGrid
           restaurants={restaurants}
           loading={loading}
           pagination={pagination}
           onPageChange={handlePageChange}
+          showTitle={false}
         />
-      </Container>
+      </Box>
     </Box>
   );
 };

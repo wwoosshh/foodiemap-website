@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Card, CardContent, CardActionArea, CircularProgress } from '@mui/material';
-import { Category as CategoryIcon } from '@mui/icons-material';
 import { ApiService } from '../../services/api';
 
 interface CategoryCubeFaceProps {
@@ -38,20 +37,36 @@ const CategoryCubeFace: React.FC<CategoryCubeFaceProps> = ({ onNavigate }) => {
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#FFFFFF',
       }}
     >
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
         {/* 헤더 */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-            <CategoryIcon sx={{ fontSize: 40, mr: 1, color: 'primary.main' }} />
-          </Box>
-          <Typography variant="h4" gutterBottom fontWeight={700}>
-            카테고리
+        <Box sx={{ mb: { xs: 3, md: 4 }, textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 300,
+              letterSpacing: 4,
+              fontSize: { xs: '1.8rem', md: '2.5rem' },
+              color: '#1a1a1a',
+              mb: 1,
+              textTransform: 'uppercase',
+              fontFamily: '"Times New Roman", serif'
+            }}
+          >
+            Categories
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            원하는 카테고리를 선택하면 해당 맛집 목록으로 이동합니다
+          <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 2 }} />
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#666',
+              fontSize: { xs: '0.85rem', md: '0.95rem' },
+              letterSpacing: 0.5
+            }}
+          >
+            Select a category to explore restaurants
           </Typography>
         </Box>
 
@@ -68,56 +83,50 @@ const CategoryCubeFace: React.FC<CategoryCubeFaceProps> = ({ onNavigate }) => {
                 xs: 'repeat(2, 1fr)',
                 sm: 'repeat(3, 1fr)',
                 md: 'repeat(4, 1fr)',
+                lg: 'repeat(5, 1fr)',
               },
-              gap: 3,
+              gap: 2,
             }}
           >
             {categories.map((category) => (
               <Card
                 key={category.id}
                 sx={{
-                  height: '100%',
-                  transition: 'all 0.3s',
+                  borderRadius: 1,
+                  border: '1px solid #e0e0e0',
+                  boxShadow: 'none',
+                  transition: 'all 0.2s',
+                  backgroundColor: '#fafafa',
                   '&:hover': {
-                    transform: 'scale(1.05)',
-                    boxShadow: 6,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    borderColor: '#1a1a1a',
                   },
                 }}
               >
                 <CardActionArea
                   onClick={() => handleCategoryClick(category.id)}
                   sx={{
-                    height: 180,
+                    height: { xs: 100, md: 120 },
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    p: 2,
+                    p: 1.5,
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 80,
-                      height: 80,
-                      borderRadius: '50%',
-                      backgroundColor: 'primary.light',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mb: 2,
-                    }}
-                  >
-                    <CategoryIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-                  </Box>
                   <CardContent sx={{ textAlign: 'center', p: 0 }}>
-                    <Typography variant="h6" fontWeight={600}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 500,
+                        fontSize: { xs: '0.9rem', md: '1rem' },
+                        color: '#1a1a1a',
+                        letterSpacing: 0.5
+                      }}
+                    >
                       {category.name}
                     </Typography>
-                    {category.description && (
-                      <Typography variant="caption" color="text.secondary">
-                        {category.description}
-                      </Typography>
-                    )}
                   </CardContent>
                 </CardActionArea>
               </Card>
@@ -130,22 +139,34 @@ const CategoryCubeFace: React.FC<CategoryCubeFaceProps> = ({ onNavigate }) => {
           <Box sx={{ mt: 3 }}>
             <Card
               sx={{
-                transition: 'all 0.3s',
+                borderRadius: 0,
+                border: '1px solid #1a1a1a',
+                boxShadow: 'none',
+                transition: 'all 0.2s',
+                backgroundColor: '#1a1a1a',
                 '&:hover': {
-                  transform: 'scale(1.02)',
-                  boxShadow: 4,
+                  backgroundColor: '#333',
                 },
               }}
             >
               <CardActionArea
                 onClick={() => onNavigate('restaurants')}
                 sx={{
-                  py: 3,
+                  py: 2,
                   textAlign: 'center',
                 }}
               >
-                <Typography variant="h6" color="primary" fontWeight={600}>
-                  전체 맛집 보기
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: '#fff',
+                    fontWeight: 500,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  View All Restaurants
                 </Typography>
               </CardActionArea>
             </Card>

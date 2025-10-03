@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Card, CardContent, CardMedia, Button, CircularProgress } from '@mui/material';
-import { Restaurant as RestaurantIcon, TrendingUp } from '@mui/icons-material';
+import { Box, Typography } from '@mui/material';
 import BannerCarousel from '../BannerCarousel';
 import { ApiService } from '../../services/api';
 import { Banner } from '../../types';
@@ -11,7 +10,6 @@ interface HomeCubeFaceProps {
 
 const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [featuredRestaurants, setFeaturedRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +18,6 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
         const response = await ApiService.getHomeData();
         if (response.success && response.data) {
           setBanners(response.data.banners || []);
-          setFeaturedRestaurants(response.data.featuredRestaurants?.slice(0, 6) || []);
         }
       } catch (error) {
         console.error('홈 데이터 로드 실패:', error);
@@ -38,109 +35,71 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#fafafa',
+        backgroundColor: '#FFFFFF',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 4,
       }}
     >
-      {/* 배너 캐러셀 */}
-      <Box sx={{ mb: 4 }}>
-        <BannerCarousel banners={banners} />
+      {/* 메인 타이틀 */}
+      <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Typography
+          variant="h1"
+          component="h1"
+          sx={{
+            fontFamily: '"Times New Roman", "Noto Serif KR", serif',
+            fontWeight: 300,
+            color: '#1a1a1a',
+            mb: 2,
+            letterSpacing: { xs: 4, md: 6 },
+            fontSize: { xs: '3rem', sm: '4rem', md: '5rem' },
+            textTransform: 'uppercase'
+          }}
+        >
+          CUBE
+        </Typography>
+        <Box sx={{ width: 60, height: 1, backgroundColor: '#000', mx: 'auto', mb: 3 }} />
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: '#666',
+            fontWeight: 400,
+            letterSpacing: 3,
+            fontSize: { xs: '0.9rem', md: '1.1rem' },
+            textTransform: 'uppercase',
+            fontFamily: '"Inter", sans-serif',
+            mb: 1
+          }}
+        >
+          Fine Dining Experience
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#999',
+            fontWeight: 300,
+            letterSpacing: 1,
+            fontSize: { xs: '0.75rem', md: '0.9rem' },
+            fontStyle: 'italic'
+          }}
+        >
+          Curated Excellence in Every Taste
+        </Typography>
       </Box>
 
-      <Container maxWidth="lg">
-        {/* 서비스 소개 */}
-        <Box sx={{ textAlign: 'center', mb: 6, mt: 4 }}>
-          <Typography variant="h3" gutterBottom fontWeight={700}>
-            Cube
-          </Typography>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            3D로 탐색하는 새로운 맛집 경험
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-            카테고리별로 분류된 맛집을 3D 큐브를 회전하며 탐색해보세요
-          </Typography>
+      {/* 배너 캐러셀 */}
+      {!loading && banners && banners.length > 0 && (
+        <Box sx={{ width: '100%', maxWidth: '900px', mx: 'auto' }}>
+          <BannerCarousel
+            banners={banners}
+            height={300}
+            autoPlay={true}
+            autoPlayInterval={6000}
+          />
         </Box>
-
-        {/* 추천 맛집 */}
-        <Box sx={{ mb: 6 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <TrendingUp sx={{ mr: 1, color: 'primary.main' }} />
-            <Typography variant="h5" fontWeight={600}>
-              추천 맛집
-            </Typography>
-          </Box>
-
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: 'repeat(1, 1fr)',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(3, 1fr)',
-                },
-                gap: 3,
-              }}
-            >
-              {featuredRestaurants.map((restaurant) => (
-                <Card
-                  key={restaurant.id}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4,
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={restaurant.image_url || '/placeholder-restaurant.jpg'}
-                    alt={restaurant.name}
-                    sx={{ objectFit: 'cover' }}
-                  />
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom noWrap>
-                      {restaurant.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {restaurant.address}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                      <Typography variant="body2" color="primary" fontWeight={600}>
-                        평점: {restaurant.rating || 'N/A'}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </Box>
-
-        {/* 탐색 시작 버튼 */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<RestaurantIcon />}
-            onClick={() => onNavigate('category')}
-            sx={{
-              px: 4,
-              py: 1.5,
-              fontSize: '1.1rem',
-              fontWeight: 600,
-            }}
-          >
-            맛집 탐색 시작하기
-          </Button>
-        </Box>
-      </Container>
+      )}
     </Box>
   );
 };

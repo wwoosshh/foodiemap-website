@@ -41,10 +41,10 @@ const InfoCubeFace: React.FC<InfoCubeFaceProps> = ({ onNavigate }) => {
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#fafafa',
+        backgroundColor: '#FFFFFF',
       }}
     >
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
         {/* 헤더 */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h3" gutterBottom fontWeight={700}>

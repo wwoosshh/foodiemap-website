@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Container,
   Typography,
   TextField,
   Button,
@@ -25,23 +24,6 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
   const [sortOption, setSortOption] = useState<string>('created_at_desc');
 
   const categoriesLoading = false; // props로 받으므로 로딩 없음
-
-  // 카테고리 한국어 -> 영어 매핑
-  const getCategoryEnglishName = (koreanName: string): string => {
-    const mapping: Record<string, string> = {
-      '한식': 'Korean',
-      '중식': 'Chinese',
-      '일식': 'Japanese',
-      '양식': 'Western',
-      '분식': 'Street Food',
-      '치킨': 'Chicken',
-      '피자': 'Pizza',
-      '카페': 'Cafe',
-      '디저트': 'Dessert',
-      '기타': 'Others'
-    };
-    return mapping[koreanName] || koreanName;
-  };
 
   // 검색 조건 변경 시 부모 컴포넌트에 알림 (카테고리, 정렬만 즉시 반영)
   useEffect(() => {
@@ -79,15 +61,15 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Box sx={{ py: { xs: 2, md: 3 }, px: { xs: 2, md: 3 }, backgroundColor: '#fafafa', borderBottom: '1px solid #e0e0e0' }}>
       <Typography
-        variant="h3"
+        variant="h4"
         component="h2"
         align="center"
         sx={{
           fontWeight: 300,
-          letterSpacing: 4,
-          fontSize: { xs: '1.8rem', md: '2.5rem' },
+          letterSpacing: 3,
+          fontSize: { xs: '1.3rem', md: '1.8rem' },
           color: '#1a1a1a',
           mb: 1,
           textTransform: 'uppercase',
@@ -96,118 +78,71 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
       >
         Discover
       </Typography>
-      <Box sx={{ width: 40, height: 1, backgroundColor: '#000', mx: 'auto', mb: 2 }} />
-      <Typography
-        variant="body1"
-        sx={{
-          mb: 6,
-          textAlign: 'center',
-          color: '#666',
-          fontSize: '1rem',
-          letterSpacing: 1,
-          fontWeight: 300,
-          fontStyle: 'italic'
-        }}
-      >
-        Find your perfect dining experience
-      </Typography>
+      <Box sx={{ width: 30, height: 1, backgroundColor: '#000', mx: 'auto', mb: 2 }} />
 
-      {/* 검색 입력 */}
-      <Box sx={{ mb: 4, maxWidth: 600, mx: 'auto', display: 'flex', gap: 1 }}>
-        <TextField
-          fullWidth
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          onKeyPress={handleSearchKeyPress}
-          placeholder="Search restaurants, cuisine, or location..."
-          disabled={loading}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#666' }} />
-              </InputAdornment>
-            ),
-            endAdornment: searchText && (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleSearchClear}
-                  sx={{ p: 0.5, color: '#666' }}
-                  disabled={loading}
-                  size="small"
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ),
-            sx: {
-              borderRadius: 0,
-              backgroundColor: 'white',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#e0e0e0',
-                borderWidth: 1
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#bdbdbd',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#1a1a1a',
-                borderWidth: 1
+      {/* 검색 및 필터 */}
+      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+        {/* 검색 입력 */}
+        <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onKeyPress={handleSearchKeyPress}
+            placeholder="Search restaurants..."
+            disabled={loading}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ fontSize: 20, color: '#666' }} />
+                </InputAdornment>
+              ),
+              endAdornment: searchText && (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleSearchClear}
+                    sx={{ p: 0.5, color: '#666' }}
+                    disabled={loading}
+                    size="small"
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: 0,
+                backgroundColor: 'white',
+                fontSize: '0.9rem'
               }
-            }
-          }}
-          sx={{
-            '& .MuiInputBase-input': {
-              padding: '16px 14px',
-              fontSize: '1rem',
-              letterSpacing: 0.5
-            }
-          }}
-        />
-        <Button
-          variant="contained"
-          onClick={handleSearchSubmit}
-          disabled={loading}
-          sx={{
-            minWidth: '120px',
-            px: 3,
-            borderRadius: 0,
-            backgroundColor: '#1a1a1a',
-            color: 'white',
-            fontWeight: 500,
-            letterSpacing: 1,
-            textTransform: 'uppercase',
-            '&:hover': {
-              backgroundColor: '#333'
-            }
-          }}
-        >
-          Search
-        </Button>
-      </Box>
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleSearchSubmit}
+            disabled={loading}
+            size="small"
+            sx={{
+              minWidth: '80px',
+              px: 2,
+              borderRadius: 0,
+              backgroundColor: '#1a1a1a',
+              fontSize: '0.85rem',
+              '&:hover': {
+                backgroundColor: '#333'
+              }
+            }}
+          >
+            Search
+          </Button>
+        </Box>
 
-      {/* 정렬 옵션 */}
-      <Box sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
-        <Typography
-          variant="subtitle2"
-          sx={{
-            mb: 2,
-            color: '#666',
-            fontSize: '0.9rem',
-            fontWeight: 500,
-            letterSpacing: 1,
-            textTransform: 'uppercase',
-            textAlign: 'center'
-          }}
-        >
-          Sort By
-        </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1.5 }}>
+        {/* 정렬 옵션 */}
+        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
           {[
             { value: 'created_at_desc', label: 'Latest' },
-            { value: 'view_count_desc', label: 'Most Viewed' },
-            { value: 'review_count_desc', label: 'Most Reviewed' },
-            { value: 'rating_desc', label: 'Highest Rated' },
-            { value: 'favorite_count_desc', label: 'Most Favorited' }
+            { value: 'rating_desc', label: 'Rated' },
+            { value: 'review_count_desc', label: 'Reviewed' },
           ].map((option) => (
             <Chip
               key={option.value}
@@ -215,103 +150,70 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ categories, onSearc
               onClick={() => setSortOption(option.value)}
               disabled={loading}
               variant={sortOption === option.value ? 'filled' : 'outlined'}
+              size="small"
               sx={{
-                px: 2,
-                py: 0.5,
-                fontSize: '0.85rem',
-                fontWeight: 500,
-                letterSpacing: 0.5,
+                fontSize: '0.75rem',
+                height: '28px',
                 borderRadius: 0,
                 borderColor: '#e0e0e0',
                 color: sortOption === option.value ? 'white' : '#666',
                 backgroundColor: sortOption === option.value ? '#1a1a1a' : 'transparent',
                 '&:hover': {
                   backgroundColor: sortOption === option.value ? '#333' : '#f5f5f5',
-                  borderColor: '#bdbdbd'
-                },
-                '&.Mui-disabled': {
-                  opacity: 0.6
                 }
               }}
             />
           ))}
         </Box>
-      </Box>
 
-      {/* 카테고리 필터 */}
-      <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            textAlign: 'center',
-            mb: 3,
-            color: '#333',
-            fontSize: '1.1rem',
-            fontWeight: 500,
-            letterSpacing: 2,
-            textTransform: 'uppercase'
-          }}
-        >
-          Categories
-        </Typography>
-
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1.5 }}>
+        {/* 카테고리 필터 */}
+        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
           {!categoriesLoading && categories.map((category) => (
             <Chip
               key={category.id}
-              label={getCategoryEnglishName(category.name)}
+              label={category.name}
               onClick={() => handleCategorySelect(category.id)}
               disabled={loading}
               variant={selectedCategoryId === category.id ? 'filled' : 'outlined'}
+              size="small"
               sx={{
-                px: 2,
-                py: 0.5,
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                letterSpacing: 1,
-                textTransform: 'uppercase',
+                fontSize: '0.75rem',
+                height: '28px',
                 borderRadius: 0,
                 borderColor: '#e0e0e0',
                 color: selectedCategoryId === category.id ? 'white' : '#666',
                 backgroundColor: selectedCategoryId === category.id ? '#1a1a1a' : 'transparent',
                 '&:hover': {
                   backgroundColor: selectedCategoryId === category.id ? '#333' : '#f5f5f5',
-                  borderColor: '#bdbdbd'
-                },
-                '&.Mui-disabled': {
-                  opacity: 0.6
                 }
               }}
             />
           ))}
         </Box>
-      </Box>
 
-      {/* 필터 리셋 버튼 */}
-      {(appliedSearchText || selectedCategoryId || sortOption !== 'created_at_desc') && (
-        <Box sx={{ textAlign: 'center' }}>
-          <Button
-            onClick={handleResetFilters}
-            disabled={loading}
-            sx={{
-              color: '#666',
-              fontSize: '0.9rem',
-              fontWeight: 400,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              textDecoration: 'underline',
-              '&:hover': {
-                backgroundColor: 'transparent',
+        {/* 필터 리셋 버튼 */}
+        {(appliedSearchText || selectedCategoryId || sortOption !== 'created_at_desc') && (
+          <Box sx={{ textAlign: 'center', mt: 1 }}>
+            <Button
+              onClick={handleResetFilters}
+              disabled={loading}
+              size="small"
+              sx={{
+                color: '#666',
+                fontSize: '0.75rem',
                 textDecoration: 'underline',
-                color: '#333'
-              }
-            }}
-          >
-            Clear All Filters
-          </Button>
-        </Box>
-      )}
-    </Container>
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                  color: '#333'
+                }
+              }}
+            >
+              Clear Filters
+            </Button>
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 };
 
