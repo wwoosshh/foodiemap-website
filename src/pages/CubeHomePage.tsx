@@ -34,6 +34,16 @@ import CubeContainer from '../components/CubeContainer';
 
 type CubeFace = 'home' | 'category' | 'restaurants' | 'profile' | 'event' | 'info';
 
+// 큐브 네비게이션 맵: 각 면에서 각 방향으로 회전했을 때 도착하는 면
+const navigationMap: Record<CubeFace, { up: CubeFace; down: CubeFace; left: CubeFace; right: CubeFace }> = {
+  home: { up: 'category', down: 'event', left: 'profile', right: 'restaurants' },
+  category: { up: 'info', down: 'home', left: 'profile', right: 'restaurants' },
+  restaurants: { up: 'category', down: 'event', left: 'home', right: 'info' },
+  profile: { up: 'category', down: 'event', left: 'info', right: 'home' },
+  event: { up: 'home', down: 'info', left: 'profile', right: 'restaurants' },
+  info: { up: 'category', down: 'event', left: 'restaurants', right: 'profile' },
+};
+
 const CubeHomePage: React.FC = () => {
   const { user, logout } = useAuth();
   const theme = useTheme();
@@ -234,10 +244,10 @@ const CubeHomePage: React.FC = () => {
           selectedCategoryId={selectedCategoryId}
         />
 
-        {/* 화살표 네비게이션 */}
-        {/* 왼쪽 화살표 - 프로필 */}
+        {/* 화살표 네비게이션 - 현재 면에서 상대적으로 회전 */}
+        {/* 왼쪽 화살표 - 왼쪽으로 90도 회전 */}
         <IconButton
-          onClick={() => handleNavigate('profile')}
+          onClick={() => handleNavigate(navigationMap[currentFace].left)}
           sx={{
             position: 'absolute',
             left: 20,
@@ -255,9 +265,9 @@ const CubeHomePage: React.FC = () => {
           <ArrowBack sx={{ fontSize: 28 }} />
         </IconButton>
 
-        {/* 오른쪽 화살표 - 맛집 */}
+        {/* 오른쪽 화살표 - 오른쪽으로 90도 회전 */}
         <IconButton
-          onClick={() => handleNavigate('restaurants')}
+          onClick={() => handleNavigate(navigationMap[currentFace].right)}
           sx={{
             position: 'absolute',
             right: 20,
@@ -275,9 +285,9 @@ const CubeHomePage: React.FC = () => {
           <ArrowForward sx={{ fontSize: 28 }} />
         </IconButton>
 
-        {/* 위쪽 화살표 - 카테고리 */}
+        {/* 위쪽 화살표 - 위로 90도 회전 */}
         <IconButton
-          onClick={() => handleNavigate('category')}
+          onClick={() => handleNavigate(navigationMap[currentFace].up)}
           sx={{
             position: 'absolute',
             left: '50%',
@@ -295,9 +305,9 @@ const CubeHomePage: React.FC = () => {
           <ArrowUpward sx={{ fontSize: 28 }} />
         </IconButton>
 
-        {/* 아래쪽 화살표 - 이벤트 */}
+        {/* 아래쪽 화살표 - 아래로 90도 회전 */}
         <IconButton
-          onClick={() => handleNavigate('event')}
+          onClick={() => handleNavigate(navigationMap[currentFace].down)}
           sx={{
             position: 'absolute',
             left: '50%',
