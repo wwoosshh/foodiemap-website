@@ -40,47 +40,98 @@ export const initKakao = () => {
   });
 };
 
-// 카카오 로그인
+// 카카오 로그인 (OAuth 리다이렉트 방식)
 export const loginWithKakao = (): Promise<any> => {
   return new Promise((resolve, reject) => {
-    if (!window.Kakao || !window.Kakao.isInitialized()) {
-      reject(new Error('Kakao SDK not initialized'));
+    const clientId = process.env.REACT_APP_KAKAO_JS_KEY || '361fbd23bff0c10f74b2df82729b0756';
+    const redirectUri = `${window.location.origin}/auth/callback`;
+
+    // 카카오 OAuth URL 생성
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+
+    // 팝업 창 열기
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const popup = window.open(
+      kakaoAuthUrl,
+      'kakaoLogin',
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    if (!popup) {
+      reject(new Error('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.'));
       return;
     }
 
-    window.Kakao.Auth.login({
-      success: (authObj: any) => {
-        console.log('✅ Kakao login success:', authObj);
+    // 팝업에서 메시지 받기
+    const messageHandler = async (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
 
-        // 사용자 정보 가져오기
-        window.Kakao.API.request({
-          url: '/v2/user/me',
-          success: (res: any) => {
-            console.log('✅ Kakao user info:', res);
+      if (event.data.type === 'KAKAO_LOGIN_SUCCESS') {
+        const code = event.data.code;
+        console.log('✅ Kakao authorization code received:', code);
 
-            const userData = {
-              social_id: res.id.toString(),
-              email: res.kakao_account?.email || '',
-              name: res.properties?.nickname || res.kakao_account?.profile?.nickname || '사용자',
-              avatar_url: res.properties?.profile_image || res.kakao_account?.profile?.profile_image_url || undefined,
-              auth_provider: 'kakao',
-              social_data: res
-            };
-
-            resolve(userData);
-          },
-          fail: (err: any) => {
-            console.error('❌ Kakao user info failed:', err);
-            reject(err);
-          }
-        });
-      },
-      fail: (err: any) => {
-        console.error('❌ Kakao login failed:', err);
-        reject(err);
+        try {
+          // 백엔드로 코드 전송하여 사용자 정보 가져오기
+          const userInfo = await getKakaoUserInfo(code);
+          window.removeEventListener('message', messageHandler);
+          clearInterval(checkPopupClosed);
+          resolve(userInfo);
+        } catch (error) {
+          window.removeEventListener('message', messageHandler);
+          clearInterval(checkPopupClosed);
+          reject(error);
+        }
+      } else if (event.data.type === 'KAKAO_LOGIN_FAILED') {
+        window.removeEventListener('message', messageHandler);
+        clearInterval(checkPopupClosed);
+        reject(new Error('카카오 로그인에 실패했습니다.'));
       }
-    });
+    };
+
+    window.addEventListener('message', messageHandler);
+
+    // 팝업이 닫혔는지 체크
+    const checkPopupClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkPopupClosed);
+        window.removeEventListener('message', messageHandler);
+        reject(new Error('로그인 창이 닫혔습니다.'));
+      }
+    }, 1000);
   });
+};
+
+// 카카오 사용자 정보 가져오기 (백엔드를 통해)
+const getKakaoUserInfo = async (code: string): Promise<any> => {
+  try {
+    const apiUrl = process.env.REACT_APP_API_URL || 'https://foodiemap-backend.onrender.com';
+    const response = await fetch(`${apiUrl}/api/auth/kakao/user-info`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        code,
+        redirect_uri: `${window.location.origin}/auth/callback`
+      })
+    });
+
+    const data = await response.json();
+    console.log('✅ Kakao user info:', data);
+
+    if (data.success && data.data) {
+      return data.data;
+    } else {
+      throw new Error(data.message || '카카오 사용자 정보를 가져올 수 없습니다.');
+    }
+  } catch (error) {
+    console.error('❌ Kakao user info failed:', error);
+    throw error;
+  }
 };
 
 // 카카오 로그아웃

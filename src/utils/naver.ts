@@ -32,24 +32,32 @@ export const loginWithNaver = (): Promise<any> => {
       return;
     }
 
+    let isProcessing = false; // 처리 중 플래그
+
     // 팝업에서 메시지 받기
     const messageHandler = async (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
 
       if (event.data.type === 'NAVER_LOGIN_SUCCESS') {
+        if (isProcessing) return; // 이미 처리 중이면 무시
+        isProcessing = true;
+
         const accessToken = event.data.accessToken;
         console.log('✅ Naver access token received:', accessToken);
+
+        // 즉시 타이머 정리
+        clearInterval(checkPopupClosed);
+        window.removeEventListener('message', messageHandler);
 
         try {
           // 네이버 사용자 정보 가져오기
           const userInfo = await getNaverUserInfo(accessToken);
-          window.removeEventListener('message', messageHandler);
           resolve(userInfo);
         } catch (error) {
-          window.removeEventListener('message', messageHandler);
           reject(error);
         }
       } else if (event.data.type === 'NAVER_LOGIN_FAILED') {
+        clearInterval(checkPopupClosed);
         window.removeEventListener('message', messageHandler);
         reject(new Error('네이버 로그인에 실패했습니다.'));
       }
@@ -57,9 +65,9 @@ export const loginWithNaver = (): Promise<any> => {
 
     window.addEventListener('message', messageHandler);
 
-    // 팝업이 닫혔는지 체크
+    // 팝업이 닫혔는지 체크 (처리 중이 아닐 때만)
     const checkPopupClosed = setInterval(() => {
-      if (popup.closed) {
+      if (!isProcessing && popup.closed) {
         clearInterval(checkPopupClosed);
         window.removeEventListener('message', messageHandler);
         reject(new Error('로그인 창이 닫혔습니다.'));

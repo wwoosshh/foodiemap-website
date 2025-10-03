@@ -13,7 +13,21 @@ const AuthCallbackPage: React.FC = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // 네이버 로그인 콜백 처리 (팝업 창인 경우)
+        // 카카오 로그인 콜백 처리 (팝업 창인 경우 - code 파라미터)
+        const urlParams = new URLSearchParams(window.location.search);
+        const kakaoCode = urlParams.get('code');
+
+        if (kakaoCode && window.opener) {
+          // 팝업 창에서 카카오 코드를 부모 창으로 전송
+          window.opener.postMessage({
+            type: 'KAKAO_LOGIN_SUCCESS',
+            code: kakaoCode
+          }, window.location.origin);
+          window.close();
+          return;
+        }
+
+        // 네이버 로그인 콜백 처리 (팝업 창인 경우 - hash 파라미터)
         const hash = window.location.hash;
         if (hash && window.opener) {
           // 팝업 창에서 네이버 토큰을 부모 창으로 전송
@@ -32,7 +46,7 @@ const AuthCallbackPage: React.FC = () => {
           }
         }
 
-        // URL에서 해시 파라미터 가져오기
+        // URL에서 해시 파라미터 가져오기 (구글 로그인용)
         if (!hash) {
           setError('인증 정보가 없습니다.');
           setTimeout(() => navigate('/'), 2000);
