@@ -86,13 +86,15 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
       sx={{
         width: '100%',
         height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        overflow: 'auto',
+        overflowX: 'hidden',
         backgroundColor: '#FFFFFF',
+        transform: 'translateZ(0)',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
-      {/* 검색 필터 - 고정 */}
-      <Box sx={{ flexShrink: 0 }}>
+      {/* 검색 필터 - sticky 고정 */}
+      <Box sx={{ position: 'sticky', top: 0, zIndex: 100, backgroundColor: '#FFFFFF' }}>
         <RestaurantSearch
           categories={categories}
           onSearchChange={handleSearchChange}
@@ -100,20 +102,8 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
         />
       </Box>
 
-      {/* 맛집 그리드 - 스크롤 가능 영역 */}
-      <Box
-        sx={{
-          flex: 1,
-          height: 0,
-          overflow: 'auto',
-          overflowX: 'hidden',
-          px: { xs: 2, md: 3 },
-          pb: 4,
-          transform: 'translateZ(0)',
-          WebkitOverflowScrolling: 'touch',
-          position: 'relative',
-        }}
-      >
+      {/* 맛집 그리드 */}
+      <Box sx={{ px: { xs: 2, md: 3 }, pb: 4 }}>
         <RestaurantGrid
           restaurants={restaurants}
           loading={loading}
