@@ -55,15 +55,18 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     onNavigate(face as CubeFace);
   };
 
-  // 큐브 깊이 최적화: 3D 효과 유지 + 면 분리 + 줌 없음
-  const cubeDepth = 150;
+  // 큐브 깊이를 화면 크기에 비례하게 설정
+  // 화면의 작은 쪽 기준으로 깊이를 절반으로 설정하여 정육면체에 가깝게
+  const cubeDepth = Math.min(cubeWidth, cubeHeight) / 2;
+  // perspective는 큐브 깊이의 4배로 설정하여 왜곡 최소화
+  const perspectiveValue = cubeDepth * 4;
 
   return (
     <Box
       sx={{
         width: '100%',
         height: '100%',
-        perspective: '3000px',
+        perspective: `${perspectiveValue}px`,
         perspectiveOrigin: 'center center',
         overflow: 'hidden',
         position: 'relative',
@@ -78,7 +81,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
           height: `${cubeHeight}px`,
           left: '50%',
           top: '50%',
-          transform: `translate(-50%, -50%) translateZ(-${cubeDepth / 2}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          // 큐브를 뒤로 밀어서 (translateZ -cubeDepth) 줌 효과 제거
+          transform: `translate(-50%, -50%) translateZ(-${cubeDepth}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           transformStyle: 'preserve-3d',
           transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
           willChange: 'transform',
