@@ -84,11 +84,8 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
   return (
     <Box
       sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        width: '100%',
+        height: '100%',
         overflow: 'auto',
         overflowX: 'hidden',
         backgroundColor: '#FFFFFF',
@@ -106,15 +103,13 @@ const RestaurantListCubeFace: React.FC<RestaurantListCubeFaceProps> = ({ initial
       </Box>
 
       {/* 맛집 그리드 */}
-      <Box sx={{ px: { xs: 2, md: 3 }, pb: 4 }}>
-        <RestaurantGrid
-          restaurants={restaurants}
-          loading={loading}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-          showTitle={false}
-        />
-      </Box>
+      <RestaurantGrid
+        restaurants={restaurants}
+        loading={loading}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        showTitle={false}
+      />
     </Box>
   );
 };

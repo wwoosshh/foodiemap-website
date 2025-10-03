@@ -122,7 +122,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   const displayRestaurants = restaurants.slice(0, limit);
 
   return (
-    <Box sx={{ py: showTitle ? 6 : 3, pointerEvents: 'auto' }}>
+    <Box sx={{ py: showTitle ? 6 : 3, px: { xs: 2, md: 3 }, pb: 4 }}>
       {showTitle && (
         <Typography
           variant="h3"
@@ -180,6 +180,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
+                pointerEvents: 'auto',
+                touchAction: 'auto',
                 '&:hover': {
                   borderColor: '#1a1a1a',
                   boxShadow: '0 0 0 1px #1a1a1a',
@@ -190,6 +192,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                 component="img"
                 src={getImageSrc(restaurant)}
                 alt={restaurant.name}
+                draggable={false}
                 onError={() => handleImageError(restaurant.id)}
                 sx={{
                   width: '100%',
@@ -198,6 +201,8 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                   backgroundColor: '#f8f8f8',
                   borderBottom: '1px solid #f0f0f0',
                   flexShrink: 0,
+                  pointerEvents: 'none',
+                  userSelect: 'none',
                 }}
               />
               <Box sx={{ p: 3, pb: 3 }}>
