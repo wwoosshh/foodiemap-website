@@ -52,7 +52,7 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
             fontFamily: '"Times New Roman", "Noto Serif KR", serif',
             fontWeight: 300,
             color: '#1a1a1a',
-            mb: 2,
+            mb: 3,
             letterSpacing: { xs: 4, md: 6 },
             fontSize: { xs: '3rem', sm: '4rem', md: '5rem' },
             textTransform: 'uppercase'
@@ -60,7 +60,6 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
         >
           CUBE
         </Typography>
-        <Box sx={{ width: 60, height: 1, backgroundColor: '#000', mx: 'auto', mb: 3 }} />
         <Typography
           variant="subtitle1"
           sx={{

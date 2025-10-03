@@ -55,8 +55,8 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     onNavigate(face as CubeFace);
   };
 
-  // 큐브 깊이를 작게 설정하여 3D 효과는 유지하되 화면에 맞춤
-  const cubeDepth = 300;
+  // 큐브 깊이를 작게 설정하여 3D 효과는 유지하되 줌 없이 화면에 맞춤
+  const cubeDepth = 50;
 
   return (
     <Box
@@ -77,7 +77,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
           height: `${cubeHeight}px`,
           left: '50%',
           top: '50%',
-          transform: `translate(-50%, -50%) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          transform: `translate(-50%, -50%) translateZ(-${cubeDepth / 2}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           transformStyle: 'preserve-3d',
           transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
@@ -91,7 +91,6 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `translateZ(${cubeDepth}px)`,
-            overflow: 'hidden',
           }}
         >
           <HomeCubeFace onNavigate={handleNavigate} />
@@ -106,7 +105,6 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateX(90deg) translateZ(${cubeDepth}px)`,
-            overflow: 'hidden',
           }}
         >
           <CategoryCubeFace onNavigate={handleNavigate} />
@@ -121,7 +119,6 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateY(90deg) translateZ(${cubeDepth}px)`,
-            overflow: 'hidden',
           }}
         >
           <RestaurantListCubeFace initialCategoryId={selectedCategoryId} />
@@ -136,7 +133,6 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateY(-90deg) translateZ(${cubeDepth}px)`,
-            overflow: 'hidden',
           }}
         >
           <ProfileCubeFace onNavigate={handleNavigate} />
@@ -151,7 +147,6 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateX(-90deg) translateZ(${cubeDepth}px)`,
-            overflow: 'hidden',
           }}
         >
           <EventCubeFace onNavigate={handleNavigate} />
@@ -166,7 +161,6 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
             backgroundColor: '#fff',
             backfaceVisibility: 'hidden',
             transform: `rotateY(180deg) translateZ(${cubeDepth}px)`,
-            overflow: 'hidden',
           }}
         >
           <InfoCubeFace onNavigate={handleNavigate} />
