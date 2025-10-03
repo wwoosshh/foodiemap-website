@@ -66,37 +66,42 @@ export const loginWithKakao = (): Promise<any> => {
       return;
     }
 
+    let isProcessing = false; // 처리 중 플래그
+
     // 팝업에서 메시지 받기
     const messageHandler = async (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
 
       if (event.data.type === 'KAKAO_LOGIN_SUCCESS') {
+        if (isProcessing) return; // 이미 처리 중이면 무시
+        isProcessing = true;
+
         const code = event.data.code;
         console.log('✅ Kakao authorization code received:', code);
+
+        // 즉시 타이머 정리
+        clearInterval(checkPopupClosed);
+        window.removeEventListener('message', messageHandler);
 
         try {
           // 백엔드로 코드 전송하여 사용자 정보 가져오기
           const userInfo = await getKakaoUserInfo(code);
-          window.removeEventListener('message', messageHandler);
-          clearInterval(checkPopupClosed);
           resolve(userInfo);
         } catch (error) {
-          window.removeEventListener('message', messageHandler);
-          clearInterval(checkPopupClosed);
           reject(error);
         }
       } else if (event.data.type === 'KAKAO_LOGIN_FAILED') {
-        window.removeEventListener('message', messageHandler);
         clearInterval(checkPopupClosed);
+        window.removeEventListener('message', messageHandler);
         reject(new Error('카카오 로그인에 실패했습니다.'));
       }
     };
 
     window.addEventListener('message', messageHandler);
 
-    // 팝업이 닫혔는지 체크
+    // 팝업이 닫혔는지 체크 (처리 중이 아닐 때만)
     const checkPopupClosed = setInterval(() => {
-      if (popup.closed) {
+      if (!isProcessing && popup.closed) {
         clearInterval(checkPopupClosed);
         window.removeEventListener('message', messageHandler);
         reject(new Error('로그인 창이 닫혔습니다.'));
