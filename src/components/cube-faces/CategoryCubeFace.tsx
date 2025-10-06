@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Card, CardContent, CardActionArea, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Card, CardContent, CardActionArea } from '@mui/material';
 import { ApiService } from '../../services/api';
+import CubeLoader from '../CubeLoader';
 
 interface CategoryCubeFaceProps {
   onNavigate: (face: string, categoryId?: number) => void;
@@ -75,7 +76,7 @@ const CategoryCubeFace: React.FC<CategoryCubeFaceProps> = ({ onNavigate }) => {
         {/* 카테고리 그리드 */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress size={60} />
+            <CubeLoader size={60} message="카테고리 불러오는 중..." />
           </Box>
         ) : (
           <Box

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Avatar, Card, CardContent, Button, Tabs, Tab, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Avatar, Card, CardContent, Button, Tabs, Tab } from '@mui/material';
 import { Person, FavoriteBorder, RateReview, Logout as LogoutIcon, Star } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../LoginModal';
 import { ApiService } from '../../services/api';
 import RestaurantDetailModal from '../RestaurantDetailModal';
+import CubeLoader from '../CubeLoader';
 
 interface ProfileCubeFaceProps {
   onNavigate: (face: string) => void;
@@ -183,7 +184,7 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
             </Typography>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress />
+                <CubeLoader size={60} message="즐겨찾기 불러오는 중..." />
               </Box>
             ) : favorites.length === 0 ? (
               <Box
@@ -255,7 +256,7 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
             </Typography>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress />
+                <CubeLoader size={60} message="리뷰 불러오는 중..." />
               </Box>
             ) : reviews.length === 0 ? (
               <Box

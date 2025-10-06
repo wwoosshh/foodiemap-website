@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
+import CubeLoader from './CubeLoader';
 
 // Code Splitting: 각 큐브 면을 동적으로 로드
 const HomeCubeFace = lazy(() => import('./cube-faces/HomeCubeFace'));
@@ -157,7 +158,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
               pointerEvents: isFaceVisible('home') ? 'auto' : 'none',
             }}
           >
-            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CubeLoader size={60} /></Box>}>
               <HomeCubeFace onNavigate={handleNavigate} />
             </Suspense>
           </Box>
@@ -178,7 +179,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
               pointerEvents: isFaceVisible('category') ? 'auto' : 'none',
             }}
           >
-            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CubeLoader size={60} /></Box>}>
               <CategoryCubeFace onNavigate={handleNavigate} />
             </Suspense>
           </Box>
@@ -199,7 +200,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
               pointerEvents: isFaceVisible('restaurants') ? 'auto' : 'none',
             }}
           >
-            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CubeLoader size={60} /></Box>}>
               <RestaurantListCubeFace initialCategoryId={selectedCategoryId} />
             </Suspense>
           </Box>
@@ -220,7 +221,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
               pointerEvents: isFaceVisible('profile') ? 'auto' : 'none',
             }}
           >
-            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CubeLoader size={60} /></Box>}>
               <ProfileCubeFace onNavigate={handleNavigate} />
             </Suspense>
           </Box>
@@ -241,7 +242,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
               pointerEvents: isFaceVisible('event') ? 'auto' : 'none',
             }}
           >
-            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CubeLoader size={60} /></Box>}>
               <EventCubeFace onNavigate={handleNavigate} />
             </Suspense>
           </Box>
@@ -262,7 +263,7 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
               pointerEvents: isFaceVisible('info') ? 'auto' : 'none',
             }}
           >
-            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CubeLoader size={60} /></Box>}>
               <InfoCubeFace onNavigate={handleNavigate} />
             </Suspense>
           </Box>

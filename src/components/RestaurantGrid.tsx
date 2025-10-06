@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  CircularProgress,
   Button,
 } from '@mui/material';
 import { Restaurant } from '../types';
 import RestaurantDetailModal from './RestaurantDetailModal';
+import CubeLoader from './CubeLoader';
 
 // 카테고리별 Material-UI 아이콘 매핑 (이모티콘 대신 커스텀 아이콘 사용)
 const getCategoryIconText = (categoryName?: string): string => {
@@ -152,7 +152,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
       {/* 로딩 상태 */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress size={60} sx={{ color: '#1a1a1a' }} />
+          <CubeLoader size={80} message="맛집 정보 불러오는 중..." />
         </Box>
       ) : (
         <>

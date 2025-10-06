@@ -15,7 +15,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  CircularProgress,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -35,6 +34,7 @@ import { useAuth } from '../context/AuthContext';
 import { ApiService } from '../services/api';
 import RestaurantReviews from './RestaurantReviews';
 import NaverMap from './NaverMap';
+import CubeLoader from './CubeLoader';
 
 // 카테고리별 기본 아이콘 매핑
 const getCategoryIcon = (categoryName: string): string => {
@@ -222,7 +222,7 @@ const RestaurantDetailModal: React.FC<RestaurantDetailModalProps> = ({
           alignItems: 'center',
           minHeight: 400
         }}>
-          <CircularProgress size={60} />
+          <CubeLoader size={80} message="맛집 정보 불러오는 중..." />
         </Box>
       </Dialog>
     );

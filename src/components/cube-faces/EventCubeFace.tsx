@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Card, CardContent, Chip, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Card, CardContent, Chip } from '@mui/material';
 import { Event as EventIcon, Campaign, AccessTime } from '@mui/icons-material';
 import { ApiService } from '../../services/api';
+import CubeLoader from '../CubeLoader';
 
 interface EventCubeFaceProps {
   onNavigate: (face: string) => void;
@@ -57,7 +58,7 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
       <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress size={60} sx={{ color: '#1a1a1a' }} />
+            <CubeLoader size={80} message="이벤트 정보 불러오는 중..." />
           </Box>
         ) : (
           <>

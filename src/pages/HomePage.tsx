@@ -13,7 +13,6 @@ import {
   AlertTitle,
   IconButton,
   Collapse,
-  CircularProgress,
 } from '@mui/material';
 import { Person, Logout, Email as EmailIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +22,7 @@ import BannerCarousel from '../components/BannerCarousel';
 import RestaurantSearch from '../components/RestaurantSearch';
 import { ApiService } from '../services/api';
 import { Banner } from '../types';
+import CubeLoader from '../components/CubeLoader';
 
 const HomePage: React.FC = () => {
   const { user, logout: userLogout, setShowEmailVerification } = useAuth();
@@ -367,7 +367,7 @@ const HomePage: React.FC = () => {
           {/* 로딩 상태 */}
           {restaurantsLoading && (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              <CircularProgress size={60} sx={{ color: '#1a1a1a' }} />
+              <CubeLoader size={80} message="맛집 정보 불러오는 중..." />
             </Box>
           )}
 
