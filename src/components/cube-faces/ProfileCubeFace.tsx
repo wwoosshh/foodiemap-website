@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Avatar, Card, CardContent, Button, Tabs, Tab, CircularProgress, Grid } from '@mui/material';
+import { Box, Container, Typography, Avatar, Card, CardContent, Button, Tabs, Tab, CircularProgress } from '@mui/material';
 import { Person, FavoriteBorder, RateReview, Logout as LogoutIcon, Star } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../LoginModal';
@@ -199,42 +199,51 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
                 </Typography>
               </Box>
             ) : (
-              <Grid container spacing={3}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: 'repeat(1, 1fr)',
+                    sm: 'repeat(2, 1fr)',
+                    md: 'repeat(3, 1fr)',
+                  },
+                  gap: 3,
+                }}
+              >
                 {favorites.map((fav) => (
-                  <Grid item xs={12} sm={6} md={4} key={fav.id}>
-                    <Card
+                  <Card
+                    key={fav.id}
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 4,
+                      },
+                    }}
+                    onClick={() => handleRestaurantClick(fav.restaurants)}
+                  >
+                    <Box
+                      component="img"
+                      src={fav.restaurants?.images?.[0] || '/placeholder-restaurant.png'}
+                      alt={fav.restaurants?.name}
                       sx={{
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: 4,
-                        },
+                        width: '100%',
+                        height: 200,
+                        objectFit: 'cover',
                       }}
-                      onClick={() => handleRestaurantClick(fav.restaurants)}
-                    >
-                      <Box
-                        component="img"
-                        src={fav.restaurants?.images?.[0] || '/placeholder-restaurant.png'}
-                        alt={fav.restaurants?.name}
-                        sx={{
-                          width: '100%',
-                          height: 200,
-                          objectFit: 'cover',
-                        }}
-                      />
-                      <CardContent>
-                        <Typography variant="h6" fontWeight={600} gutterBottom>
-                          {fav.restaurants?.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" noWrap>
-                          {fav.restaurants?.address}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                    />
+                    <CardContent>
+                      <Typography variant="h6" fontWeight={600} gutterBottom>
+                        {fav.restaurants?.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" noWrap>
+                        {fav.restaurants?.address}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 ))}
-              </Grid>
+              </Box>
             )}
           </Box>
         )}

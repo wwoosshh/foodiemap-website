@@ -383,7 +383,14 @@ export class ApiService {
     limit?: number;
   } = {}): Promise<ApiResponse<{
     events: any[];
-    pagination: PaginationData;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
   }>> {
     const response = await api.get('/api/events', { params });
     return response.data;
@@ -395,7 +402,14 @@ export class ApiService {
     limit?: number;
   } = {}): Promise<ApiResponse<{
     notices: any[];
-    pagination: PaginationData;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
   }>> {
     const response = await api.get('/api/events/notices', { params });
     return response.data;
