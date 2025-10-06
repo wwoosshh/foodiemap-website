@@ -1,57 +1,49 @@
-import React from 'react';
-import { Box, Container, Typography, Card, CardContent, Chip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Container, Typography, Card, CardContent, Chip, CircularProgress } from '@mui/material';
 import { Event as EventIcon, Campaign, AccessTime } from '@mui/icons-material';
+import { ApiService } from '../../services/api';
 
 interface EventCubeFaceProps {
   onNavigate: (face: string) => void;
 }
 
 const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
-  // 임시 이벤트 데이터
-  const events = [
-    {
-      id: 1,
-      title: '신규 회원 환영 이벤트',
-      description: '회원가입하고 첫 리뷰 작성 시 포인트 지급!',
-      period: '2025.01.01 ~ 2025.12.31',
-      status: '진행중',
-      badge: 'NEW',
-    },
-    {
-      id: 2,
-      title: '월간 베스트 리뷰어',
-      description: '이달의 베스트 리뷰어에게 특별한 혜택을 드립니다',
-      period: '매월 1일 ~ 말일',
-      status: '진행중',
-      badge: 'HOT',
-    },
-    {
-      id: 3,
-      title: '맛집 추천 이벤트',
-      description: '숨겨진 맛집을 추천해주세요',
-      period: '상시 진행',
-      status: '진행중',
-      badge: null,
-    },
-  ];
+  const [events, setEvents] = useState<any[]>([]);
+  const [notices, setNotices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const notices = [
-    {
-      id: 1,
-      title: '3D 큐브 UI 업데이트 안내',
-      date: '2025.01.15',
-    },
-    {
-      id: 2,
-      title: '개인정보 처리방침 변경 안내',
-      date: '2025.01.10',
-    },
-    {
-      id: 3,
-      title: '서비스 점검 안내',
-      date: '2025.01.05',
-    },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [eventsResponse, noticesResponse] = await Promise.all([
+          ApiService.getEvents({ page: 1, limit: 20 }),
+          ApiService.getNotices({ page: 1, limit: 10 })
+        ]);
+
+        if (eventsResponse.success && eventsResponse.data) {
+          setEvents(eventsResponse.data.events || []);
+        }
+
+        if (noticesResponse.success && noticesResponse.data) {
+          setNotices(noticesResponse.data.notices || []);
+        }
+      } catch (error) {
+        console.error('데이터 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const formatPeriod = (startDate: string, endDate: string | null) => {
+    const start = new Date(startDate).toLocaleDateString('ko-KR');
+    if (!endDate) return `${start} ~ 상시 진행`;
+    const end = new Date(endDate).toLocaleDateString('ko-KR');
+    return `${start} ~ ${end}`;
+  };
 
   return (
     <Box
@@ -63,111 +55,143 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
-        {/* 이벤트 섹션 */}
-        <Box sx={{ mb: 6 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <EventIcon sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
-            <Typography variant="h4" fontWeight={700}>
-              진행 중인 이벤트
-            </Typography>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress size={60} sx={{ color: '#1a1a1a' }} />
           </Box>
+        ) : (
+          <>
+            {/* 이벤트 섹션 */}
+            <Box sx={{ mb: 6 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <EventIcon sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
+                <Typography variant="h4" fontWeight={700}>
+                  진행 중인 이벤트
+                </Typography>
+              </Box>
 
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(2, 1fr)',
-              },
-              gap: 3,
-            }}
-          >
-            {events.map((event) => (
-              <Card
-                key={event.id}
-                sx={{
-                  height: '100%',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4,
-                  },
-                }}
-              >
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6" fontWeight={600} sx={{ flex: 1 }}>
-                      {event.title}
-                    </Typography>
-                    {event.badge && (
-                      <Chip
-                        label={event.badge}
-                        size="small"
-                        color={event.badge === 'NEW' ? 'primary' : 'error'}
-                        sx={{ fontWeight: 600 }}
-                      />
-                    )}
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {event.description}
+              {events.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    진행 중인 이벤트가 없습니다
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="caption" color="text.secondary">
-                      {event.period}
-                    </Typography>
-                    <Chip
-                      label={event.status}
-                      size="small"
-                      color="success"
-                      variant="outlined"
-                      sx={{ ml: 'auto' }}
-                    />
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </Box>
-
-        {/* 공지사항 섹션 */}
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <Campaign sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
-            <Typography variant="h4" fontWeight={700}>
-              공지사항
-            </Typography>
-          </Box>
-
-          <Card>
-            <CardContent sx={{ p: 0 }}>
-              {notices.map((notice, index) => (
+                </Box>
+              ) : (
                 <Box
-                  key={notice.id}
                   sx={{
-                    p: 3,
-                    cursor: 'pointer',
-                    borderBottom: index < notices.length - 1 ? '1px solid #e0e0e0' : 'none',
-                    transition: 'background-color 0.2s',
-                    '&:hover': {
-                      backgroundColor: '#f5f5f5',
+                    display: 'grid',
+                    gridTemplateColumns: {
+                      xs: 'repeat(1, 1fr)',
+                      md: 'repeat(2, 1fr)',
                     },
+                    gap: 3,
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body1" fontWeight={500}>
-                      {notice.title}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {notice.date}
-                    </Typography>
-                  </Box>
+                  {events.map((event) => (
+                    <Card
+                      key={event.id}
+                      sx={{
+                        height: '100%',
+                        cursor: event.link_url ? 'pointer' : 'default',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          transform: event.link_url ? 'translateY(-4px)' : 'none',
+                          boxShadow: event.link_url ? 4 : 1,
+                        },
+                      }}
+                      onClick={() => event.link_url && window.open(event.link_url, '_blank')}
+                    >
+                      <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                          <Typography variant="h6" fontWeight={600} sx={{ flex: 1 }}>
+                            {event.title}
+                          </Typography>
+                          {event.badge && (
+                            <Chip
+                              label={event.badge}
+                              size="small"
+                              color={event.badge === 'NEW' ? 'primary' : 'error'}
+                              sx={{ fontWeight: 600 }}
+                            />
+                          )}
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          {event.description}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {formatPeriod(event.start_date, event.end_date)}
+                          </Typography>
+                          <Chip
+                            label={event.status === 'active' ? '진행중' : event.status === 'inactive' ? '대기' : '종료'}
+                            size="small"
+                            color={event.status === 'active' ? 'success' : 'default'}
+                            variant="outlined"
+                            sx={{ ml: 'auto' }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Box>
+              )}
+            </Box>
+          </>
+        )}
+
+        {/* 공지사항 섹션 */}
+        {!loading && (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Campaign sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
+              <Typography variant="h4" fontWeight={700}>
+                공지사항
+              </Typography>
+            </Box>
+
+            {notices.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="body1" color="text.secondary">
+                  공지사항이 없습니다
+                </Typography>
+              </Box>
+            ) : (
+              <Card>
+                <CardContent sx={{ p: 0 }}>
+                  {notices.map((notice, index) => (
+                    <Box
+                      key={notice.id}
+                      sx={{
+                        p: 3,
+                        cursor: 'pointer',
+                        borderBottom: index < notices.length - 1 ? '1px solid #e0e0e0' : 'none',
+                        transition: 'background-color 0.2s',
+                        '&:hover': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {notice.is_important && (
+                            <Chip label="중요" size="small" color="error" sx={{ fontWeight: 600 }} />
+                          )}
+                          <Typography variant="body1" fontWeight={notice.is_important ? 600 : 500}>
+                            {notice.title}
+                          </Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(notice.created_at).toLocaleDateString('ko-KR')}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </Box>
+        )}
       </Container>
     </Box>
   );

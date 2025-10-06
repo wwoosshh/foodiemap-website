@@ -356,6 +356,57 @@ export class ApiService {
     return response.data;
   }
 
+  // 사용자 리뷰 목록 조회
+  static async getUserReviews(params: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<ApiResponse<{
+    reviews: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }>> {
+    const response = await api.get('/api/reviews/user/my', { params });
+    return response.data;
+  }
+
+  // ==================== 이벤트 및 공지사항 ====================
+
+  // 이벤트 목록 조회
+  static async getEvents(params: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<ApiResponse<{
+    events: any[];
+    pagination: PaginationData;
+  }>> {
+    const response = await api.get('/api/events', { params });
+    return response.data;
+  }
+
+  // 공지사항 목록 조회
+  static async getNotices(params: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<ApiResponse<{
+    notices: any[];
+    pagination: PaginationData;
+  }>> {
+    const response = await api.get('/api/events/notices', { params });
+    return response.data;
+  }
+
+  // 공지사항 상세 조회
+  static async getNoticeDetail(id: string): Promise<ApiResponse<{ notice: any }>> {
+    const response = await api.get(`/api/events/notices/${id}`);
+    return response.data;
+  }
+
   // ==================== 이메일 인증 ====================
 
   // 이메일 인증 코드 발송
