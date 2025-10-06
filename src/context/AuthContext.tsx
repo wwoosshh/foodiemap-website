@@ -5,6 +5,7 @@ import { ApiService } from '../services/api';
 interface AuthContextType {
   user: User | null;
   setUser: (user: User | null) => void;
+  updateUser: (userData: Partial<User>) => void;
   isLoading: boolean;
   showEmailVerification: boolean;
   setShowEmailVerification: (show: boolean) => void;
@@ -122,6 +123,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setShowEmailVerification(false);
   };
 
+  // 사용자 정보 업데이트
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      localStorage.setItem('user_data', JSON.stringify(updatedUser));
+    }
+  };
+
   // 사용자 정보 새로고침
   const refreshUser = () => {
     const userData = localStorage.getItem('user_data');
@@ -138,6 +148,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     setUser,
+    updateUser,
     isLoading,
     showEmailVerification,
     setShowEmailVerification,

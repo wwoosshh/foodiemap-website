@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Avatar, Card, CardContent, Button, Tabs, Tab } from '@mui/material';
-import { Person, FavoriteBorder, RateReview, Logout as LogoutIcon, Star } from '@mui/icons-material';
+import { Person, FavoriteBorder, RateReview, Logout as LogoutIcon, Star, Settings, VerifiedUser } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../LoginModal';
 import { ApiService } from '../../services/api';
 import RestaurantDetailModal from '../RestaurantDetailModal';
 import CubeLoader from '../CubeLoader';
+import ProfileEditModal from '../ProfileEditModal';
 
 interface ProfileCubeFaceProps {
   onNavigate: (face: string) => void;
@@ -20,6 +21,7 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -144,9 +146,14 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
                 <Person sx={{ fontSize: 60 }} />
               </Avatar>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h4" gutterBottom fontWeight={700}>
-                  {user.name}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Typography variant="h4" fontWeight={700}>
+                    {user.name}
+                  </Typography>
+                  {user.email_verified && (
+                    <VerifiedUser sx={{ color: 'primary.main', fontSize: 24 }} />
+                  )}
+                </Box>
                 <Typography variant="body1" color="text.secondary" gutterBottom>
                   {user.email}
                 </Typography>
@@ -155,15 +162,31 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
                     {user.phone}
                   </Typography>
                 )}
+                {user.auth_provider && user.auth_provider !== 'email' && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                    {user.auth_provider === 'google' && 'Google 계정'}
+                    {user.auth_provider === 'kakao' && 'Kakao 계정'}
+                    {user.auth_provider === 'naver' && 'Naver 계정'}
+                  </Typography>
+                )}
               </Box>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<LogoutIcon />}
-                onClick={handleLogout}
-              >
-                로그아웃
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Settings />}
+                  onClick={() => setEditModalOpen(true)}
+                >
+                  수정
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<LogoutIcon />}
+                  onClick={handleLogout}
+                >
+                  로그아웃
+                </Button>
+              </Box>
             </Box>
           </CardContent>
         </Card>
@@ -329,6 +352,12 @@ const ProfileCubeFace: React.FC<ProfileCubeFaceProps> = ({ onNavigate }) => {
         open={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
         restaurant={selectedRestaurant}
+      />
+
+      {/* 프로필 편집 모달 */}
+      <ProfileEditModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
       />
     </Box>
   );

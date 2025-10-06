@@ -6,6 +6,7 @@ export interface User {
   phone?: string;
   avatar_url?: string;
   email_verified: boolean;
+  auth_provider?: string;
   created_at: string;
 }
 

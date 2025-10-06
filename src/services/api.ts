@@ -440,6 +440,32 @@ export class ApiService {
     const response = await api.post('/api/verification/resend-email-verification', { email });
     return response.data;
   }
+
+  // ==================== 프로필 관리 ====================
+
+  // 현재 사용자 정보 조회
+  static async getCurrentUser(): Promise<ApiResponse<{ user: any }>> {
+    const response = await api.get('/api/auth/me');
+    return response.data;
+  }
+
+  // 프로필 정보 수정
+  static async updateProfile(data: {
+    name?: string;
+    phone?: string;
+    avatar_url?: string;
+    current_password?: string;
+    new_password?: string;
+  }): Promise<ApiResponse<{ user: any }>> {
+    const response = await api.put('/api/auth/profile', data);
+    return response.data;
+  }
+
+  // 프로필 이미지 업로드
+  static async uploadProfileImage(imageData: string): Promise<ApiResponse<{ url: string; public_id: string }>> {
+    const response = await api.post('/api/auth/upload-profile-image', { image: imageData });
+    return response.data;
+  }
 }
 
 export default api;
