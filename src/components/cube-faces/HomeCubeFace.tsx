@@ -13,20 +13,31 @@ const HomeCubeFace: React.FC<HomeCubeFaceProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const loadHomeData = async () => {
       try {
         const response = await ApiService.getHomeData();
-        if (response.success && response.data) {
+        if (response.success && response.data && !abortController.signal.aborted) {
           setBanners(response.data.banners || []);
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return; // 요청이 취소되면 무시
+        }
         console.error('홈 데이터 로드 실패:', error);
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     loadHomeData();
+
+    return () => {
+      abortController.abort();
+    };
   }, []); // 빈 배열로 한 번만 실행
 
   return (

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
-import HomeCubeFace from './cube-faces/HomeCubeFace';
-import CategoryCubeFace from './cube-faces/CategoryCubeFace';
-import RestaurantListCubeFace from './cube-faces/RestaurantListCubeFace';
-import ProfileCubeFace from './cube-faces/ProfileCubeFace';
-import EventCubeFace from './cube-faces/EventCubeFace';
-import InfoCubeFace from './cube-faces/InfoCubeFace';
+import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
+import { Box, CircularProgress } from '@mui/material';
+
+// Code Splitting: 각 큐브 면을 동적으로 로드
+const HomeCubeFace = lazy(() => import('./cube-faces/HomeCubeFace'));
+const CategoryCubeFace = lazy(() => import('./cube-faces/CategoryCubeFace'));
+const RestaurantListCubeFace = lazy(() => import('./cube-faces/RestaurantListCubeFace'));
+const ProfileCubeFace = lazy(() => import('./cube-faces/ProfileCubeFace'));
+const EventCubeFace = lazy(() => import('./cube-faces/EventCubeFace'));
+const InfoCubeFace = lazy(() => import('./cube-faces/InfoCubeFace'));
 
 type CubeFace = 'home' | 'category' | 'restaurants' | 'profile' | 'event' | 'info';
 
@@ -33,6 +35,30 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
   const [rotation, setRotation] = useState<CubeRotation>({ x: 0, y: 0 });
   const [cubeWidth, setCubeWidth] = useState(window.innerWidth);
   const [cubeHeight, setCubeHeight] = useState(window.innerHeight - 64);
+  const [isRotating, setIsRotating] = useState(false);
+
+  // 각 face가 현재 보이는지 확인하는 함수
+  const isFaceVisible = (face: CubeFace): boolean => {
+    return face === currentFace;
+  };
+
+  // 현재 면과 인접한 면들을 반환하는 함수
+  const getAdjacentFaces = (face: CubeFace): CubeFace[] => {
+    const adjacencyMap: Record<CubeFace, CubeFace[]> = {
+      home: ['category', 'restaurants', 'profile', 'event'],
+      category: ['home', 'restaurants', 'profile', 'info'],
+      restaurants: ['home', 'category', 'event', 'info'],
+      profile: ['home', 'category', 'event', 'info'],
+      event: ['home', 'restaurants', 'profile', 'info'],
+      info: ['category', 'restaurants', 'profile', 'event'],
+    };
+    return adjacencyMap[face] || [];
+  };
+
+  // 렌더링 여부 결정 (현재 면 + 인접 면만 렌더링)
+  const shouldRenderFace = (face: CubeFace): boolean => {
+    return face === currentFace || getAdjacentFaces(currentFace).includes(face);
+  };
 
   // 화면 크기에 따라 큐브 크기 조정
   useEffect(() => {
@@ -64,21 +90,29 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
     };
   };
 
+  // 큐브 깊이를 화면 크기에 비례하게 설정 (useMemo로 최적화)
+  const cubeDepth = useMemo(() => Math.max(cubeWidth, cubeHeight) / 2, [cubeWidth, cubeHeight]);
+
+  // perspective는 큐브 깊이의 3배로 설정하여 왜곡 최소화 (useMemo로 최적화)
+  const perspectiveValue = useMemo(() => cubeDepth * 3, [cubeDepth]);
+
   // 현재 면에 따라 회전 업데이트 (최단 경로)
   useEffect(() => {
     const targetRotation = faceRotations[currentFace];
+    setIsRotating(true);
     setRotation(prev => calculateShortestRotation(prev, targetRotation));
+
+    // 회전 애니메이션 완료 후 isRotating false로 설정 (1초 후)
+    const timer = setTimeout(() => {
+      setIsRotating(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, [currentFace]);
 
   const handleNavigate = (face: string, categoryId?: number) => {
     onNavigate(face as CubeFace);
   };
-
-  // 큐브 깊이를 화면 크기에 비례하게 설정
-  // 화면의 큰 쪽 기준으로 깊이를 설정하여 회전 시 면들이 겹치지 않도록
-  const cubeDepth = Math.max(cubeWidth, cubeHeight) / 2;
-  // perspective는 큐브 깊이의 3배로 설정하여 왜곡 최소화
-  const perspectiveValue = cubeDepth * 3;
 
   return (
     <Box
@@ -104,104 +138,135 @@ const CubeContainer: React.FC<CubeContainerProps> = ({ currentFace, onNavigate, 
           transform: `translate(-50%, -50%) translateZ(-${cubeDepth}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           transformStyle: 'preserve-3d',
           transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'transform',
+          // 회전 중에만 willChange 적용하여 GPU 메모리 최적화
+          ...(isRotating && { willChange: 'transform' }),
         }}
       >
         {/* 앞면 - 홈 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#fff',
-            backfaceVisibility: 'hidden',
-            transform: `translateZ(${cubeDepth}px)`,
-            border: '2px solid #e0e0e0',
-            boxSizing: 'border-box',
-          }}
-        >
-          <HomeCubeFace onNavigate={handleNavigate} />
-        </Box>
+        {shouldRenderFace('home') && (
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              transform: `translateZ(${cubeDepth}px)`,
+              border: '2px solid #e0e0e0',
+              boxSizing: 'border-box',
+              pointerEvents: isFaceVisible('home') ? 'auto' : 'none',
+            }}
+          >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+              <HomeCubeFace onNavigate={handleNavigate} />
+            </Suspense>
+          </Box>
+        )}
 
         {/* 위 - 카테고리 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#fff',
-            backfaceVisibility: 'hidden',
-            transform: `rotateX(90deg) translateZ(${cubeDepth}px)`,
-            border: '2px solid #e0e0e0',
-            boxSizing: 'border-box',
-          }}
-        >
-          <CategoryCubeFace onNavigate={handleNavigate} />
-        </Box>
+        {shouldRenderFace('category') && (
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              transform: `rotateX(90deg) translateZ(${cubeDepth}px)`,
+              border: '2px solid #e0e0e0',
+              boxSizing: 'border-box',
+              pointerEvents: isFaceVisible('category') ? 'auto' : 'none',
+            }}
+          >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+              <CategoryCubeFace onNavigate={handleNavigate} />
+            </Suspense>
+          </Box>
+        )}
 
         {/* 오른쪽 - 맛집 목록 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#fff',
-            backfaceVisibility: 'hidden',
-            transform: `rotateY(90deg) translateZ(${cubeDepth}px)`,
-            border: '2px solid #e0e0e0',
-            boxSizing: 'border-box',
-          }}
-        >
-          <RestaurantListCubeFace initialCategoryId={selectedCategoryId} />
-        </Box>
+        {shouldRenderFace('restaurants') && (
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              transform: `rotateY(90deg) translateZ(${cubeDepth}px)`,
+              border: '2px solid #e0e0e0',
+              boxSizing: 'border-box',
+              pointerEvents: isFaceVisible('restaurants') ? 'auto' : 'none',
+            }}
+          >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+              <RestaurantListCubeFace initialCategoryId={selectedCategoryId} />
+            </Suspense>
+          </Box>
+        )}
 
         {/* 왼쪽 - 프로필 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#fff',
-            backfaceVisibility: 'hidden',
-            transform: `rotateY(-90deg) translateZ(${cubeDepth}px)`,
-            border: '2px solid #e0e0e0',
-            boxSizing: 'border-box',
-          }}
-        >
-          <ProfileCubeFace onNavigate={handleNavigate} />
-        </Box>
+        {shouldRenderFace('profile') && (
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              transform: `rotateY(-90deg) translateZ(${cubeDepth}px)`,
+              border: '2px solid #e0e0e0',
+              boxSizing: 'border-box',
+              pointerEvents: isFaceVisible('profile') ? 'auto' : 'none',
+            }}
+          >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+              <ProfileCubeFace onNavigate={handleNavigate} />
+            </Suspense>
+          </Box>
+        )}
 
         {/* 아래 - 이벤트 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#fff',
-            backfaceVisibility: 'hidden',
-            transform: `rotateX(-90deg) translateZ(${cubeDepth}px)`,
-            border: '2px solid #e0e0e0',
-            boxSizing: 'border-box',
-          }}
-        >
-          <EventCubeFace onNavigate={handleNavigate} />
-        </Box>
+        {shouldRenderFace('event') && (
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              transform: `rotateX(-90deg) translateZ(${cubeDepth}px)`,
+              border: '2px solid #e0e0e0',
+              boxSizing: 'border-box',
+              pointerEvents: isFaceVisible('event') ? 'auto' : 'none',
+            }}
+          >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+              <EventCubeFace onNavigate={handleNavigate} />
+            </Suspense>
+          </Box>
+        )}
 
         {/* 뒤 - 정보 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#fff',
-            backfaceVisibility: 'hidden',
-            transform: `rotateY(180deg) translateZ(${cubeDepth}px)`,
-            border: '2px solid #e0e0e0',
-            boxSizing: 'border-box',
-          }}
-        >
-          <InfoCubeFace onNavigate={handleNavigate} />
-        </Box>
+        {shouldRenderFace('info') && (
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              transform: `rotateY(180deg) translateZ(${cubeDepth}px)`,
+              border: '2px solid #e0e0e0',
+              boxSizing: 'border-box',
+              pointerEvents: isFaceVisible('info') ? 'auto' : 'none',
+            }}
+          >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>}>
+              <InfoCubeFace onNavigate={handleNavigate} />
+            </Suspense>
+          </Box>
+        )}
       </Box>
     </Box>
   );

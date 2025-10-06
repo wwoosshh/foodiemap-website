@@ -100,40 +100,55 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
           transition: 'transform 0.5s ease-in-out',
         }}
       >
-        {activeBanners.map((banner) => (
-          <Card
-            key={banner.id}
-            sx={{
-              width: `${100 / activeBanners.length}%`,
-              height: '100%',
-              position: 'relative',
-              cursor: banner.link_url ? 'pointer' : 'default',
-              borderRadius: 0,
-              '&:hover': {
-                '& .banner-overlay': {
-                  opacity: banner.link_url ? 0.3 : 0,
-                },
-                '& .banner-content': {
-                  transform: 'translateY(-10px)',
-                },
-              },
-            }}
-            onClick={() => handleBannerClick(banner)}
-          >
-            <CardMedia
-              component="img"
-              height={height}
-              image={banner.image_url}
-              alt={banner.title}
+        {activeBanners.map((banner, index) => {
+          // 현재 배너와 인접한 배너만 이미지 로드 (성능 최적화)
+          const shouldLoadImage = Math.abs(index - currentIndex) <= 1;
+
+          return (
+            <Card
+              key={banner.id}
               sx={{
-                objectFit: 'cover',
-                width: '100%',
+                width: `${100 / activeBanners.length}%`,
                 height: '100%',
+                position: 'relative',
+                cursor: banner.link_url ? 'pointer' : 'default',
+                borderRadius: 0,
+                '&:hover': {
+                  '& .banner-overlay': {
+                    opacity: banner.link_url ? 0.3 : 0,
+                  },
+                  '& .banner-content': {
+                    transform: 'translateY(-10px)',
+                  },
+                },
               }}
-              onError={(e: any) => {
-                e.target.src = '/api/placeholder/1200/300';
-              }}
-            />
+              onClick={() => handleBannerClick(banner)}
+            >
+              {shouldLoadImage ? (
+                <CardMedia
+                  component="img"
+                  height={height}
+                  image={banner.image_url}
+                  alt={banner.title}
+                  loading="lazy"
+                  sx={{
+                    objectFit: 'cover',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  onError={(e: any) => {
+                    e.target.src = '/api/placeholder/1200/300';
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: '#f5f5f5',
+                  }}
+                />
+              )}
 
             {/* 오버레이 */}
             <Box
@@ -201,7 +216,8 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
               )}
             </Box>
           </Card>
-        ))}
+          );
+        })}
       </Box>
 
       {/* 네비게이션 화살표 */}

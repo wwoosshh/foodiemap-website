@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -50,8 +50,9 @@ interface RestaurantGridProps {
   loading?: boolean;
   pagination?: {
     page: number;
+    limit: number;
+    total: number;
     totalPages: number;
-    totalCount: number;
     hasNext: boolean;
     hasPrev: boolean;
   };
@@ -70,6 +71,11 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  // 페이지 변경 시 imageErrors 초기화
+  useEffect(() => {
+    setImageErrors({});
+  }, [pagination?.page]);
 
   // 빈 상태를 위한 메시지 컴포넌트
   const renderEmptyState = () => (
@@ -190,6 +196,7 @@ const RestaurantGrid: React.FC<RestaurantGridProps> = ({
                 component="img"
                 src={getImageSrc(restaurant)}
                 alt={restaurant.name}
+                loading="lazy"
                 onError={() => handleImageError(restaurant.id)}
                 sx={{
                   width: '100%',
