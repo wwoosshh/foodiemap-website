@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { Box, Container, AppBar, Toolbar, Button, IconButton } from '@mui/material';
+import { Box, Container, AppBar, Toolbar, Button } from '@mui/material';
 import { Home as HomeIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 

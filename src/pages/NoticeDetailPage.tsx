@@ -27,32 +27,32 @@ const NoticeDetailPage: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const loadNotice = async () => {
+      if (!id) {
+        setError('공지사항 ID가 없습니다.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await ApiService.getNoticeById(id);
+
+        if (response.success && response.data) {
+          setNotice(response.data);
+        } else {
+          setError('공지사항을 찾을 수 없습니다.');
+        }
+      } catch (err) {
+        console.error('공지사항 로드 실패:', err);
+        setError('공지사항을 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadNotice();
   }, [id]);
-
-  const loadNotice = async () => {
-    if (!id) {
-      setError('공지사항 ID가 없습니다.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await ApiService.getNoticeById(id);
-
-      if (response.success && response.data) {
-        setNotice(response.data);
-      } else {
-        setError('공지사항을 찾을 수 없습니다.');
-      }
-    } catch (err) {
-      console.error('공지사항 로드 실패:', err);
-      setError('공지사항을 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {

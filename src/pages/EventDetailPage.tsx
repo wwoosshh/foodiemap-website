@@ -28,32 +28,32 @@ const EventDetailPage: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const loadEvent = async () => {
+      if (!id) {
+        setError('이벤트 ID가 없습니다.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await ApiService.getEventById(id);
+
+        if (response.success && response.data) {
+          setEvent(response.data);
+        } else {
+          setError('이벤트를 찾을 수 없습니다.');
+        }
+      } catch (err) {
+        console.error('이벤트 로드 실패:', err);
+        setError('이벤트를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadEvent();
   }, [id]);
-
-  const loadEvent = async () => {
-    if (!id) {
-      setError('이벤트 ID가 없습니다.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await ApiService.getEventById(id);
-
-      if (response.success && response.data) {
-        setEvent(response.data);
-      } else {
-        setError('이벤트를 찾을 수 없습니다.');
-      }
-    } catch (err) {
-      console.error('이벤트 로드 실패:', err);
-      setError('이벤트를 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
