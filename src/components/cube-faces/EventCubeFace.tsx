@@ -66,7 +66,16 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
           <>
             {/* 이벤트 섹션 */}
             <Box sx={{ mb: 6 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  mb: 3,
+                  cursor: 'pointer',
+                  '&:hover': { opacity: 0.7 },
+                }}
+                onClick={() => navigate('/events')}
+              >
                 <EventIcon sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
                 <Typography variant="h4" fontWeight={700}>
                   진행 중인 이벤트
@@ -146,7 +155,16 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
         {/* 공지사항 섹션 */}
         {!loading && (
           <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                mb: 3,
+                cursor: 'pointer',
+                '&:hover': { opacity: 0.7 },
+              }}
+              onClick={() => navigate('/notices')}
+            >
               <Campaign sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
               <Typography variant="h4" fontWeight={700}>
                 공지사항
