@@ -6,6 +6,10 @@ import { CssBaseline } from '@mui/material';
 // Pages
 import CubeHomePage from './pages/CubeHomePage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
+import EventDetailPage from './pages/EventDetailPage';
+import NoticeDetailPage from './pages/NoticeDetailPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
 
 // Components
 import EmailVerificationModal from './components/EmailVerificationModal';
@@ -97,6 +101,16 @@ const AppContent = () => {
 
           {/* OAuth 콜백 */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
+          {/* 이벤트 상세 페이지 */}
+          <Route path="/events/:id" element={<EventDetailPage />} />
+
+          {/* 공지사항 상세 페이지 */}
+          <Route path="/notices/:id" element={<NoticeDetailPage />} />
+
+          {/* 정책 페이지 */}
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
 
           {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
           <Route path="*" element={<Navigate to="/" replace />} />

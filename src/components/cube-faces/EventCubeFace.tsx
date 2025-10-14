@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, Card, CardContent, Chip } from '@mui/material';
 import { Event as EventIcon, Campaign, AccessTime } from '@mui/icons-material';
 import { ApiService } from '../../services/api';
@@ -9,6 +10,7 @@ interface EventCubeFaceProps {
 }
 
 const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<any[]>([]);
   const [notices, setNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,14 +95,14 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
                       key={event.id}
                       sx={{
                         height: '100%',
-                        cursor: event.link_url ? 'pointer' : 'default',
+                        cursor: 'pointer',
                         transition: 'all 0.3s',
                         '&:hover': {
-                          transform: event.link_url ? 'translateY(-4px)' : 'none',
-                          boxShadow: event.link_url ? 4 : 1,
+                          transform: 'translateY(-4px)',
+                          boxShadow: 4,
                         },
                       }}
-                      onClick={() => event.link_url && window.open(event.link_url, '_blank')}
+                      onClick={() => navigate(`/events/${event.id}`)}
                     >
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
@@ -163,6 +165,7 @@ const EventCubeFace: React.FC<EventCubeFaceProps> = ({ onNavigate }) => {
                   {notices.map((notice, index) => (
                     <Box
                       key={notice.id}
+                      onClick={() => navigate(`/notices/${notice.id}`)}
                       sx={{
                         p: 3,
                         cursor: 'pointer',

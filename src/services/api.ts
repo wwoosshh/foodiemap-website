@@ -415,10 +415,21 @@ export class ApiService {
     return response.data;
   }
 
+  // 이벤트 상세 조회
+  static async getEventById(id: string): Promise<ApiResponse<any>> {
+    const response = await api.get(`/api/events/${id}`);
+    return response.data;
+  }
+
   // 공지사항 상세 조회
-  static async getNoticeDetail(id: string): Promise<ApiResponse<{ notice: any }>> {
+  static async getNoticeById(id: string): Promise<ApiResponse<any>> {
     const response = await api.get(`/api/events/notices/${id}`);
     return response.data;
+  }
+
+  // (구버전 호환성) 공지사항 상세 조회
+  static async getNoticeDetail(id: string): Promise<ApiResponse<{ notice: any }>> {
+    return this.getNoticeById(id);
   }
 
   // ==================== 이메일 인증 ====================
