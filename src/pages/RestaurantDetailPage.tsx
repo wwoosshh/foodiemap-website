@@ -32,14 +32,12 @@ import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import {
   StarFilledIcon,
-  StarOutlineIcon,
   LocationIcon,
   PhoneIcon,
   HeartFilledIcon,
   HeartOutlineIcon,
   ShareIcon,
   ReviewIcon,
-  ClockIcon,
   ArrowRightIcon,
 } from '../components/icons/CustomIcons';
 import {
@@ -60,7 +58,6 @@ const RestaurantDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [restaurant, setRestaurant] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewStats, setReviewStats] = useState<any>(null);
   const [menus, setMenus] = useState<any[]>([]);
   const [isFavorited, setIsFavorited] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -85,6 +82,7 @@ const RestaurantDetailPage: React.FC = () => {
     if (id) {
       loadRestaurantData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadRestaurantData = async () => {
@@ -95,12 +93,8 @@ const RestaurantDetailPage: React.FC = () => {
       if (response.success && response.data) {
         setRestaurant(response.data.restaurant);
         setReviews(response.data.reviews?.items || []);
-        setReviewStats(response.data.reviews?.stats);
         setMenus(response.data.menus || []);
         setIsFavorited(response.data.userInfo?.isFavorited || false);
-
-        // 디버깅: 리뷰 데이터 확인
-        console.log('리뷰 데이터:', response.data.reviews?.items);
 
         // 도움이 돼요 상태 초기화
         if (user && response.data.reviews?.items) {
@@ -114,7 +108,6 @@ const RestaurantDetailPage: React.FC = () => {
         }
       }
     } catch (err: any) {
-      console.error('Failed to load restaurant data:', err);
       setError(err.userMessage || '맛집 정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);

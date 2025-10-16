@@ -19,8 +19,6 @@ import {
   Alert,
   useTheme,
   alpha,
-  Button,
-  IconButton,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
@@ -60,6 +58,7 @@ const RestaurantsListPage: React.FC = () => {
 
   useEffect(() => {
     loadRestaurants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const loadCategories = async () => {
@@ -69,7 +68,7 @@ const RestaurantsListPage: React.FC = () => {
         setCategories(response.data.categories || []);
       }
     } catch (err) {
-      console.error('Failed to load categories:', err);
+      // 카테고리 로드 실패는 무시 (선택 사항)
     }
   };
 
@@ -99,7 +98,7 @@ const RestaurantsListPage: React.FC = () => {
         });
       }
     } catch (err: any) {
-      console.error('Failed to load restaurants:', err);
+      // 로드 실패 시 빈 목록 유지
     } finally {
       setLoading(false);
     }

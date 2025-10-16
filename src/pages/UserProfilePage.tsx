@@ -10,16 +10,11 @@ import {
   Avatar,
   Tabs,
   Tab,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
   Chip,
   CircularProgress,
   Alert,
   useTheme,
   alpha,
-  IconButton,
   CardMedia,
   CardActionArea,
 } from '@mui/material';
@@ -56,6 +51,7 @@ const UserProfilePage: React.FC = () => {
       return;
     }
     loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadUserData = async () => {
@@ -74,7 +70,7 @@ const UserProfilePage: React.FC = () => {
         setMyReviews(reviewsRes.data.reviews || []);
       }
     } catch (err) {
-      console.error('Failed to load user data:', err);
+      // 로드 실패 시 빈 배열 유지
     } finally {
       setLoading(false);
     }

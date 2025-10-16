@@ -10,7 +10,6 @@ import {
   CardActionArea,
   Button,
   Chip,
-  CircularProgress,
   Alert,
   useTheme,
   alpha,
@@ -25,8 +24,6 @@ import {
   LocationIcon,
   RestaurantIcon,
   ArrowRightIcon,
-  HeartOutlineIcon,
-  HeartFilledIcon,
 } from '../components/icons/CustomIcons';
 
 const NewHomePage: React.FC = () => {
@@ -56,7 +53,6 @@ const NewHomePage: React.FC = () => {
         setLatestRestaurants(response.data.restaurants || []);
       }
     } catch (err: any) {
-      console.error('Failed to load home data:', err);
       setError(err.userMessage || '데이터를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
