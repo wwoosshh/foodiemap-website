@@ -40,6 +40,13 @@ import {
   ClockIcon,
   ArrowRightIcon,
 } from '../components/icons/CustomIcons';
+import {
+  ThumbUp,
+  ThumbUpOutlined,
+  Report,
+  Edit,
+  Delete,
+} from '@mui/icons-material';
 
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +70,14 @@ const RestaurantDetailPage: React.FC = () => {
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewContent, setReviewContent] = useState('');
 
+  // 리뷰 인터랙션 상태
+  const [helpfulReviews, setHelpfulReviews] = useState<Set<string>>(new Set());
+  const [editingReview, setEditingReview] = useState<any>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
+
   useEffect(() => {
     if (id) {
       loadRestaurantData();
@@ -80,6 +95,17 @@ const RestaurantDetailPage: React.FC = () => {
         setReviewStats(response.data.reviews?.stats);
         setMenus(response.data.menus || []);
         setIsFavorited(response.data.userInfo?.isFavorited || false);
+
+        // 도움이 돼요 상태 초기화
+        if (user && response.data.reviews?.items) {
+          const helpfulSet = new Set<string>();
+          response.data.reviews.items.forEach((review: any) => {
+            if (review.user_helpful) {
+              helpfulSet.add(review.id);
+            }
+          });
+          setHelpfulReviews(helpfulSet);
+        }
       }
     } catch (err: any) {
       console.error('Failed to load restaurant data:', err);
@@ -134,6 +160,123 @@ const RestaurantDetailPage: React.FC = () => {
       loadRestaurantData(); // 리뷰 목록 새로고침
     } catch (err: any) {
       alert(err.userMessage || '리뷰 작성에 실패했습니다.');
+    }
+  };
+
+  const handleToggleHelpful = async (reviewId: string) => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const response = await ApiService.toggleReviewHelpful(reviewId);
+      if (response.success && response.data) {
+        // 로컬 상태 업데이트
+        const newHelpfulReviews = new Set(helpfulReviews);
+        if (response.data.is_helpful) {
+          newHelpfulReviews.add(reviewId);
+        } else {
+          newHelpfulReviews.delete(reviewId);
+        }
+        setHelpfulReviews(newHelpfulReviews);
+
+        // 리뷰 목록에서 해당 리뷰의 helpful_count 업데이트
+        setReviews(reviews.map(review =>
+          review.id === reviewId
+            ? { ...review, helpful_count: response.data.helpful_count }
+            : review
+        ));
+      }
+    } catch (err: any) {
+      alert(err.userMessage || '도움이 돼요 처리에 실패했습니다.');
+    }
+  };
+
+  const handleOpenEditDialog = (review: any) => {
+    setEditingReview(review);
+    setReviewRating(review.rating);
+    setReviewTitle(review.title || '');
+    setReviewContent(review.content || '');
+    setReviewDialogOpen(true);
+  };
+
+  const handleUpdateReview = async () => {
+    if (!user || !editingReview) {
+      return;
+    }
+
+    if (!reviewTitle.trim() || !reviewContent.trim()) {
+      alert('제목과 내용을 모두 입력해주세요.');
+      return;
+    }
+
+    try {
+      await ApiService.updateReview(editingReview.id, {
+        rating: reviewRating,
+        title: reviewTitle,
+        content: reviewContent,
+      });
+
+      alert('리뷰가 수정되었습니다.');
+      setReviewDialogOpen(false);
+      setEditingReview(null);
+      setReviewTitle('');
+      setReviewContent('');
+      setReviewRating(5);
+      loadRestaurantData(); // 리뷰 목록 새로고침
+    } catch (err: any) {
+      alert(err.userMessage || '리뷰 수정에 실패했습니다.');
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    if (!confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await ApiService.deleteReview(reviewId);
+      alert('리뷰가 삭제되었습니다.');
+      loadRestaurantData(); // 리뷰 목록 새로고침
+    } catch (err: any) {
+      alert(err.userMessage || '리뷰 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleOpenReportDialog = (reviewId: string) => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    setReportingReviewId(reviewId);
+    setReportDialogOpen(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!reportingReviewId || !reportReason.trim()) {
+      alert('신고 사유를 선택해주세요.');
+      return;
+    }
+
+    try {
+      await ApiService.reportReview(reportingReviewId, {
+        reason: reportReason,
+        details: reportDetails,
+      });
+
+      alert('신고가 접수되었습니다.');
+      setReportDialogOpen(false);
+      setReportingReviewId(null);
+      setReportReason('');
+      setReportDetails('');
+    } catch (err: any) {
+      alert(err.userMessage || '신고 접수에 실패했습니다.');
     }
   };
 
@@ -371,66 +514,116 @@ const RestaurantDetailPage: React.FC = () => {
                   <Alert severity="info">첫 번째 리뷰를 작성해보세요!</Alert>
                 ) : (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {reviews.map((review) => (
-                      <Card key={review.id} variant="outlined">
-                        <CardContent>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Avatar src={review.user?.avatar_url}>
-                                {review.user?.name?.[0]}
-                              </Avatar>
-                              <Box>
-                                <Typography variant="subtitle1" fontWeight={600}>
-                                  {review.user?.name || '익명'}
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  {renderRating(review.rating || 0, 'small')}
-                                  <Typography variant="caption" color="text.secondary">
-                                    {new Date(review.created_at).toLocaleDateString()}
+                    {reviews.map((review) => {
+                      const isOwnReview = user?.id === review.user?.id;
+                      const isHelpful = helpfulReviews.has(review.id);
+
+                      return (
+                        <Card key={review.id} variant="outlined">
+                          <CardContent>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Avatar src={review.user?.avatar_url}>
+                                  {review.user?.name?.[0]}
+                                </Avatar>
+                                <Box>
+                                  <Typography variant="subtitle1" fontWeight={600}>
+                                    {review.user?.name || '익명'}
                                   </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    {renderRating(review.rating || 0, 'small')}
+                                    <Typography variant="caption" color="text.secondary">
+                                      {new Date(review.created_at).toLocaleDateString()}
+                                    </Typography>
+                                  </Box>
                                 </Box>
                               </Box>
-                            </Box>
-                          </Box>
 
-                          {review.title && (
-                            <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                              {review.title}
-                            </Typography>
-                          )}
-
-                          <Typography variant="body2" sx={{ mb: 2 }}>
-                            {review.content}
-                          </Typography>
-
-                          {review.images && review.images.length > 0 && (
-                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                              {review.images.map((img: string, idx: number) => (
-                                <Box
-                                  key={idx}
-                                  sx={{
-                                    width: 100,
-                                    height: 100,
-                                    borderRadius: 2,
-                                    overflow: 'hidden',
-                                  }}
-                                >
-                                  <img
-                                    src={img}
-                                    alt={`리뷰 이미지 ${idx + 1}`}
-                                    style={{
-                                      width: '100%',
-                                      height: '100%',
-                                      objectFit: 'cover',
-                                    }}
-                                  />
+                              {/* 본인 리뷰: 수정/삭제 버튼 */}
+                              {isOwnReview && (
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleOpenEditDialog(review)}
+                                    sx={{ color: 'primary.main' }}
+                                  >
+                                    <Edit fontSize="small" />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDeleteReview(review.id)}
+                                    sx={{ color: 'error.main' }}
+                                  >
+                                    <Delete fontSize="small" />
+                                  </IconButton>
                                 </Box>
-                              ))}
+                              )}
                             </Box>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+
+                            {review.title && (
+                              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                                {review.title}
+                              </Typography>
+                            )}
+
+                            <Typography variant="body2" sx={{ mb: 2 }}>
+                              {review.content}
+                            </Typography>
+
+                            {review.images && review.images.length > 0 && (
+                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                                {review.images.map((img: string, idx: number) => (
+                                  <Box
+                                    key={idx}
+                                    sx={{
+                                      width: 100,
+                                      height: 100,
+                                      borderRadius: 2,
+                                      overflow: 'hidden',
+                                    }}
+                                  >
+                                    <img
+                                      src={img}
+                                      alt={`리뷰 이미지 ${idx + 1}`}
+                                      style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                      }}
+                                    />
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+
+                            {/* 리뷰 액션 버튼 (다른 사람 리뷰) */}
+                            {!isOwnReview && user && (
+                              <Box sx={{ display: 'flex', gap: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                                <Button
+                                  size="small"
+                                  startIcon={isHelpful ? <ThumbUp /> : <ThumbUpOutlined />}
+                                  onClick={() => handleToggleHelpful(review.id)}
+                                  variant={isHelpful ? 'contained' : 'outlined'}
+                                  sx={{ textTransform: 'none' }}
+                                >
+                                  도움이 돼요 {review.helpful_count > 0 && `(${review.helpful_count})`}
+                                </Button>
+                                <Button
+                                  size="small"
+                                  startIcon={<Report />}
+                                  onClick={() => handleOpenReportDialog(review.id)}
+                                  variant="outlined"
+                                  color="error"
+                                  sx={{ textTransform: 'none' }}
+                                >
+                                  신고
+                                </Button>
+                              </Box>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </Box>
                 )}
               </Box>
@@ -554,14 +747,20 @@ const RestaurantDetailPage: React.FC = () => {
         </Box>
       </Container>
 
-      {/* 리뷰 작성 다이얼로그 */}
+      {/* 리뷰 작성/수정 다이얼로그 */}
       <Dialog
         open={reviewDialogOpen}
-        onClose={() => setReviewDialogOpen(false)}
+        onClose={() => {
+          setReviewDialogOpen(false);
+          setEditingReview(null);
+          setReviewTitle('');
+          setReviewContent('');
+          setReviewRating(5);
+        }}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>리뷰 작성</DialogTitle>
+        <DialogTitle>{editingReview ? '리뷰 수정' : '리뷰 작성'}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <Typography variant="subtitle2" gutterBottom>
@@ -593,9 +792,86 @@ const RestaurantDetailPage: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setReviewDialogOpen(false)}>취소</Button>
-          <Button variant="contained" onClick={handleSubmitReview}>
-            작성하기
+          <Button
+            onClick={() => {
+              setReviewDialogOpen(false);
+              setEditingReview(null);
+              setReviewTitle('');
+              setReviewContent('');
+              setReviewRating(5);
+            }}
+          >
+            취소
+          </Button>
+          <Button
+            variant="contained"
+            onClick={editingReview ? handleUpdateReview : handleSubmitReview}
+          >
+            {editingReview ? '수정하기' : '작성하기'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 신고 다이얼로그 */}
+      <Dialog
+        open={reportDialogOpen}
+        onClose={() => {
+          setReportDialogOpen(false);
+          setReportingReviewId(null);
+          setReportReason('');
+          setReportDetails('');
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>리뷰 신고</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              부적절한 리뷰를 신고해주세요. 신고 내용은 관리자가 검토합니다.
+            </Typography>
+
+            <TextField
+              fullWidth
+              select
+              label="신고 사유"
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              SelectProps={{ native: true }}
+              sx={{ mb: 2 }}
+            >
+              <option value="">선택해주세요</option>
+              <option value="spam">스팸/광고</option>
+              <option value="inappropriate">부적절한 내용</option>
+              <option value="offensive">욕설/비방</option>
+              <option value="false_info">허위 정보</option>
+              <option value="other">기타</option>
+            </TextField>
+
+            <TextField
+              fullWidth
+              label="상세 내용 (선택사항)"
+              multiline
+              rows={4}
+              value={reportDetails}
+              onChange={(e) => setReportDetails(e.target.value)}
+              placeholder="신고 사유를 자세히 설명해주세요."
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setReportDialogOpen(false);
+              setReportingReviewId(null);
+              setReportReason('');
+              setReportDetails('');
+            }}
+          >
+            취소
+          </Button>
+          <Button variant="contained" color="error" onClick={handleSubmitReport}>
+            신고하기
           </Button>
         </DialogActions>
       </Dialog>
