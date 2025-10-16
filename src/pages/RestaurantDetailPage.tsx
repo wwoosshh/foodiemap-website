@@ -99,6 +99,9 @@ const RestaurantDetailPage: React.FC = () => {
         setMenus(response.data.menus || []);
         setIsFavorited(response.data.userInfo?.isFavorited || false);
 
+        // 디버깅: 리뷰 데이터 확인
+        console.log('리뷰 데이터:', response.data.reviews?.items);
+
         // 도움이 돼요 상태 초기화
         if (user && response.data.reviews?.items) {
           const helpfulSet = new Set<string>();
