@@ -172,9 +172,11 @@ const RestaurantDetailPage: React.FC = () => {
     try {
       const response = await ApiService.toggleReviewHelpful(reviewId);
       if (response.success && response.data) {
+        const responseData = response.data;
+
         // 로컬 상태 업데이트
         const newHelpfulReviews = new Set(helpfulReviews);
-        if (response.data.is_helpful) {
+        if (responseData.is_helpful) {
           newHelpfulReviews.add(reviewId);
         } else {
           newHelpfulReviews.delete(reviewId);
@@ -184,7 +186,7 @@ const RestaurantDetailPage: React.FC = () => {
         // 리뷰 목록에서 해당 리뷰의 helpful_count 업데이트
         setReviews(reviews.map(review =>
           review.id === reviewId
-            ? { ...review, helpful_count: response.data.helpful_count }
+            ? { ...review, helpful_count: responseData.helpful_count }
             : review
         ));
       }
