@@ -280,6 +280,7 @@ export class ApiService {
     content: string;
     images?: string[];
     tags?: string[];
+    is_anonymous?: boolean;
   }): Promise<ApiResponse<any>> {
     const response = await api.post('/api/reviews', data);
     return response.data;
@@ -292,6 +293,7 @@ export class ApiService {
     content: string;
     images?: string[];
     tags?: string[];
+    is_anonymous?: boolean;
   }): Promise<ApiResponse<any>> {
     const response = await api.put(`/api/reviews/${reviewId}`, data);
     return response.data;
