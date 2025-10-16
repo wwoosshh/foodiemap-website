@@ -236,7 +236,7 @@ const RestaurantDetailPage: React.FC = () => {
       return;
     }
 
-    if (!confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
+    if (!window.confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
       return;
     }
 
