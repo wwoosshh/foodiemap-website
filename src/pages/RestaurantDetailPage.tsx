@@ -23,6 +23,8 @@ import {
   DialogActions,
   Tab,
   Tabs,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import NaverMap from '../components/NaverMap';
@@ -69,6 +71,7 @@ const RestaurantDetailPage: React.FC = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewContent, setReviewContent] = useState('');
+  const [reviewIsAnonymous, setReviewIsAnonymous] = useState(false);
 
   // 리뷰 인터랙션 상태
   const [helpfulReviews, setHelpfulReviews] = useState<Set<string>>(new Set());
@@ -150,6 +153,7 @@ const RestaurantDetailPage: React.FC = () => {
         rating: reviewRating,
         title: reviewTitle,
         content: reviewContent,
+        is_anonymous: reviewIsAnonymous,
       });
 
       alert('리뷰가 작성되었습니다.');
@@ -157,6 +161,7 @@ const RestaurantDetailPage: React.FC = () => {
       setReviewTitle('');
       setReviewContent('');
       setReviewRating(5);
+      setReviewIsAnonymous(false);
       loadRestaurantData(); // 리뷰 목록 새로고침
     } catch (err: any) {
       alert(err.userMessage || '리뷰 작성에 실패했습니다.');
@@ -200,6 +205,7 @@ const RestaurantDetailPage: React.FC = () => {
     setReviewRating(review.rating);
     setReviewTitle(review.title || '');
     setReviewContent(review.content || '');
+    setReviewIsAnonymous(review.is_anonymous || false);
     setReviewDialogOpen(true);
   };
 
@@ -218,6 +224,7 @@ const RestaurantDetailPage: React.FC = () => {
         rating: reviewRating,
         title: reviewTitle,
         content: reviewContent,
+        is_anonymous: reviewIsAnonymous,
       });
 
       alert('리뷰가 수정되었습니다.');
@@ -226,6 +233,7 @@ const RestaurantDetailPage: React.FC = () => {
       setReviewTitle('');
       setReviewContent('');
       setReviewRating(5);
+      setReviewIsAnonymous(false);
       loadRestaurantData(); // 리뷰 목록 새로고침
     } catch (err: any) {
       alert(err.userMessage || '리뷰 수정에 실패했습니다.');
@@ -517,7 +525,7 @@ const RestaurantDetailPage: React.FC = () => {
                 ) : (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {reviews.map((review) => {
-                      const isOwnReview = user?.id === review.user?.id;
+                      const isOwnReview = user?.id === review.user_id;
                       const isHelpful = helpfulReviews.has(review.id);
 
                       return (
@@ -525,12 +533,12 @@ const RestaurantDetailPage: React.FC = () => {
                           <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar src={review.user?.avatar_url}>
-                                  {review.user?.name?.[0]}
+                                <Avatar src={review.is_anonymous ? undefined : review.avatar_url}>
+                                  {review.username?.[0] || '익'}
                                 </Avatar>
                                 <Box>
                                   <Typography variant="subtitle1" fontWeight={600}>
-                                    {review.user?.name || '익명'}
+                                    {review.username || '익명'}
                                   </Typography>
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     {renderRating(review.rating || 0, 'small')}
@@ -758,6 +766,7 @@ const RestaurantDetailPage: React.FC = () => {
           setReviewTitle('');
           setReviewContent('');
           setReviewRating(5);
+          setReviewIsAnonymous(false);
         }}
         maxWidth="sm"
         fullWidth
@@ -790,6 +799,17 @@ const RestaurantDetailPage: React.FC = () => {
               rows={6}
               value={reviewContent}
               onChange={(e) => setReviewContent(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={reviewIsAnonymous}
+                  onChange={(e) => setReviewIsAnonymous(e.target.checked)}
+                />
+              }
+              label="익명으로 작성"
             />
           </Box>
         </DialogContent>
@@ -801,6 +821,7 @@ const RestaurantDetailPage: React.FC = () => {
               setReviewTitle('');
               setReviewContent('');
               setReviewRating(5);
+              setReviewIsAnonymous(false);
             }}
           >
             취소
