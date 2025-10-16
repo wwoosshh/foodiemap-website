@@ -1,13 +1,14 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent, Divider } from '@mui/material';
+import { Box, Typography, Card, CardContent, Divider, Container } from '@mui/material';
 import { Security } from '@mui/icons-material';
-import StandardLayout from '../components/StandardLayout';
+import MainLayout from '../components/layout/MainLayout';
 
 const PrivacyPolicyPage: React.FC = () => {
   const lastUpdated = '2024년 10월 1일';
 
   return (
-    <StandardLayout maxWidth="md">
+    <MainLayout>
+      <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Security sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
         <Typography variant="h3" fontWeight={700} gutterBottom>
@@ -182,7 +183,8 @@ const PrivacyPolicyPage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-    </StandardLayout>
+    </Container>
+    </MainLayout>
   );
 };
 

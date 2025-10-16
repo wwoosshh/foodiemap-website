@@ -13,7 +13,7 @@ import {
   Container,
 } from '@mui/material';
 import { AccessTime, Event as EventIcon } from '@mui/icons-material';
-import StandardLayout from '../components/StandardLayout';
+import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 
 const EventListPage: React.FC = () => {
@@ -61,7 +61,8 @@ const EventListPage: React.FC = () => {
   };
 
   return (
-    <StandardLayout maxWidth="lg">
+    <MainLayout>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 페이지 헤더 */}
       <Box sx={{ mb: 6, textAlign: 'center' }}>
         <EventIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
@@ -227,7 +228,8 @@ const EventListPage: React.FC = () => {
           )}
         </>
       )}
-    </StandardLayout>
+      </Container>
+    </MainLayout>
   );
 };
 

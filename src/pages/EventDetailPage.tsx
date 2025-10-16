@@ -10,6 +10,7 @@ import {
   Button,
   Skeleton,
   Alert,
+  Container,
 } from '@mui/material';
 import {
   AccessTime,
@@ -17,7 +18,7 @@ import {
   ArrowBack,
   OpenInNew,
 } from '@mui/icons-material';
-import StandardLayout from '../components/StandardLayout';
+import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 
 const EventDetailPage: React.FC = () => {
@@ -71,7 +72,8 @@ const EventDetailPage: React.FC = () => {
   };
 
   return (
-    <StandardLayout maxWidth="md">
+    <MainLayout>
+      <Container maxWidth="md" sx={{ py: 4 }}>
       {loading ? (
         <Box>
           <Skeleton variant="text" width="60%" height={60} />
@@ -207,7 +209,8 @@ const EventDetailPage: React.FC = () => {
           </Box>
         </Box>
       ) : null}
-    </StandardLayout>
+    </Container>
+    </MainLayout>
   );
 };
 

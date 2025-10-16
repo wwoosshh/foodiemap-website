@@ -19,9 +19,10 @@ import { useAuth } from '../context/AuthContext';
 interface ProfileEditModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) => {
+const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose, onSuccess }) => {
   const { user, updateUser } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -123,6 +124,11 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ open, onClose }) =>
         // 사용자 정보 업데이트
         updateUser(response.data.user);
         setSuccess('프로필이 수정되었습니다.');
+
+        // 성공 콜백 호출
+        if (onSuccess) {
+          onSuccess();
+        }
 
         // 2초 후 모달 닫기
         setTimeout(() => {

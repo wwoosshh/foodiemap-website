@@ -4,7 +4,10 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
 // Pages
-import CubeHomePage from './pages/CubeHomePage';
+import NewHomePage from './pages/NewHomePage';
+import RestaurantsListPage from './pages/RestaurantsListPage';
+import RestaurantDetailPage from './pages/RestaurantDetailPage';
+import UserProfilePage from './pages/UserProfilePage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import EventListPage from './pages/EventListPage';
 import EventDetailPage from './pages/EventDetailPage';
@@ -19,56 +22,174 @@ import EmailVerificationModal from './components/EmailVerificationModal';
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// 미니멀 블랙&화이트 테마
+// 맛집큐브 테마 - 따뜻하고 친근한 색상
 const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#000000',
+      main: '#FF6B6B', // 따뜻한 코랄 레드
+      light: '#FF8E8E',
+      dark: '#E85555',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#757575',
+      main: '#4ECDC4', // 시원한 터콰이즈
+      light: '#7EDBD4',
+      dark: '#3AB5AD',
+      contrastText: '#FFFFFF',
+    },
+    success: {
+      main: '#95E1D3', // 부드러운 민트
+    },
+    warning: {
+      main: '#FFD93D', // 따뜻한 골드
     },
     background: {
-      default: '#FFFFFF',
-      paper: '#FAFAFA',
+      default: '#FFF8F3', // 크림 화이트
+      paper: '#FFFFFF',
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: '#2C3E50', // 다크 블루 그레이
+      secondary: '#6C7A89',
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Pretendard", "Noto Sans KR", "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
-      fontWeight: 700,
-      color: '#000000',
+      fontWeight: 800,
+      fontSize: '2.5rem',
+      color: '#2C3E50',
+      letterSpacing: '-0.02em',
     },
     h2: {
-      fontWeight: 600,
-      color: '#000000',
+      fontWeight: 700,
+      fontSize: '2rem',
+      color: '#2C3E50',
+      letterSpacing: '-0.01em',
     },
     h3: {
+      fontWeight: 700,
+      fontSize: '1.5rem',
+      color: '#2C3E50',
+    },
+    h4: {
       fontWeight: 600,
-      color: '#212121',
+      fontSize: '1.25rem',
+      color: '#2C3E50',
+    },
+    h5: {
+      fontWeight: 600,
+      fontSize: '1.1rem',
+      color: '#2C3E50',
+    },
+    h6: {
+      fontWeight: 600,
+      fontSize: '1rem',
+      color: '#2C3E50',
+    },
+    body1: {
+      fontSize: '1rem',
+      lineHeight: 1.7,
+    },
+    body2: {
+      fontSize: '0.875rem',
+      lineHeight: 1.6,
+    },
+    button: {
+      fontWeight: 600,
+      textTransform: 'none',
     },
   },
+  shape: {
+    borderRadius: 12,
+  },
+  shadows: [
+    'none',
+    '0px 2px 4px rgba(0, 0, 0, 0.05)',
+    '0px 4px 8px rgba(0, 0, 0, 0.08)',
+    '0px 6px 12px rgba(0, 0, 0, 0.1)',
+    '0px 8px 16px rgba(0, 0, 0, 0.12)',
+    '0px 10px 20px rgba(0, 0, 0, 0.14)',
+    '0px 12px 24px rgba(0, 0, 0, 0.16)',
+    '0px 14px 28px rgba(0, 0, 0, 0.18)',
+    '0px 16px 32px rgba(0, 0, 0, 0.2)',
+    '0px 18px 36px rgba(0, 0, 0, 0.22)',
+    '0px 20px 40px rgba(0, 0, 0, 0.24)',
+    '0px 22px 44px rgba(0, 0, 0, 0.26)',
+    '0px 24px 48px rgba(0, 0, 0, 0.28)',
+    '0px 26px 52px rgba(0, 0, 0, 0.3)',
+    '0px 28px 56px rgba(0, 0, 0, 0.32)',
+    '0px 30px 60px rgba(0, 0, 0, 0.34)',
+    '0px 32px 64px rgba(0, 0, 0, 0.36)',
+    '0px 34px 68px rgba(0, 0, 0, 0.38)',
+    '0px 36px 72px rgba(0, 0, 0, 0.4)',
+    '0px 38px 76px rgba(0, 0, 0, 0.42)',
+    '0px 40px 80px rgba(0, 0, 0, 0.44)',
+    '0px 42px 84px rgba(0, 0, 0, 0.46)',
+    '0px 44px 88px rgba(0, 0, 0, 0.48)',
+    '0px 46px 92px rgba(0, 0, 0, 0.5)',
+    '0px 48px 96px rgba(0, 0, 0, 0.52)',
+  ],
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: 'none',
-          borderRadius: 8,
-          fontWeight: 500,
+          borderRadius: 10,
+          fontWeight: 600,
+          padding: '10px 24px',
+          fontSize: '0.95rem',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.15)',
+          },
+        },
+        contained: {
+          boxShadow: '0px 4px 12px rgba(255, 107, 107, 0.3)',
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
+          borderRadius: 16,
+          boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.08)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+            transform: 'translateY(-4px)',
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 10,
+            '&:hover fieldset': {
+              borderColor: '#FF6B6B',
+            },
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
           borderRadius: 12,
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+        },
+        elevation1: {
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.06)',
         },
       },
     },
@@ -98,8 +219,15 @@ const AppContent = () => {
     <>
       <Router>
         <Routes>
-          {/* 메인 페이지 - 3D 큐브 네비게이션 */}
-          <Route path="/" element={<CubeHomePage />} />
+          {/* 메인 페이지 */}
+          <Route path="/" element={<NewHomePage />} />
+
+          {/* 맛집 페이지 */}
+          <Route path="/restaurants" element={<RestaurantsListPage />} />
+          <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
+
+          {/* 프로필 페이지 */}
+          <Route path="/profile" element={<UserProfilePage />} />
 
           {/* OAuth 콜백 */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />

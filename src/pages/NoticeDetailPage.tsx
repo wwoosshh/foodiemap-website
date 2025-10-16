@@ -10,13 +10,14 @@ import {
   Skeleton,
   Alert,
   Divider,
+  Container,
 } from '@mui/material';
 import {
   Campaign,
   ArrowBack,
   Visibility,
 } from '@mui/icons-material';
-import StandardLayout from '../components/StandardLayout';
+import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 
 const NoticeDetailPage: React.FC = () => {
@@ -65,7 +66,8 @@ const NoticeDetailPage: React.FC = () => {
   };
 
   return (
-    <StandardLayout maxWidth="md">
+    <MainLayout>
+      <Container maxWidth="md" sx={{ py: 4 }}>
       {loading ? (
         <Box>
           <Skeleton variant="text" width="60%" height={60} />
@@ -179,7 +181,8 @@ const NoticeDetailPage: React.FC = () => {
           </Box>
         </Box>
       ) : null}
-    </StandardLayout>
+    </Container>
+    </MainLayout>
   );
 };
 
