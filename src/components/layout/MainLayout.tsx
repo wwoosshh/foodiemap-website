@@ -375,7 +375,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </Drawer>
 
       {/* 메인 콘텐츠 */}
-      <Box component="main" sx={{ flexGrow: 1, backgroundColor: 'background.default' }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          background: 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
+        }}
+      >
         {children}
       </Box>
 
@@ -465,7 +471,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             {/* 링크 */}
             <Box>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                gutterBottom
+                sx={{
+                  color: '#FFFFFF',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                }}
+              >
                 바로가기
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -510,7 +524,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             {/* 정책 */}
             <Box>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                gutterBottom
+                sx={{
+                  color: '#FFFFFF',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                }}
+              >
                 정책
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

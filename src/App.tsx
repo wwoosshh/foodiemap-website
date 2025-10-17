@@ -59,7 +59,7 @@ const theme = createTheme({
       dark: '#556370',
     },
     background: {
-      default: '#FFF8F3', // 따뜻한 크림 화이트
+      default: '#FFF5F0', // 따뜻한 핑크빛 화이트 (더 색감 있게)
       paper: '#FFFFFF',
     },
     text: {
