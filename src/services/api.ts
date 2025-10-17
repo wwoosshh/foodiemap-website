@@ -198,6 +198,11 @@ export class ApiService {
     featuredRestaurants: Restaurant[];
     restaurants: Restaurant[];
     pushedRestaurants: any[];
+    stats: {
+      totalRestaurants: number;
+      totalReviews: number;
+      totalUsers: number;
+    };
   }>> {
     const response = await api.get('/api/home/data');
     return response.data;

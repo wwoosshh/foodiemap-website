@@ -18,7 +18,6 @@ import {
   CircularProgress,
   Alert,
   useTheme,
-  alpha,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
@@ -196,8 +195,8 @@ const RestaurantsListPage: React.FC = () => {
               size="small"
               sx={{
                 mb: 1,
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                color: 'primary.main',
+                backgroundColor: theme.palette.primary.main,
+                color: '#FFFFFF',
                 fontWeight: 600,
               }}
             />

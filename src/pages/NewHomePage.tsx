@@ -56,6 +56,11 @@ const NewHomePage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
+  const [stats, setStats] = useState({
+    totalRestaurants: 0,
+    totalReviews: 0,
+    totalUsers: 0,
+  });
 
   // 다양한 알고리즘별 맛집 상태
   const [ratingRestaurants, setRatingRestaurants] = useState<Restaurant[]>([]);
@@ -107,6 +112,7 @@ const NewHomePage: React.FC = () => {
         setBanners(homeDataRes.data.banners || []);
         setCategories(homeDataRes.data.categories || []);
         setPushedRestaurants(homeDataRes.data.pushedRestaurants || []);
+        setStats(homeDataRes.data.stats || { totalRestaurants: 0, totalReviews: 0, totalUsers: 0 });
       }
 
       // 전체 맛집 로드
@@ -187,10 +193,10 @@ const NewHomePage: React.FC = () => {
               size="small"
               sx={{
                 mb: 1,
-                backgroundColor: alpha(theme.palette.primary.main, 0.15),
-                color: theme.palette.primary.dark,
+                backgroundColor: theme.palette.primary.main,
+                color: '#FFFFFF',
                 fontWeight: 600,
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                border: 'none',
               }}
             />
           )}
@@ -714,19 +720,19 @@ const NewHomePage: React.FC = () => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 4, textAlign: 'center' }}>
             <Box>
               <Typography variant="h3" fontWeight={800} gutterBottom>
-                1,000+
+                {stats.totalRestaurants.toLocaleString()}+
               </Typography>
               <Typography variant="h6">등록된 맛집</Typography>
             </Box>
             <Box>
               <Typography variant="h3" fontWeight={800} gutterBottom>
-                10,000+
+                {stats.totalReviews.toLocaleString()}+
               </Typography>
               <Typography variant="h6">작성된 리뷰</Typography>
             </Box>
             <Box>
               <Typography variant="h3" fontWeight={800} gutterBottom>
-                5,000+
+                {stats.totalUsers.toLocaleString()}+
               </Typography>
               <Typography variant="h6">활성 사용자</Typography>
             </Box>

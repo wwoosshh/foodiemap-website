@@ -14,7 +14,6 @@ import {
   CircularProgress,
   Alert,
   useTheme,
-  alpha,
   CardMedia,
   CardActionArea,
 } from '@mui/material';
@@ -253,8 +252,8 @@ const UserProfilePage: React.FC = () => {
                                   size="small"
                                   sx={{
                                     mb: 1,
-                                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                                    color: 'primary.main',
+                                    backgroundColor: theme.palette.primary.main,
+                                    color: '#FFFFFF',
                                     fontWeight: 600,
                                   }}
                                 />
