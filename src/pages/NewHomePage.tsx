@@ -81,7 +81,7 @@ const NewHomePage: React.FC = () => {
   const loadRestaurantsByCategory = async (categoryId: number | null) => {
     try {
       // 다양한 정렬 기준으로 맛집 로드
-      const params = categoryId ? { category_id: categoryId, limit: 8 } : { limit: 8 };
+      const params = categoryId ? { category_id: categoryId, limit: 10 } : { limit: 10 };
 
       const [ratingRes, reviewRes, viewRes, favoriteRes, latestRes] = await Promise.all([
         ApiService.getRestaurants({ ...params, sort: 'rating_desc' }),
@@ -240,15 +240,39 @@ const NewHomePage: React.FC = () => {
             더보기
           </Button>
         </Box>
+        {/* 가로 스크롤 캐러셀 */}
         <Box
           sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+            display: 'flex',
             gap: 3,
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            pb: 2,
+            '&::-webkit-scrollbar': {
+              height: 8,
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              borderRadius: 4,
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.5),
+              borderRadius: 4,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.main,
+              },
+            },
           }}
         >
-          {restaurants.slice(0, 8).map((restaurant) => (
-            <Box key={restaurant.id}>
+          {restaurants.slice(0, 10).map((restaurant) => (
+            <Box
+              key={restaurant.id}
+              sx={{
+                minWidth: { xs: '280px', sm: '320px', md: '280px' },
+                maxWidth: { xs: '280px', sm: '320px', md: '280px' },
+                flex: '0 0 auto',
+              }}
+            >
               <RestaurantCard restaurant={restaurant} />
             </Box>
           ))}
@@ -438,27 +462,29 @@ const NewHomePage: React.FC = () => {
 
               <Divider sx={{ my: 2 }} />
 
-              {/* 카테고리 버튼들 */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {/* 카테고리 버튼들 - 2열 grid */}
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
                 {categories.map((category) => (
                   <Button
                     key={category.id}
-                    fullWidth
                     variant={selectedCategoryId === category.id ? 'contained' : 'outlined'}
                     onClick={() => handleCategoryClick(category.id)}
-                    startIcon={<RestaurantIcon />}
+                    startIcon={<RestaurantIcon sx={{ fontSize: 16 }} />}
                     sx={{
-                      justifyContent: 'flex-start',
-                      textAlign: 'left',
-                      py: 1.5,
+                      py: 1,
+                      px: 1.5,
+                      fontSize: '0.85rem',
                       fontWeight: selectedCategoryId === category.id ? 700 : 500,
                       transition: 'all 0.2s ease',
+                      minHeight: '42px',
                       '&:hover': {
-                        transform: 'translateX(5px)',
+                        transform: 'scale(1.05)',
                       },
                     }}
                   >
-                    {category.name}
+                    <Typography variant="caption" fontWeight="inherit" noWrap>
+                      {category.name}
+                    </Typography>
                   </Button>
                 ))}
               </Box>
