@@ -66,8 +66,8 @@ const NewHomePage: React.FC = () => {
         ApiService.getPublicCategories(),
       ]);
 
-      if (bannersRes.success) setBanners(bannersRes.data.banners || []);
-      if (categoriesRes.success) setCategories(categoriesRes.data.categories || []);
+      if (bannersRes.success && bannersRes.data) setBanners(bannersRes.data.banners || []);
+      if (categoriesRes.success && categoriesRes.data) setCategories(categoriesRes.data.categories || []);
 
       // 전체 맛집 로드
       await loadRestaurantsByCategory(null);
