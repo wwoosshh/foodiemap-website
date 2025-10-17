@@ -35,7 +35,17 @@ import {
   NewIcon,
 } from '../components/icons/CustomIcons';
 
-const DEFAULT_RESTAURANT_IMAGE = 'https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=%EB%A7%9B%EC%A7%91+%EC%9D%B4%EB%AF%B8%EC%A7%80';
+// SVG data URI로 placeholder 이미지 생성 (외부 서비스 의존 제거)
+const DEFAULT_RESTAURANT_IMAGE =
+  'data:image/svg+xml;charset=utf-8,' +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="400" height="300" fill="#FF6B6B"/>
+      <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">
+        맛집 이미지
+      </text>
+    </svg>
+  `.trim());
 
 interface PushedRestaurant {
   id: number;
