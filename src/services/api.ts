@@ -197,6 +197,7 @@ export class ApiService {
     categories: any[];
     featuredRestaurants: Restaurant[];
     restaurants: Restaurant[];
+    pushedRestaurants: any[];
   }>> {
     const response = await api.get('/api/home/data');
     return response.data;

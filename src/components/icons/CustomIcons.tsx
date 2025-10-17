@@ -325,3 +325,53 @@ export const ThumbUpIcon: React.FC<SvgIconProps> = (props) => (
     />
   </SvgIcon>
 );
+
+// 눈 아이콘 (조회수)
+export const EyeIcon: React.FC<SvgIconProps> = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+    />
+  </SvgIcon>
+);
+
+// 신규 아이콘 (NEW/최신)
+export const NewIcon: React.FC<SvgIconProps> = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V6h16v12zM6 10h2v7H6zm3 0h2v7H9zm3 0h2v7h-2zm3-3h2v10h-2zm3 3h2v7h-2z"
+    />
+  </SvgIcon>
+);
+
+// 화살표 왼쪽 아이콘
+export const ArrowLeftIcon: React.FC<SvgIconProps> = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"
+    />
+  </SvgIcon>
+);
+
+// 화살표 원형 왼쪽 (캐러셀용)
+export const ChevronLeftIcon: React.FC<SvgIconProps> = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
+    />
+  </SvgIcon>
+);
+
+// 화살표 원형 오른쪽 (캐러셀용)
+export const ChevronRightIcon: React.FC<SvgIconProps> = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+    />
+  </SvgIcon>
+);

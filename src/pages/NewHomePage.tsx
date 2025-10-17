@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -16,6 +16,7 @@ import {
   Skeleton,
   Paper,
   Divider,
+  IconButton,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
@@ -26,9 +27,25 @@ import {
   LocationIcon,
   RestaurantIcon,
   ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ReviewIcon,
+  EyeIcon,
+  HeartFilledIcon,
+  NewIcon,
 } from '../components/icons/CustomIcons';
 
 const DEFAULT_RESTAURANT_IMAGE = 'https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=%EB%A7%9B%EC%A7%91+%EC%9D%B4%EB%AF%B8%EC%A7%80';
+
+interface PushedRestaurant {
+  id: number;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  badge_text?: string;
+  badge_color?: string;
+  restaurant: Restaurant;
+}
 
 const NewHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,6 +56,7 @@ const NewHomePage: React.FC = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
 
   // 다양한 알고리즘별 맛집 상태
   const [ratingRestaurants, setRatingRestaurants] = useState<Restaurant[]>([]);
@@ -47,38 +65,7 @@ const NewHomePage: React.FC = () => {
   const [favoriteRestaurants, setFavoriteRestaurants] = useState<Restaurant[]>([]);
   const [latestRestaurants, setLatestRestaurants] = useState<Restaurant[]>([]);
 
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    if (!loading) {
-      loadRestaurantsByCategory(selectedCategoryId);
-    }
-  }, [selectedCategoryId]);
-
-  const loadInitialData = async () => {
-    try {
-      setLoading(true);
-      // 배너와 카테고리만 먼저 로드
-      const [bannersRes, categoriesRes] = await Promise.all([
-        ApiService.getPublicBanners(),
-        ApiService.getPublicCategories(),
-      ]);
-
-      if (bannersRes.success && bannersRes.data) setBanners(bannersRes.data.banners || []);
-      if (categoriesRes.success && categoriesRes.data) setCategories(categoriesRes.data.categories || []);
-
-      // 전체 맛집 로드
-      await loadRestaurantsByCategory(null);
-    } catch (err: any) {
-      setError(err.userMessage || '데이터를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadRestaurantsByCategory = async (categoryId: number | null) => {
+  const loadRestaurantsByCategory = useCallback(async (categoryId: number | null) => {
     try {
       // 다양한 정렬 기준으로 맛집 로드
       const params = categoryId ? { category_id: categoryId, limit: 10 } : { limit: 10 };
@@ -109,11 +96,41 @@ const NewHomePage: React.FC = () => {
     } catch (err: any) {
       console.error('Failed to load restaurants:', err);
     }
-  };
+  }, []);
+
+  const loadInitialData = useCallback(async () => {
+    try {
+      setLoading(true);
+      // 배너, 카테고리, 푸시 맛집 로드
+      const homeDataRes = await ApiService.getHomeData();
+
+      if (homeDataRes.success && homeDataRes.data) {
+        setBanners(homeDataRes.data.banners || []);
+        setCategories(homeDataRes.data.categories || []);
+        setPushedRestaurants(homeDataRes.data.pushedRestaurants || []);
+      }
+
+      // 전체 맛집 로드
+      await loadRestaurantsByCategory(null);
+    } catch (err: any) {
+      setError(err.userMessage || '데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, [loadRestaurantsByCategory]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
+
+  useEffect(() => {
+    if (!loading) {
+      loadRestaurantsByCategory(selectedCategoryId);
+    }
+  }, [selectedCategoryId, loading, loadRestaurantsByCategory]);
 
   const handleCategoryClick = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
-    // 페이지 상단으로 스크롤
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -219,17 +236,46 @@ const NewHomePage: React.FC = () => {
 
   const RestaurantSection: React.FC<{
     title: string;
+    icon: React.ReactNode;
     restaurants: Restaurant[];
     sortParam: string;
-  }> = ({ title, restaurants, sortParam }) => {
+  }> = ({ title, icon, restaurants, sortParam }) => {
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const scroll = (direction: 'left' | 'right') => {
+      if (scrollRef.current) {
+        const scrollAmount = 320; // 카드 너비 + gap
+        scrollRef.current.scrollBy({
+          left: direction === 'left' ? -scrollAmount : scrollAmount,
+          behavior: 'smooth',
+        });
+      }
+    };
+
     if (restaurants.length === 0) return null;
 
     return (
-      <Box sx={{ mb: 8 }}>
+      <Box sx={{ mb: 8, position: 'relative' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" fontWeight={700}>
-            {title}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                color: 'primary.main',
+              }}
+            >
+              {icon}
+            </Box>
+            <Typography variant="h4" fontWeight={700}>
+              {title}
+            </Typography>
+          </Box>
           <Button
             endIcon={<ArrowRightIcon />}
             onClick={() => {
@@ -240,42 +286,88 @@ const NewHomePage: React.FC = () => {
             더보기
           </Button>
         </Box>
-        {/* 가로 스크롤 캐러셀 */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 3,
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            pb: 2,
-            '&::-webkit-scrollbar': {
-              height: 8,
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              borderRadius: 4,
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: alpha(theme.palette.primary.main, 0.5),
-              borderRadius: 4,
+
+        {/* 캐러셀 컨트롤 */}
+        <Box sx={{ position: 'relative' }}>
+          {/* 왼쪽 버튼 */}
+          <IconButton
+            onClick={() => scroll('left')}
+            sx={{
+              position: 'absolute',
+              left: -20,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              backgroundColor: 'white',
+              boxShadow: 3,
               '&:hover': {
-                backgroundColor: theme.palette.primary.main,
+                backgroundColor: 'white',
+                boxShadow: 6,
               },
-            },
-          }}
-        >
-          {restaurants.slice(0, 10).map((restaurant) => (
-            <Box
-              key={restaurant.id}
-              sx={{
-                minWidth: { xs: '280px', sm: '320px', md: '280px' },
-                maxWidth: { xs: '280px', sm: '320px', md: '280px' },
-                flex: '0 0 auto',
-              }}
-            >
-              <RestaurantCard restaurant={restaurant} />
-            </Box>
-          ))}
+            }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+
+          {/* 가로 스크롤 캐러셀 */}
+          <Box
+            ref={scrollRef}
+            sx={{
+              display: 'flex',
+              gap: 3,
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              pb: 2,
+              scrollbarWidth: 'thin',
+              '&::-webkit-scrollbar': {
+                height: 8,
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                borderRadius: 4,
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.5),
+                borderRadius: 4,
+                '&:hover': {
+                  backgroundColor: theme.palette.primary.main,
+                },
+              },
+            }}
+          >
+            {restaurants.slice(0, 10).map((restaurant) => (
+              <Box
+                key={restaurant.id}
+                sx={{
+                  minWidth: { xs: '280px', sm: '320px', md: '280px' },
+                  maxWidth: { xs: '280px', sm: '320px', md: '280px' },
+                  flex: '0 0 auto',
+                }}
+              >
+                <RestaurantCard restaurant={restaurant} />
+              </Box>
+            ))}
+          </Box>
+
+          {/* 오른쪽 버튼 */}
+          <IconButton
+            onClick={() => scroll('right')}
+            sx={{
+              position: 'absolute',
+              right: -20,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              backgroundColor: 'white',
+              boxShadow: 3,
+              '&:hover': {
+                backgroundColor: 'white',
+                boxShadow: 6,
+              },
+            }}
+          >
+            <ChevronRightIcon />
+          </IconButton>
         </Box>
       </Box>
     );
@@ -312,6 +404,118 @@ const NewHomePage: React.FC = () => {
 
   return (
     <MainLayout>
+      {/* 푸시 맛집 섹션 - 배너 상단에 위치 */}
+      {pushedRestaurants.length > 0 && (
+        <Box
+          sx={{
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+              theme.palette.secondary.main,
+              0.08
+            )} 100%)`,
+            py: 6,
+            mb: 6,
+          }}
+        >
+          <Container maxWidth="xl">
+            <Typography
+              variant="h3"
+              fontWeight={800}
+              align="center"
+              gutterBottom
+              sx={{
+                background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mb: 5,
+              }}
+            >
+              지금 꼭 가봐야 할 맛집
+            </Typography>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+                gap: 4,
+              }}
+            >
+              {pushedRestaurants.map((pushed, index) => (
+                <Card
+                  key={pushed.id}
+                  sx={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    transition: 'all 0.4s ease',
+                    '&:hover': {
+                      transform: 'translateY(-12px)',
+                      boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.25)',
+                    },
+                  }}
+                  onClick={() => handleRestaurantClick(pushed.restaurant.id)}
+                >
+                  {/* 배지 */}
+                  {pushed.badge_text && (
+                    <Chip
+                      label={pushed.badge_text}
+                      sx={{
+                        position: 'absolute',
+                        top: 16,
+                        right: 16,
+                        zIndex: 2,
+                        backgroundColor: pushed.badge_color || '#FF6B6B',
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                      }}
+                    />
+                  )}
+
+                  <CardMedia
+                    component="img"
+                    height="250"
+                    image={pushed.restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                    alt={pushed.restaurant.name}
+                    sx={{
+                      objectFit: 'cover',
+                      transition: 'transform 0.4s ease',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                      },
+                    }}
+                  />
+
+                  <CardContent>
+                    <Typography variant="overline" color="primary" fontWeight={700} sx={{ display: 'block', mb: 1 }}>
+                      {pushed.title}
+                    </Typography>
+                    <Typography variant="h5" fontWeight={700} gutterBottom>
+                      {pushed.restaurant.name}
+                    </Typography>
+                    {pushed.subtitle && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {pushed.subtitle}
+                      </Typography>
+                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+                      {renderRating(pushed.restaurant.rating)}
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          리뷰 {pushed.restaurant.review_count || 0}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          조회 {pushed.restaurant.view_count || 0}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Container>
+        </Box>
+      )}
+
       {/* 히어로 섹션 with 배너 */}
       {banners.length > 0 && (
         <Box sx={{ mb: 8, mt: 3 }}>
@@ -396,27 +600,32 @@ const NewHomePage: React.FC = () => {
 
             {/* 다양한 알고리즘별 맛집 섹션 */}
             <RestaurantSection
-              title="⭐ 별점이 높은 맛집"
+              title="별점이 높은 맛집"
+              icon={<StarFilledIcon />}
               restaurants={ratingRestaurants}
               sortParam="rating_desc"
             />
             <RestaurantSection
-              title="💬 리뷰가 많은 맛집"
+              title="리뷰가 많은 맛집"
+              icon={<ReviewIcon />}
               restaurants={reviewCountRestaurants}
               sortParam="review_count_desc"
             />
             <RestaurantSection
-              title="👀 조회수가 많은 맛집"
+              title="조회수가 많은 맛집"
+              icon={<EyeIcon />}
               restaurants={viewCountRestaurants}
               sortParam="view_count_desc"
             />
             <RestaurantSection
-              title="❤️ 좋아요가 많은 맛집"
+              title="좋아요가 많은 맛집"
+              icon={<HeartFilledIcon />}
               restaurants={favoriteRestaurants}
               sortParam="favorite_count_desc"
             />
             <RestaurantSection
-              title="🆕 최신 맛집"
+              title="최신 맛집"
+              icon={<NewIcon />}
               restaurants={latestRestaurants}
               sortParam="created_at_desc"
             />
