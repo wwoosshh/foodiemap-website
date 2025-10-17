@@ -18,7 +18,6 @@ import {
   Link,
 } from '@mui/material';
 import { Close, Visibility, VisibilityOff } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../config/supabase';
 import { initKakao, loginWithKakao } from '../utils/kakao';
@@ -54,7 +53,6 @@ function TabPanel(props: TabPanelProps) {
 
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
   const { login, register, isLoading, setUser } = useAuth();
-  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
