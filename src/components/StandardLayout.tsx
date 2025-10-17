@@ -87,7 +87,7 @@ const StandardLayout: React.FC<StandardLayoutProps> = ({ children, maxWidth = 'l
           </Box>
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Box component="span" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-              © 2024 Cube. All rights reserved.
+              © 2025 Cube. All rights reserved.
             </Box>
           </Box>
         </Container>

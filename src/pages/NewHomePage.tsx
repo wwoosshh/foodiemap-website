@@ -407,7 +407,54 @@ const NewHomePage: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* 푸시 맛집 섹션 - 배너 상단에 위치 */}
+      {/* 히어로 텍스트 - 최상단 배치 */}
+      <Container maxWidth="xl">
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 8,
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+              theme.palette.secondary.main,
+              0.05
+            )} 100%)`,
+            borderRadius: 4,
+            mb: 8,
+            mt: 3,
+          }}
+        >
+          <Typography
+            variant="h2"
+            fontWeight={800}
+            gutterBottom
+            sx={{
+              background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 2,
+            }}
+          >
+            당신의 맛있는 순간
+          </Typography>
+          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
+            전국의 숨은 맛집을 찾아보세요
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            endIcon={<ArrowRightIcon />}
+            onClick={() => navigate('/restaurants')}
+            sx={{
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+            }}
+          >
+            맛집 탐색하기
+          </Button>
+        </Box>
+      </Container>
+
+      {/* 푸시 맛집 섹션 - 두 번째 배치 */}
       {pushedRestaurants.length > 0 && (
         <Box
           sx={{
@@ -520,57 +567,15 @@ const NewHomePage: React.FC = () => {
         </Box>
       )}
 
-      {/* 히어로 섹션 with 배너 */}
+      {/* 배너 캐러셀 - 세 번째 배치 */}
       {banners.length > 0 && (
-        <Box sx={{ mb: 8, mt: 3 }}>
+        <Box sx={{ mb: 8 }}>
           <BannerCarousel banners={banners} />
         </Box>
       )}
 
-      {/* 히어로 텍스트 */}
+      {/* 메인 콘텐츠 */}
       <Container maxWidth="xl">
-        <Box
-          sx={{
-            textAlign: 'center',
-            py: 8,
-            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
-              theme.palette.secondary.main,
-              0.05
-            )} 100%)`,
-            borderRadius: 4,
-            mb: 8,
-          }}
-        >
-          <Typography
-            variant="h2"
-            fontWeight={800}
-            gutterBottom
-            sx={{
-              background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 2,
-            }}
-          >
-            당신의 맛있는 순간
-          </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-            전국의 숨은 맛집을 찾아보세요
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            endIcon={<ArrowRightIcon />}
-            onClick={() => navigate('/restaurants')}
-            sx={{
-              px: 4,
-              py: 1.5,
-              fontSize: '1.1rem',
-            }}
-          >
-            맛집 탐색하기
-          </Button>
-        </Box>
 
         {/* 메인 레이아웃: 콘텐츠 + 카테고리 사이드바 */}
         <Box sx={{ display: 'flex', gap: 4, position: 'relative' }}>

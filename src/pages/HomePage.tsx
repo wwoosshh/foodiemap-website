@@ -431,7 +431,7 @@ const HomePage: React.FC = () => {
       <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 3, mt: 8 }}>
         <Container maxWidth="lg">
           <Typography variant="body2" align="center">
-            © 2024 Cube. All rights reserved.
+            © 2025 Cube. All rights reserved.
           </Typography>
         </Container>
       </Box>

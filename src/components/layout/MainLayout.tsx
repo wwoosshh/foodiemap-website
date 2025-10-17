@@ -571,7 +571,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             align="center"
             sx={{ color: 'rgba(255,255,255,0.5)' }}
           >
-            © 2024 맛집큐브. All rights reserved.
+            © 2025 맛집큐브. All rights reserved.
           </Typography>
         </Container>
       </Box>
