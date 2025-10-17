@@ -33,6 +33,7 @@ import {
   LocationIcon,
   RestaurantIcon,
 } from '../components/icons/CustomIcons';
+import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 
 const UserProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -233,9 +234,10 @@ const UserProfilePage: React.FC = () => {
                               component="img"
                               height="200"
                               image={
-                                fav.restaurant?.images?.[0] || '/placeholder-restaurant.jpg'
+                                fav.restaurant?.images?.[0] || DEFAULT_RESTAURANT_IMAGE
                               }
                               alt={fav.restaurant?.name}
+                              onError={handleImageError}
                             />
                             <CardContent>
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -331,6 +333,7 @@ const UserProfilePage: React.FC = () => {
                                   <img
                                     src={img}
                                     alt={`리뷰 이미지 ${idx + 1}`}
+                                    onError={handleImageError}
                                     style={{
                                       width: '100%',
                                       height: '100%',

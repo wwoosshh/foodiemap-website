@@ -34,18 +34,7 @@ import {
   HeartFilledIcon,
   NewIcon,
 } from '../components/icons/CustomIcons';
-
-// SVG data URI로 placeholder 이미지 생성 (외부 서비스 의존 제거)
-const DEFAULT_RESTAURANT_IMAGE =
-  'data:image/svg+xml;charset=utf-8,' +
-  encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-      <rect width="400" height="300" fill="#FF6B6B"/>
-      <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">
-        맛집 이미지
-      </text>
-    </svg>
-  `.trim());
+import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 
 interface PushedRestaurant {
   id: number;
@@ -175,9 +164,7 @@ const NewHomePage: React.FC = () => {
           height="200"
           image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
           alt={restaurant.name}
-          onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-            e.currentTarget.src = DEFAULT_RESTAURANT_IMAGE;
-          }}
+          onError={handleImageError}
           sx={{
             objectFit: 'cover',
             transition: 'transform 0.3s ease',
@@ -486,6 +473,7 @@ const NewHomePage: React.FC = () => {
                     height="250"
                     image={pushed.restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
                     alt={pushed.restaurant.name}
+                    onError={handleImageError}
                     sx={{
                       objectFit: 'cover',
                       transition: 'transform 0.4s ease',

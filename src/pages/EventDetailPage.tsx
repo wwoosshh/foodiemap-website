@@ -20,6 +20,7 @@ import {
 } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
+import { DEFAULT_EVENT_IMAGE, handleImageError } from '../constants/images';
 
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -140,21 +141,20 @@ const EventDetailPage: React.FC = () => {
           </Box>
 
           {/* 이벤트 이미지 */}
-          {event.image_url && (
-            <Card sx={{ mb: 4 }}>
-              <CardMedia
-                component="img"
-                image={event.image_url}
-                alt={event.title}
-                sx={{
-                  width: '100%',
-                  maxHeight: 500,
-                  objectFit: 'contain',
-                  backgroundColor: '#f5f5f5',
-                }}
-              />
-            </Card>
-          )}
+          <Card sx={{ mb: 4 }}>
+            <CardMedia
+              component="img"
+              image={event.image_url || DEFAULT_EVENT_IMAGE}
+              alt={event.title}
+              onError={(e) => handleImageError(e, DEFAULT_EVENT_IMAGE)}
+              sx={{
+                width: '100%',
+                maxHeight: 500,
+                objectFit: 'contain',
+                backgroundColor: '#f5f5f5',
+              }}
+            />
+          </Card>
 
           {/* 이벤트 설명 */}
           <Card sx={{ mb: 4 }}>

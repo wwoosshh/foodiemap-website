@@ -15,6 +15,7 @@ import {
 import { AccessTime, Event as EventIcon } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
+import { DEFAULT_EVENT_IMAGE, handleImageError } from '../constants/images';
 
 const EventListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -136,15 +137,14 @@ const EventListPage: React.FC = () => {
                 }}
                 onClick={() => navigate(`/events/${event.id}`)}
               >
-                {event.image_url && (
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={event.image_url}
-                    alt={event.title}
-                    sx={{ objectFit: 'cover' }}
-                  />
-                )}
+                <CardMedia
+                  component="img"
+                  height="200"
+                  image={event.image_url || DEFAULT_EVENT_IMAGE}
+                  alt={event.title}
+                  onError={(e) => handleImageError(e, DEFAULT_EVENT_IMAGE)}
+                  sx={{ objectFit: 'cover' }}
+                />
                 <CardContent>
                   {/* 배지 */}
                   <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>

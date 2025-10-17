@@ -30,6 +30,7 @@ import {
   FilterIcon,
   RestaurantIcon,
 } from '../components/icons/CustomIcons';
+import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 
 const RestaurantsListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -170,8 +171,9 @@ const RestaurantsListPage: React.FC = () => {
         <CardMedia
           component="img"
           height="200"
-          image={restaurant.images?.[0] || '/placeholder-restaurant.jpg'}
+          image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
           alt={restaurant.name}
+          onError={handleImageError}
           sx={{
             objectFit: 'cover',
             transition: 'transform 0.3s ease',

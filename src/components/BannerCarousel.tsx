@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { ChevronLeft, ChevronRight, OpenInNew } from '@mui/icons-material';
 import { Banner } from '../types';
+import { DEFAULT_BANNER_IMAGE, handleImageError } from '../constants/images';
 
 interface BannerCarouselProps {
   banners: Banner[];
@@ -128,7 +129,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 <CardMedia
                   component="img"
                   height={height}
-                  image={banner.image_url}
+                  image={banner.image_url || DEFAULT_BANNER_IMAGE}
                   alt={banner.title}
                   loading="lazy"
                   sx={{
@@ -136,9 +137,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
                     width: '100%',
                     height: '100%',
                   }}
-                  onError={(e: any) => {
-                    e.target.src = '/api/placeholder/1200/300';
-                  }}
+                  onError={(e) => handleImageError(e, DEFAULT_BANNER_IMAGE)}
                 />
               ) : (
                 <Box
