@@ -13,8 +13,12 @@ import {
   IconButton,
   InputAdornment,
   Divider,
+  Checkbox,
+  FormControlLabel,
+  Link,
 } from '@mui/material';
 import { Close, Visibility, VisibilityOff } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../config/supabase';
 import { initKakao, loginWithKakao } from '../utils/kakao';
@@ -50,10 +54,17 @@ function TabPanel(props: TabPanelProps) {
 
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
   const { login, register, isLoading, setUser } = useAuth();
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
+
+  // 약관 동의 상태
+  const [agreements, setAgreements] = useState({
+    termsOfService: false,
+    privacyPolicy: false,
+  });
 
   // 카카오 SDK 초기화
   useEffect(() => {
@@ -118,6 +129,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       return;
     }
 
+    // 약관 동의 확인
+    if (!agreements.termsOfService || !agreements.privacyPolicy) {
+      setError('이용약관 및 개인정보처리방침에 동의해주세요.');
+      return;
+    }
+
     try {
       const success = await register({
         email: registerData.email,
@@ -130,6 +147,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
         onClose();
         // 회원가입 성공 시 폼 초기화
         setRegisterData({ email: '', password: '', name: '', phone: '' });
+        setAgreements({ termsOfService: false, privacyPolicy: false });
       } else {
         setError('회원가입에 실패했습니다. 다시 시도해주세요.');
       }
@@ -541,13 +559,70 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 ),
               }}
             />
+
+            {/* 약관 동의 체크박스 */}
+            <Box sx={{ mt: 3, mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={agreements.termsOfService}
+                    onChange={(e) => setAgreements({ ...agreements, termsOfService: e.target.checked })}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Typography variant="body2">
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open('/terms', '_blank');
+                      }}
+                      sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                    >
+                      이용약관
+                    </Link>
+                    에 동의합니다 (필수)
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={agreements.privacyPolicy}
+                    onChange={(e) => setAgreements({ ...agreements, privacyPolicy: e.target.checked })}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Typography variant="body2">
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open('/privacy', '_blank');
+                      }}
+                      sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                    >
+                      개인정보처리방침
+                    </Link>
+                    에 동의합니다 (필수)
+                  </Typography>
+                }
+              />
+            </Box>
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
               size="large"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
-              disabled={isLoading}
+              sx={{ mt: 1, mb: 2, py: 1.5 }}
+              disabled={isLoading || !agreements.termsOfService || !agreements.privacyPolicy}
             >
               {isLoading ? '가입 중...' : '회원가입'}
             </Button>

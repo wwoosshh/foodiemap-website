@@ -523,7 +523,7 @@ const TermsOfServicePage: React.FC = () => {
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2">
-                  <strong>이메일:</strong> support@cube.com
+                  <strong>이메일:</strong> nunconnect1@gmail.com
                 </Typography>
                 <Typography variant="body2">
                   <strong>운영시간:</strong> 평일 09:00 - 18:00 (주말 및 공휴일 제외)

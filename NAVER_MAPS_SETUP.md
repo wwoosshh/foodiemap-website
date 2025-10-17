@@ -23,7 +23,8 @@
      - **Web Dynamic Map** 체크
 4. **Web 서비스 URL** 등록:
    ```
-   https://foodiemap-website.vercel.app
+   https://www.mzcube.com
+   https://mzcube.com
    http://localhost:3000
    ```
 5. 등록 완료 후 **클라이언트 ID** 확인
@@ -87,7 +88,7 @@ Vercel 배포 후 실제 사이트에서 확인
 - **원인**: Web 서비스 URL 미등록
 - **해결**:
   - 네이버 클라우드 콘솔에서 URL 등록
-  - `https://foodiemap-website.vercel.app` 정확히 입력
+  - `https://www.mzcube.com` 정확히 입력
 
 ## 5. 참고 자료
 

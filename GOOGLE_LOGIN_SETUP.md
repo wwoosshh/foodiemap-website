@@ -24,7 +24,8 @@ Google Cloud Console에서 리디렉션 URI를 추가해야 합니다.
 
 ```
 https://kyhouclobasgszovlbyg.supabase.co/auth/v1/callback
-https://foodiemap-website.vercel.app/auth/callback
+https://www.mzcube.com/auth/callback
+https://mzcube.com/auth/callback
 http://localhost:3000/auth/callback
 ```
 
@@ -64,7 +65,7 @@ Environments: Production, Preview, Development (모두 선택)
 
 배포가 완료되면 (약 2-3분):
 
-1. https://foodiemap-website.vercel.app 접속
+1. https://www.mzcube.com 접속
 2. 우측 상단 **로그인** 버튼 클릭
 3. **Google로 계속하기** 버튼 클릭
 4. Google 계정 선택

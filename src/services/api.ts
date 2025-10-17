@@ -485,6 +485,37 @@ export class ApiService {
     const response = await api.post('/api/auth/upload-profile-image', { image: imageData });
     return response.data;
   }
+
+  // ==================== 회원 탈퇴 및 복구 ====================
+
+  // 회원 탈퇴 요청
+  static async requestAccountDeletion(reason?: string): Promise<ApiResponse<{
+    deletion_scheduled_at: string;
+    deletion_deadline: string;
+  }>> {
+    const response = await api.post('/api/auth/request-deletion', { reason });
+    return response.data;
+  }
+
+  // 계정 복구
+  static async recoverAccount(): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/auth/recover-account');
+    return response.data;
+  }
+
+  // 탈퇴 상태 조회
+  static async getDeletionStatus(): Promise<ApiResponse<{
+    is_deletion_scheduled: boolean;
+    is_active: boolean;
+    deletion_scheduled_at?: string;
+    deletion_deadline?: string;
+    days_remaining?: number;
+    can_recover?: boolean;
+    message: string;
+  }>> {
+    const response = await api.get('/api/auth/deletion-status');
+    return response.data;
+  }
 }
 
 export default api;
