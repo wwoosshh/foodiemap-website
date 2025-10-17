@@ -72,18 +72,23 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
+  color: '#2C3E50', // 명시적으로 어두운 색상 지정
   width: '100%',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1.2, 1, 1.2, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create('width'),
     width: '100%',
+    color: '#2C3E50', // 입력 텍스트 색상 명시
     [theme.breakpoints.up('sm')]: {
       width: '20ch',
       '&:focus': {
         width: '30ch',
       },
+    },
+    '&::placeholder': {
+      color: '#6C7A89',
+      opacity: 0.8,
     },
   },
 }));
@@ -381,8 +386,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           mt: 'auto',
           py: 6,
           px: 2,
-          backgroundColor: '#2C3E50',
+          background: 'linear-gradient(135deg, #1a252f 0%, #2C3E50 50%, #34495e 100%)',
           color: 'white',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #FFD93D 100%)',
+          },
         }}
       >
         <Container maxWidth="lg">
@@ -394,14 +410,53 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             }}
           >
             {/* 회사 정보 */}
-            <Box>
+            <Box
+              sx={{
+                animation: 'fadeInUp 0.6s ease-out',
+                '@keyframes fadeInUp': {
+                  from: {
+                    opacity: 0,
+                    transform: 'translateY(20px)',
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                  },
+                },
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <CubeLogoIcon sx={{ fontSize: 32, color: '#FF6B6B' }} />
-                <Typography variant="h6" fontWeight={700}>
+                <CubeLogoIcon
+                  sx={{
+                    fontSize: 36,
+                    color: '#FF6B6B',
+                    filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'rotate(15deg) scale(1.1)',
+                    },
+                  }}
+                />
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  sx={{
+                    color: '#FFFFFF',
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                    letterSpacing: '0.5px',
+                  }}
+                >
                   맛집큐브
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.8 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'rgba(255,255,255,0.85)',
+                  lineHeight: 1.8,
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                }}
+              >
                 전국의 숨은 맛집을 찾아드립니다.
                 <br />
                 당신의 맛있는 순간을 함께하세요.

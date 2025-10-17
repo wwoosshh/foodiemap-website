@@ -26,6 +26,8 @@ import {
   ArrowRightIcon,
 } from '../components/icons/CustomIcons';
 
+const DEFAULT_RESTAURANT_IMAGE = 'https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=%EB%A7%9B%EC%A7%91+%EC%9D%B4%EB%AF%B8%EC%A7%80';
+
 const NewHomePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -92,8 +94,11 @@ const NewHomePage: React.FC = () => {
         <CardMedia
           component="img"
           height="200"
-          image={restaurant.images?.[0] || '/placeholder-restaurant.jpg'}
+          image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
           alt={restaurant.name}
+          onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+            e.currentTarget.src = DEFAULT_RESTAURANT_IMAGE;
+          }}
           sx={{
             objectFit: 'cover',
             transition: 'transform 0.3s ease',

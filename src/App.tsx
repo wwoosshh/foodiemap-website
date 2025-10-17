@@ -22,36 +22,52 @@ import EmailVerificationModal from './components/EmailVerificationModal';
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// 맛집큐브 테마 - 따뜻하고 친근한 색상
+// 맛집큐브 테마 - 세련되고 생동감 있는 디자인
 const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#FF6B6B', // 따뜻한 코랄 레드
-      light: '#FF8E8E',
+      main: '#FF6B6B', // 시그니처 코랄 레드
+      light: '#FF9999',
       dark: '#E85555',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#4ECDC4', // 시원한 터콰이즈
+      main: '#4ECDC4', // 세련된 터콰이즈
       light: '#7EDBD4',
       dark: '#3AB5AD',
       contrastText: '#FFFFFF',
     },
     success: {
       main: '#95E1D3', // 부드러운 민트
+      light: '#B4EBE0',
+      dark: '#76C7BB',
     },
     warning: {
-      main: '#FFD93D', // 따뜻한 골드
+      main: '#FFD93D', // 생동감 있는 골드
+      light: '#FFE570',
+      dark: '#F5C400',
+    },
+    error: {
+      main: '#FF6B6B',
+      light: '#FF9999',
+      dark: '#E85555',
+    },
+    info: {
+      main: '#6C7A89',
+      light: '#95A5A6',
+      dark: '#556370',
     },
     background: {
-      default: '#FFF8F3', // 크림 화이트
+      default: '#FFF8F3', // 따뜻한 크림 화이트
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#2C3E50', // 다크 블루 그레이
+      primary: '#2C3E50', // 깊이 있는 다크 블루
       secondary: '#6C7A89',
+      disabled: '#BDC3C7',
     },
+    divider: 'rgba(0, 0, 0, 0.08)',
   },
   typography: {
     fontFamily: '"Pretendard", "Noto Sans KR", "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -135,18 +151,49 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          borderRadius: 10,
+          borderRadius: 12,
           fontWeight: 600,
           padding: '10px 24px',
           fontSize: '0.95rem',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)',
+            transform: 'translateX(-100%)',
+            transition: 'transform 0.6s ease',
+          },
           '&:hover': {
             transform: 'translateY(-2px)',
-            boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.15)',
+            boxShadow: '0px 8px 20px rgba(255, 107, 107, 0.25)',
+            '&::before': {
+              transform: 'translateX(100%)',
+            },
+          },
+          '&:active': {
+            transform: 'translateY(0px)',
           },
         },
         contained: {
-          boxShadow: '0px 4px 12px rgba(255, 107, 107, 0.3)',
+          boxShadow: '0px 4px 14px rgba(255, 107, 107, 0.35)',
+          background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #FF8E8E 0%, #FF6B6B 100%)',
+            boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.4)',
+          },
+        },
+        outlined: {
+          borderWidth: 2,
+          '&:hover': {
+            borderWidth: 2,
+            backgroundColor: 'rgba(255, 107, 107, 0.08)',
+          },
         },
       },
     },
@@ -154,11 +201,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.08)',
-          transition: 'all 0.3s ease',
+          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          border: '1px solid rgba(0, 0, 0, 0.04)',
           '&:hover': {
-            boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
-            transform: 'translateY(-4px)',
+            boxShadow: '0px 12px 32px rgba(255, 107, 107, 0.15)',
+            transform: 'translateY(-8px)',
+            borderColor: 'rgba(255, 107, 107, 0.2)',
           },
         },
       },
@@ -168,6 +217,13 @@ const theme = createTheme({
         root: {
           borderRadius: 8,
           fontWeight: 500,
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'scale(1.05)',
+          },
+        },
+        filled: {
+          background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
         },
       },
     },
@@ -175,9 +231,16 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 10,
+            borderRadius: 12,
+            transition: 'all 0.3s ease',
             '&:hover fieldset': {
               borderColor: '#FF6B6B',
+              borderWidth: 2,
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#FF6B6B',
+              borderWidth: 2,
+              boxShadow: '0 0 0 4px rgba(255, 107, 107, 0.1)',
             },
           },
         },
@@ -186,10 +249,24 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 16,
+          transition: 'box-shadow 0.3s ease',
         },
         elevation1: {
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.06)',
+          boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.06)',
+        },
+        elevation2: {
+          boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.08)',
+        },
+        elevation3: {
+          boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          transition: 'all 0.3s ease',
         },
       },
     },
