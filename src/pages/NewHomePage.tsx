@@ -71,31 +71,17 @@ const NewHomePage: React.FC = () => {
 
   const loadRestaurantsByCategory = useCallback(async (categoryId: number | null) => {
     try {
-      // 다양한 정렬 기준으로 맛집 로드
+      // 통합 API로 한 번에 모든 정렬 방식의 맛집 로드
       const params = categoryId ? { category_id: categoryId, limit: 10 } : { limit: 10 };
 
-      const [ratingRes, reviewRes, viewRes, favoriteRes, latestRes] = await Promise.all([
-        ApiService.getRestaurants({ ...params, sort: 'rating_desc' }),
-        ApiService.getRestaurants({ ...params, sort: 'review_count_desc' }),
-        ApiService.getRestaurants({ ...params, sort: 'view_count_desc' }),
-        ApiService.getRestaurants({ ...params, sort: 'favorite_count_desc' }),
-        ApiService.getRestaurants({ ...params, sort: 'created_at_desc' }),
-      ]);
+      const multiSortRes = await ApiService.getRestaurantsMultiSort(params);
 
-      if (ratingRes.success && ratingRes.data) {
-        setRatingRestaurants(ratingRes.data.restaurants || []);
-      }
-      if (reviewRes.success && reviewRes.data) {
-        setReviewCountRestaurants(reviewRes.data.restaurants || []);
-      }
-      if (viewRes.success && viewRes.data) {
-        setViewCountRestaurants(viewRes.data.restaurants || []);
-      }
-      if (favoriteRes.success && favoriteRes.data) {
-        setFavoriteRestaurants(favoriteRes.data.restaurants || []);
-      }
-      if (latestRes.success && latestRes.data) {
-        setLatestRestaurants(latestRes.data.restaurants || []);
+      if (multiSortRes.success && multiSortRes.data) {
+        setRatingRestaurants(multiSortRes.data.byRating || []);
+        setReviewCountRestaurants(multiSortRes.data.byReviewCount || []);
+        setViewCountRestaurants(multiSortRes.data.byViewCount || []);
+        setFavoriteRestaurants(multiSortRes.data.byFavoriteCount || []);
+        setLatestRestaurants(multiSortRes.data.byLatest || []);
       }
     } catch (err: any) {
       console.error('Failed to load restaurants:', err);

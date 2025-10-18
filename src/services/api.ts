@@ -171,6 +171,25 @@ export class ApiService {
     return response.data;
   }
 
+  // 다중 정렬 맛집 목록 조회 (한 번의 요청으로 모든 정렬 방식 반환)
+  static async getRestaurantsMultiSort(params: {
+    limit?: number;
+    category_id?: number;
+  } = {}): Promise<ApiResponse<{
+    byRating: Restaurant[];
+    byReviewCount: Restaurant[];
+    byViewCount: Restaurant[];
+    byFavoriteCount: Restaurant[];
+    byLatest: Restaurant[];
+    filters: {
+      limit: number;
+      categoryId: number | null;
+    };
+  }>> {
+    const response = await api.get('/api/restaurants/multi-sort', { params });
+    return response.data;
+  }
+
   // 공개 배너 목록 조회 (로그인 불필요)
   static async getPublicBanners(): Promise<ApiResponse<{ banners: Banner[] }>> {
     const response = await api.get('/api/banners');
