@@ -61,6 +61,7 @@ const NewHomePage: React.FC = () => {
     totalReviews: 0,
     totalUsers: 0,
   });
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // 다양한 알고리즘별 맛집 상태
   const [ratingRestaurants, setRatingRestaurants] = useState<Restaurant[]>([]);
@@ -107,6 +108,7 @@ const NewHomePage: React.FC = () => {
       setError(err.userMessage || '데이터를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
+      setIsInitialLoad(false);
     }
   }, [loadRestaurantsByCategory]);
 
@@ -115,10 +117,10 @@ const NewHomePage: React.FC = () => {
   }, [loadInitialData]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !isInitialLoad) {
       loadRestaurantsByCategory(selectedCategoryId);
     }
-  }, [selectedCategoryId, loading, loadRestaurantsByCategory]);
+  }, [selectedCategoryId, loading, isInitialLoad, loadRestaurantsByCategory]);
 
   const handleCategoryClick = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
