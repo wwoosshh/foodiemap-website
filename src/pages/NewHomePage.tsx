@@ -117,10 +117,11 @@ const NewHomePage: React.FC = () => {
   }, [loadInitialData]);
 
   useEffect(() => {
-    if (!loading && !isInitialLoad) {
+    // 초기 로드가 완료되고, 카테고리가 실제로 변경되었을 때만 실행
+    if (!isInitialLoad && selectedCategoryId !== null) {
       loadRestaurantsByCategory(selectedCategoryId);
     }
-  }, [selectedCategoryId, loading, isInitialLoad, loadRestaurantsByCategory]);
+  }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory]);
 
   const handleCategoryClick = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
