@@ -25,6 +25,8 @@ import {
   Tabs,
   FormControlLabel,
   Checkbox,
+  Stack,
+  Link,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import NaverMap from '../components/NaverMap';
@@ -46,6 +48,18 @@ import {
   Report,
   Edit,
   Delete,
+  Schedule,
+  LocalParking,
+  Wifi,
+  DeliveryDining,
+  ShoppingBag,
+  EventAvailable,
+  AttachMoney,
+  Restaurant as RestaurantIcon,
+  Language,
+  Article,
+  Instagram,
+  Facebook,
 } from '@mui/icons-material';
 
 const RestaurantDetailPage: React.FC = () => {
@@ -298,6 +312,92 @@ const RestaurantDetailPage: React.FC = () => {
     );
   };
 
+  // 영업시간 렌더링 함수
+  const renderBusinessHours = () => {
+    if (!restaurant.business_hours || typeof restaurant.business_hours !== 'object') {
+      return <Typography variant="body2" color="text.secondary">영업시간 정보가 없습니다.</Typography>;
+    }
+
+    const weekdays = [
+      { key: 'mon', label: '월' },
+      { key: 'tue', label: '화' },
+      { key: 'wed', label: '수' },
+      { key: 'thu', label: '목' },
+      { key: 'fri', label: '금' },
+      { key: 'sat', label: '토' },
+      { key: 'sun', label: '일' },
+    ];
+
+    return (
+      <Stack spacing={1}>
+        {weekdays.map((day) => (
+          <Box key={day.key} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2" fontWeight={600}>{day.label}요일</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {restaurant.business_hours[day.key] || '휴무'}
+            </Typography>
+          </Box>
+        ))}
+        {restaurant.break_time && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="body2" fontWeight={600}>브레이크 타임</Typography>
+            <Typography variant="body2" color="text.secondary">{restaurant.break_time}</Typography>
+          </Box>
+        )}
+        {restaurant.last_order && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2" fontWeight={600}>라스트 오더</Typography>
+            <Typography variant="body2" color="text.secondary">{restaurant.last_order}</Typography>
+          </Box>
+        )}
+      </Stack>
+    );
+  };
+
+  // 편의시설 렌더링
+  const renderFacilities = () => {
+    const facilities = [
+      { key: 'wifi_available', label: '무료 와이파이', icon: <Wifi /> },
+      { key: 'delivery_available', label: '배달 가능', icon: <DeliveryDining /> },
+      { key: 'takeout_available', label: '포장 가능', icon: <ShoppingBag /> },
+      { key: 'reservation_available', label: '예약 가능', icon: <EventAvailable /> },
+    ];
+
+    const availableFacilities = facilities.filter(f => restaurant[f.key]);
+
+    if (availableFacilities.length === 0 && !restaurant.parking_info) {
+      return <Typography variant="body2" color="text.secondary">편의시설 정보가 없습니다.</Typography>;
+    }
+
+    return (
+      <Stack spacing={1.5}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+          {availableFacilities.map((facility) => (
+            <Chip
+              key={facility.key}
+              icon={facility.icon}
+              label={facility.label}
+              variant="outlined"
+              color="primary"
+              sx={{ width: '100%' }}
+            />
+          ))}
+        </Box>
+        {restaurant.parking_info && (
+          <Box sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', alignItems: 'start', gap: 1 }}>
+              <LocalParking sx={{ fontSize: 20, color: 'primary.main', mt: 0.3 }} />
+              <Box>
+                <Typography variant="body2" fontWeight={600} gutterBottom>주차 정보</Typography>
+                <Typography variant="body2" color="text.secondary">{restaurant.parking_info}</Typography>
+              </Box>
+            </Box>
+          </Box>
+        )}
+      </Stack>
+    );
+  };
+
   if (loading) {
     return (
       <MainLayout>
@@ -390,7 +490,7 @@ const RestaurantDetailPage: React.FC = () => {
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
                 <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, flexWrap: 'wrap' }}>
                     <Typography variant="h3" fontWeight={800}>
                       {restaurant.name}
                     </Typography>
@@ -405,7 +505,17 @@ const RestaurantDetailPage: React.FC = () => {
                       />
                     )}
                   </Box>
-                  {renderRating(restaurant.rating || 0, 'large')}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    {renderRating(restaurant.rating || 0, 'large')}
+                    {restaurant.price_range && (
+                      <Chip
+                        icon={<AttachMoney />}
+                        label={restaurant.price_range}
+                        variant="outlined"
+                        size="medium"
+                      />
+                    )}
+                  </Box>
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1 }}>
@@ -440,54 +550,152 @@ const RestaurantDetailPage: React.FC = () => {
 
               <Divider sx={{ my: 3 }} />
 
-              {/* 정보 카드 */}
-              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2, mb: 3 }}>
-                <Box>
-                  <Card variant="outlined">
+              {/* 정보 카드 그리드 */}
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2, mb: 3 }}>
+                {/* 주소 */}
+                <Card variant="outlined" sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5 }}>
+                      <LocationIcon sx={{ fontSize: 24, color: 'primary.main', mt: 0.5 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          주소
+                        </Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                          {restaurant.address}
+                        </Typography>
+                        {restaurant.road_address && (
+                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                            도로명: {restaurant.road_address}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* 전화번호 */}
+                {restaurant.phone && (
+                  <Card variant="outlined" sx={{ height: '100%' }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <LocationIcon sx={{ fontSize: 24, color: 'primary.main' }} />
+                        <PhoneIcon sx={{ fontSize: 24, color: 'primary.main' }} />
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="caption" color="text.secondary">
-                            주소
+                            전화번호
                           </Typography>
                           <Typography variant="body2" fontWeight={500}>
-                            {restaurant.address}
+                            <Link href={`tel:${restaurant.phone}`} underline="hover" color="inherit">
+                              {restaurant.phone}
+                            </Link>
                           </Typography>
                         </Box>
                       </Box>
                     </CardContent>
                   </Card>
-                </Box>
+                )}
 
-                {restaurant.phone && (
-                  <Box>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <PhoneIcon sx={{ fontSize: 24, color: 'primary.main' }} />
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="caption" color="text.secondary">
-                              전화번호
-                            </Typography>
-                            <Typography variant="body2" fontWeight={500}>
-                              {restaurant.phone}
+                {/* 영업시간 */}
+                <Card variant="outlined" sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5 }}>
+                      <Schedule sx={{ fontSize: 24, color: 'primary.main', mt: 0.5 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" color="text.secondary" gutterBottom>
+                          영업시간
+                        </Typography>
+                        {renderBusinessHours()}
+                        {restaurant.closed_days && restaurant.closed_days.length > 0 && (
+                          <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                            <Typography variant="caption" color="error.main" fontWeight={600}>
+                              휴무: {restaurant.closed_days.join(', ')}
                             </Typography>
                           </Box>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Box>
-                )}
+                        )}
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* 편의시설 */}
+                <Card variant="outlined" sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="caption" color="text.secondary" gutterBottom display="block">
+                      편의시설
+                    </Typography>
+                    {renderFacilities()}
+                  </CardContent>
+                </Card>
               </Box>
 
               {/* 설명 */}
               {restaurant.description && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-                    {restaurant.description}
-                  </Typography>
-                </Box>
+                <Card variant="outlined" sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                      소개
+                    </Typography>
+                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                      {restaurant.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* 시그니처 메뉴 */}
+              {restaurant.signature_menu && restaurant.signature_menu.length > 0 && (
+                <Card variant="outlined" sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <RestaurantIcon sx={{ color: 'primary.main' }} />
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        시그니처 메뉴
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {restaurant.signature_menu.map((menu: string, index: number) => (
+                        <Chip key={index} label={menu} color="primary" variant="outlined" />
+                      ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* 소셜 링크 */}
+              {(restaurant.website_url || restaurant.blog_url || restaurant.instagram_url || restaurant.facebook_url) && (
+                <Card variant="outlined" sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                      링크
+                    </Typography>
+                    <Stack spacing={1}>
+                      {restaurant.website_url && (
+                        <Link href={restaurant.website_url} target="_blank" rel="noopener" underline="hover" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Language fontSize="small" />
+                          <Typography variant="body2">웹사이트</Typography>
+                        </Link>
+                      )}
+                      {restaurant.blog_url && (
+                        <Link href={restaurant.blog_url} target="_blank" rel="noopener" underline="hover" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Article fontSize="small" />
+                          <Typography variant="body2">블로그</Typography>
+                        </Link>
+                      )}
+                      {restaurant.instagram_url && (
+                        <Link href={restaurant.instagram_url} target="_blank" rel="noopener" underline="hover" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Instagram fontSize="small" />
+                          <Typography variant="body2">인스타그램</Typography>
+                        </Link>
+                      )}
+                      {restaurant.facebook_url && (
+                        <Link href={restaurant.facebook_url} target="_blank" rel="noopener" underline="hover" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Facebook fontSize="small" />
+                          <Typography variant="body2">페이스북</Typography>
+                        </Link>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
               )}
             </Box>
 
@@ -641,33 +849,75 @@ const RestaurantDetailPage: React.FC = () => {
                 <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
                   메뉴
                 </Typography>
-                {menus.length === 0 ? (
+                {menus.length === 0 && (!restaurant.menu_info || !restaurant.menu_info.items) ? (
                   <Alert severity="info">등록된 메뉴가 없습니다.</Alert>
                 ) : (
-                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
-                    {menus.map((menu) => (
-                      <Box key={menu.id}>
-                        <Card variant="outlined">
-                          <CardContent>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <Box>
-                                <Typography variant="h6" fontWeight={600}>
-                                  {menu.name}
-                                </Typography>
-                                {menu.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                    {menu.description}
-                                  </Typography>
-                                )}
-                              </Box>
-                              <Typography variant="h6" fontWeight={700} color="primary.main">
-                                {menu.price?.toLocaleString()}원
-                              </Typography>
-                            </Box>
-                          </CardContent>
-                        </Card>
+                  <Box>
+                    {/* 구조화된 메뉴 정보 (menu_info.items) */}
+                    {restaurant.menu_info && restaurant.menu_info.items && restaurant.menu_info.items.length > 0 && (
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                          메뉴 목록
+                        </Typography>
+                        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
+                          {restaurant.menu_info.items.map((item: any, index: number) => (
+                            <Card key={index} variant="outlined">
+                              <CardContent>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                  <Box>
+                                    <Typography variant="h6" fontWeight={600}>
+                                      {item.name}
+                                    </Typography>
+                                    {item.description && (
+                                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                        {item.description}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                  {item.price && (
+                                    <Typography variant="h6" fontWeight={700} color="primary.main">
+                                      {item.price}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </Box>
                       </Box>
-                    ))}
+                    )}
+
+                    {/* 별도 menus 테이블 데이터 */}
+                    {menus.length > 0 && (
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                          대표 메뉴
+                        </Typography>
+                        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
+                          {menus.map((menu) => (
+                            <Card key={menu.id} variant="outlined">
+                              <CardContent>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <Box>
+                                    <Typography variant="h6" fontWeight={600}>
+                                      {menu.name}
+                                    </Typography>
+                                    {menu.description && (
+                                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                        {menu.description}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                  <Typography variant="h6" fontWeight={700} color="primary.main">
+                                    {menu.price?.toLocaleString()}원
+                                  </Typography>
+                                </Box>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 )}
               </Box>
