@@ -585,17 +585,27 @@ const RestaurantDetailPage: React.FC = () => {
                   {restaurant.name}
                 </Typography>
                 {restaurant.categories && (
-                  <Chip
-                    label={restaurant.categories.name}
-                    size="medium"
+                  <Box
                     sx={{
-                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                      color: 'primary.main',
-                      fontWeight: 600,
-                      borderRadius: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.75,
                       px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1.5,
+                      backgroundColor: 'background.paper',
+                      border: '2px solid',
+                      borderColor: restaurant.categories.color || 'primary.main',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
                     }}
-                  />
+                  >
+                    {restaurant.categories.icon && (
+                      <Typography sx={{ fontSize: 16 }}>{restaurant.categories.icon}</Typography>
+                    )}
+                    <Typography variant="body2" fontWeight={700} color="text.primary">
+                      {restaurant.categories.name}
+                    </Typography>
+                  </Box>
                 )}
               </Box>
 
