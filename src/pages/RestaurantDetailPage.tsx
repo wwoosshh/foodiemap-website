@@ -1015,7 +1015,7 @@ const RestaurantDetailPage: React.FC = () => {
                 <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
                   메뉴
                 </Typography>
-                {menus.all.length === 0 && (!restaurant.menu_info || !restaurant.menu_info.items) ? (
+                {menus.all.length === 0 && !restaurant.menu_info ? (
                   <Alert severity="info" sx={{ borderRadius: 1 }}>등록된 메뉴가 없습니다.</Alert>
                 ) : (
                   <Box>
@@ -1147,38 +1147,43 @@ const RestaurantDetailPage: React.FC = () => {
                     )}
 
                     {/* 구 menu_info 구조도 fallback으로 지원 */}
-                    {menus.all.length === 0 && restaurant.menu_info && restaurant.menu_info.items && restaurant.menu_info.items.length > 0 && (
-                      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
-                        {restaurant.menu_info.items.map((item: any, index: number) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              p: 2,
-                              border: '1px solid',
-                              borderColor: 'divider',
-                              borderRadius: 1,
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'start',
-                            }}
-                          >
-                            <Box>
-                              <Typography variant="subtitle1" fontWeight={600}>
-                                {item.name}
-                              </Typography>
-                              {item.description && (
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  {item.description}
+                    {menus.all.length === 0 && restaurant.menu_info && (
+                      <Box>
+                        <Typography variant="h6" fontWeight={600} gutterBottom>
+                          전체 메뉴
+                        </Typography>
+                        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
+                          {(Array.isArray(restaurant.menu_info) ? restaurant.menu_info : restaurant.menu_info.items || []).map((item: any, index: number) => (
+                            <Box
+                              key={index}
+                              sx={{
+                                p: 2,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 1,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'start',
+                              }}
+                            >
+                              <Box>
+                                <Typography variant="subtitle1" fontWeight={600}>
+                                  {item.name}
+                                </Typography>
+                                {item.description && (
+                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                    {item.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                              {item.price && (
+                                <Typography variant="h6" fontWeight={700} color="primary.main">
+                                  {typeof item.price === 'number' ? item.price.toLocaleString() : item.price}원
                                 </Typography>
                               )}
                             </Box>
-                            {item.price && (
-                              <Typography variant="h6" fontWeight={700} color="primary.main">
-                                {item.price}
-                              </Typography>
-                            )}
-                          </Box>
-                        ))}
+                          ))}
+                        </Box>
                       </Box>
                     )}
                   </Box>
