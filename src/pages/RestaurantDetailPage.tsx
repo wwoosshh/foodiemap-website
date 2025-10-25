@@ -674,12 +674,12 @@ const RestaurantDetailPage: React.FC = () => {
                             </Typography>
                           </Box>
                           <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ fontSize: '1rem' }}>
-                            {tag.score.toFixed(1)}
+                            {tag.score?.toFixed(1) || '0.0'}
                           </Typography>
                         </Box>
                         <LinearProgress
                           variant="determinate"
-                          value={(tag.score / 10) * 100}
+                          value={((tag.score || 0) / 10) * 100}
                           sx={{
                             height: 6,
                             borderRadius: 3,
