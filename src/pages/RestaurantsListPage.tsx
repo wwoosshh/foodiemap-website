@@ -145,17 +145,6 @@ const RestaurantsListPage: React.FC = () => {
     navigate(`/restaurants/${restaurantId}`);
   };
 
-  const renderRating = (rating: number) => {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <StarFilledIcon sx={{ fontSize: 18, color: '#FFD93D' }} />
-        <Typography variant="body2" fontWeight={600}>
-          {rating.toFixed(1)}
-        </Typography>
-      </Box>
-    );
-  };
-
   const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
     <Card
       sx={{

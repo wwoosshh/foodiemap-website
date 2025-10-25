@@ -238,7 +238,20 @@ export class ApiService {
       total: number;
       hasMore: boolean;
     };
-    menus: any[];
+    menus: {
+      all: any[];
+      signature: any[];
+      popular: any[];
+    } | any[];
+    photos?: {
+      all: any[];
+      representative: any[];
+      food: any[];
+      interior: any[];
+      exterior: any[];
+      menu: any[];
+    };
+    tags?: any[];
     userInfo: {
       isFavorited: boolean;
       canReview: boolean;
