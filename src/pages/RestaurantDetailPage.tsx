@@ -25,6 +25,7 @@ import {
   Checkbox,
   Stack,
   Link,
+  LinearProgress,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import NaverMap from '../components/NaverMap';
@@ -629,20 +630,59 @@ const RestaurantDetailPage: React.FC = () => {
 
               {/* 태그 섹션 */}
               {tags && tags.length > 0 && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                  {tags.slice(0, 8).map((tag) => (
-                    <Chip
-                      key={tag.id}
-                      label={tag.name}
-                      size="small"
-                      sx={{
-                        backgroundColor: tag.color ? alpha(tag.color, 0.1) : alpha(theme.palette.secondary.main, 0.1),
-                        color: tag.color || 'secondary.main',
-                        fontWeight: 500,
-                        borderRadius: 1,
-                      }}
-                    />
-                  ))}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" color="text.secondary" fontWeight={600} sx={{ mb: 1.5, textTransform: 'uppercase', fontSize: '0.75rem' }}>
+                    평가 태그
+                  </Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+                    {tags.slice(0, 6).map((tag) => (
+                      <Box
+                        key={tag.id}
+                        sx={{
+                          p: 2,
+                          borderRadius: 2,
+                          backgroundColor: 'background.paper',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderLeft: 4,
+                          borderLeftColor: tag.color || 'primary.main',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                            transform: 'translateY(-2px)',
+                          }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {tag.icon && (
+                              <Typography sx={{ fontSize: 18 }}>{tag.icon}</Typography>
+                            )}
+                            <Typography variant="body2" fontWeight={600} color="text.primary">
+                              {tag.name}
+                            </Typography>
+                          </Box>
+                          <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ fontSize: '1rem' }}>
+                            {tag.score.toFixed(1)}
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={(tag.score / 10) * 100}
+                          sx={{
+                            height: 6,
+                            borderRadius: 3,
+                            backgroundColor: alpha(tag.color || theme.palette.primary.main, 0.1),
+                            '& .MuiLinearProgress-bar': {
+                              backgroundColor: tag.color || 'primary.main',
+                              borderRadius: 3,
+                            }
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
               )}
 
