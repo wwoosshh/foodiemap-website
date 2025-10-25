@@ -57,7 +57,10 @@ import {
   Article,
   Instagram,
   Facebook,
+  CloudUpload,
+  Close,
 } from '@mui/icons-material';
+import { openCloudinaryWidget } from '../lib/cloudinary';
 
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,6 +86,7 @@ const RestaurantDetailPage: React.FC = () => {
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewContent, setReviewContent] = useState('');
   const [reviewIsAnonymous, setReviewIsAnonymous] = useState(false);
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
 
   // 리뷰 인터랙션 상태
   const [helpfulReviews, setHelpfulReviews] = useState<Set<string>>(new Set());
@@ -177,6 +181,7 @@ const RestaurantDetailPage: React.FC = () => {
         title: reviewTitle,
         content: reviewContent,
         is_anonymous: reviewIsAnonymous,
+        images: reviewImages.length > 0 ? reviewImages : undefined,
       });
 
       alert('리뷰가 작성되었습니다.');
@@ -185,6 +190,7 @@ const RestaurantDetailPage: React.FC = () => {
       setReviewContent('');
       setReviewRating(5);
       setReviewIsAnonymous(false);
+      setReviewImages([]);
       loadRestaurantData();
     } catch (err: any) {
       alert(err.userMessage || '리뷰 작성에 실패했습니다.');
@@ -227,6 +233,7 @@ const RestaurantDetailPage: React.FC = () => {
     setReviewTitle(review.title || '');
     setReviewContent(review.content || '');
     setReviewIsAnonymous(review.is_anonymous || false);
+    setReviewImages(review.images || []);
     setReviewDialogOpen(true);
   };
 
@@ -246,6 +253,7 @@ const RestaurantDetailPage: React.FC = () => {
         title: reviewTitle,
         content: reviewContent,
         is_anonymous: reviewIsAnonymous,
+        images: reviewImages.length > 0 ? reviewImages : undefined,
       });
 
       alert('리뷰가 수정되었습니다.');
@@ -255,6 +263,7 @@ const RestaurantDetailPage: React.FC = () => {
       setReviewContent('');
       setReviewRating(5);
       setReviewIsAnonymous(false);
+      setReviewImages([]);
       loadRestaurantData();
     } catch (err: any) {
       alert(err.userMessage || '리뷰 수정에 실패했습니다.');
@@ -472,11 +481,16 @@ const RestaurantDetailPage: React.FC = () => {
             <Box
               sx={{
                 width: '100%',
-                height: 500,
+                maxHeight: 600,
+                minHeight: 400,
                 borderRadius: 2,
                 overflow: 'hidden',
                 position: 'relative',
                 mb: 2,
+                backgroundColor: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               {photos.all && photos.all.length > 0 ? (
@@ -486,8 +500,11 @@ const RestaurantDetailPage: React.FC = () => {
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',
+                    maxHeight: '600px',
+                    objectFit: 'contain',
+                    cursor: 'pointer',
                   }}
+                  onClick={() => window.open(photos[selectedPhotoCategory][selectedImage]?.photo_url || photos.all[0].photo_url, '_blank')}
                 />
               ) : (
                 <img
@@ -496,8 +513,11 @@ const RestaurantDetailPage: React.FC = () => {
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',
+                    maxHeight: '600px',
+                    objectFit: 'contain',
+                    cursor: 'pointer',
                   }}
+                  onClick={() => window.open(restaurant.images[selectedImage], '_blank')}
                 />
               )}
             </Box>
@@ -505,29 +525,34 @@ const RestaurantDetailPage: React.FC = () => {
             {/* 썸네일 그리드 */}
             {photos.all && photos.all.length > 0 ? (
               photos[selectedPhotoCategory].length > 1 && (
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(4, 1fr)", sm: "repeat(6, 1fr)", md: "repeat(8, 1fr)" }, gap: 1 }}>
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(4, 1fr)", md: "repeat(6, 1fr)" }, gap: 1.5 }}>
                   {photos[selectedPhotoCategory].map((photo: any, index: number) => (
                     <Box
                       key={photo.id}
                       onClick={() => setSelectedImage(index)}
                       sx={{
                         width: '100%',
-                        height: 80,
+                        paddingTop: '100%',
+                        position: 'relative',
                         borderRadius: 1,
                         overflow: 'hidden',
                         cursor: 'pointer',
-                        border: '2px solid',
+                        border: '3px solid',
                         borderColor: selectedImage === index ? 'primary.main' : 'transparent',
                         transition: 'all 0.2s ease',
                         '&:hover': {
                           borderColor: 'primary.light',
+                          transform: 'scale(1.05)',
                         },
                       }}
                     >
                       <img
-                        src={photo.thumbnail_url || photo.photo_url}
+                        src={photo.photo_url}
                         alt={`${restaurant.name} ${index + 1}`}
                         style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
@@ -539,22 +564,24 @@ const RestaurantDetailPage: React.FC = () => {
               )
             ) : (
               restaurant.images.length > 1 && (
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(4, 1fr)", sm: "repeat(6, 1fr)", md: "repeat(8, 1fr)" }, gap: 1 }}>
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(4, 1fr)", md: "repeat(6, 1fr)" }, gap: 1.5 }}>
                   {restaurant.images.map((image: string, index: number) => (
                     <Box
                       key={index}
                       onClick={() => setSelectedImage(index)}
                       sx={{
                         width: '100%',
-                        height: 80,
+                        paddingTop: '100%',
+                        position: 'relative',
                         borderRadius: 1,
                         overflow: 'hidden',
                         cursor: 'pointer',
-                        border: '2px solid',
+                        border: '3px solid',
                         borderColor: selectedImage === index ? 'primary.main' : 'transparent',
                         transition: 'all 0.2s ease',
                         '&:hover': {
                           borderColor: 'primary.light',
+                          transform: 'scale(1.05)',
                         },
                       }}
                     >
@@ -562,6 +589,9 @@ const RestaurantDetailPage: React.FC = () => {
                         src={image}
                         alt={`${restaurant.name} ${index + 1}`}
                         style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
@@ -1010,20 +1040,38 @@ const RestaurantDetailPage: React.FC = () => {
                           </Typography>
 
                           {review.images && review.images.length > 0 && (
-                            <Box sx={{ display: 'flex', gap: 1, mb: 2, overflowX: 'auto' }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 1, mb: 2 }}>
                               {review.images.map((img: string, idx: number) => (
                                 <Box
                                   key={idx}
-                                  component="img"
-                                  src={img}
                                   sx={{
-                                    width: 100,
-                                    height: 100,
-                                    objectFit: 'cover',
+                                    width: '100%',
+                                    paddingTop: '100%',
+                                    position: 'relative',
                                     borderRadius: 1,
+                                    overflow: 'hidden',
                                     cursor: 'pointer',
+                                    '&:hover': {
+                                      opacity: 0.9,
+                                      transform: 'scale(1.02)',
+                                    },
+                                    transition: 'all 0.2s ease',
                                   }}
-                                />
+                                  onClick={() => window.open(img, '_blank')}
+                                >
+                                  <Box
+                                    component="img"
+                                    src={img}
+                                    sx={{
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'cover',
+                                    }}
+                                  />
+                                </Box>
                               ))}
                             </Box>
                           )}
@@ -1364,6 +1412,7 @@ const RestaurantDetailPage: React.FC = () => {
           setReviewContent('');
           setReviewRating(5);
           setReviewIsAnonymous(false);
+          setReviewImages([]);
         }}
         maxWidth="sm"
         fullWidth
@@ -1399,6 +1448,83 @@ const RestaurantDetailPage: React.FC = () => {
               sx={{ mb: 2 }}
             />
 
+            {/* 이미지 업로드 */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                사진 ({reviewImages.length}/5)
+              </Typography>
+              <Button
+                variant="outlined"
+                startIcon={<CloudUpload />}
+                onClick={() => {
+                  if (reviewImages.length >= 5) {
+                    alert('최대 5장까지 업로드할 수 있습니다.');
+                    return;
+                  }
+                  openCloudinaryWidget(
+                    (result) => {
+                      setReviewImages([...reviewImages, result.secure_url]);
+                    },
+                    {
+                      multiple: false,
+                      folder: 'reviews',
+                      tags: ['review'],
+                    }
+                  );
+                }}
+                disabled={reviewImages.length >= 5}
+                sx={{ mb: 1 }}
+              >
+                사진 추가
+              </Button>
+
+              {reviewImages.length > 0 && (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 1, mt: 1 }}>
+                  {reviewImages.map((img, idx) => (
+                    <Box
+                      key={idx}
+                      sx={{
+                        width: '100%',
+                        paddingTop: '100%',
+                        position: 'relative',
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={img}
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => setReviewImages(reviewImages.filter((_, i) => i !== idx))}
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          },
+                        }}
+                      >
+                        <Close fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -1419,6 +1545,7 @@ const RestaurantDetailPage: React.FC = () => {
               setReviewContent('');
               setReviewRating(5);
               setReviewIsAnonymous(false);
+              setReviewImages([]);
             }}
           >
             취소
