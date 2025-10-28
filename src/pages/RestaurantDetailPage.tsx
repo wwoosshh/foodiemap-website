@@ -801,6 +801,64 @@ const RestaurantDetailPage: React.FC = () => {
 
             <Divider sx={{ my: 3 }} />
 
+            {/* 통계 섹션 */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" fontWeight={700} gutterBottom>
+                통계
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+                  gap: 2,
+                  p: 3,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                }}
+              >
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.5 }}>
+                    <StarFilledIcon sx={{ fontSize: 20, color: '#FFD93D' }} />
+                    <Typography variant="h5" fontWeight={700}>
+                      {restaurant.rating ? restaurant.rating.toFixed(1) : '0.0'}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    평균 평점
+                  </Typography>
+                </Box>
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {restaurant.review_count || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    리뷰 수
+                  </Typography>
+                </Box>
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {restaurant.view_count || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    조회수
+                  </Typography>
+                </Box>
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {restaurant.favorite_count || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    즐겨찾기
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
             {/* 탭 섹션 */}
             <Box sx={{ mb: 3 }}>
               <Tabs
@@ -1171,254 +1229,138 @@ const RestaurantDetailPage: React.FC = () => {
             )}
           </Box>
 
-          {/* 오른쪽: 사이드바 (통계 + 이미지 목록) */}
+          {/* 오른쪽: 이미지 목록 */}
           <Box>
-            <Box
-              sx={{
-                position: 'sticky',
-                top: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-              }}
-            >
-              {/* 통계 섹션 */}
+            {photos.all.length > 0 && (
               <Box
                 sx={{
-                  p: 2.5,
+                  position: 'sticky',
+                  top: 80,
+                  p: 3,
                   border: '1px solid',
                   borderColor: 'divider',
                   borderRadius: 2,
+                  backgroundColor: 'background.paper',
                 }}
               >
-                <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-                  통계
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      평균 평점
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <StarFilledIcon sx={{ fontSize: 16, color: '#FFD93D' }} />
-                      <Typography variant="body2" fontWeight={600}>
-                        {restaurant.rating ? restaurant.rating.toFixed(1) : '0.0'}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      리뷰 수
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {restaurant.review_count || 0}개
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      조회수
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {restaurant.view_count || 0}회
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      즐겨찾기
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {restaurant.favorite_count || 0}명
-                    </Typography>
-                  </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" fontWeight={700}>
+                    사진 ({photos[selectedPhotoCategory].length})
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsImageListExpanded(!isImageListExpanded)}
+                    sx={{
+                      backgroundColor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '&:hover': {
+                        backgroundColor: 'action.hover',
+                      }
+                    }}
+                  >
+                    {isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                  </IconButton>
                 </Box>
 
-                <Divider sx={{ my: 1.5 }} />
+                {/* 카테고리 필터 */}
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                  {[
+                    { key: 'all', label: '전체', count: photos.all.length },
+                    { key: 'food', label: '음식', count: photos.food.length },
+                    { key: 'interior', label: '내부', count: photos.interior.length },
+                    { key: 'exterior', label: '외부', count: photos.exterior.length },
+                    { key: 'menu', label: '메뉴판', count: photos.menu.length },
+                  ].map((category) => (
+                    category.count > 0 && (
+                      <Chip
+                        key={category.key}
+                        label={`${category.label} ${category.count}`}
+                        onClick={() => {
+                          setSelectedPhotoCategory(category.key as any);
+                          setSelectedImage(0);
+                          setThumbnailScrollIndex(0);
+                          setIsImageListExpanded(false);
+                        }}
+                        size="small"
+                        color={selectedPhotoCategory === category.key ? 'primary' : 'default'}
+                        sx={{
+                          borderRadius: 1,
+                          fontWeight: selectedPhotoCategory === category.key ? 600 : 400,
+                        }}
+                      />
+                    )
+                  ))}
+                </Box>
 
-                <Stack spacing={1.5}>
-                  {restaurant.phone && (
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      size="large"
-                      href={`tel:${restaurant.phone}`}
-                      sx={{
-                        borderRadius: 1,
-                        textTransform: 'none',
-                        fontWeight: 600,
-                      }}
-                    >
-                      전화하기
-                    </Button>
-                  )}
+                <Divider sx={{ my: 2 }} />
+
+                {/* 이미지 그리드 */}
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 1,
+                  }}
+                >
+                  {photos[selectedPhotoCategory]
+                    .slice(0, isImageListExpanded ? undefined : 6)
+                    .map((photo: any, idx: number) => (
+                      <Box
+                        key={idx}
+                        sx={{
+                          width: '100%',
+                          paddingTop: '100%',
+                          position: 'relative',
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          border: selectedImage === idx ? '2px solid' : '1px solid',
+                          borderColor: selectedImage === idx ? 'primary.main' : 'divider',
+                          '&:hover': {
+                            opacity: 0.8,
+                            transform: 'scale(0.98)',
+                          },
+                          transition: 'all 0.2s ease',
+                        }}
+                        onClick={() => setSelectedImage(idx)}
+                      >
+                        <Box
+                          component="img"
+                          src={photo.photo_url}
+                          alt={`사진 ${idx + 1}`}
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </Box>
+                    ))}
+                </Box>
+
+                {/* 펼치기/접기 버튼 */}
+                {photos[selectedPhotoCategory].length > 6 && (
                   <Button
-                    variant="outlined"
                     fullWidth
-                    size="large"
-                    onClick={() => navigate('/restaurants')}
+                    variant="outlined"
+                    onClick={() => setIsImageListExpanded(!isImageListExpanded)}
                     sx={{
+                      mt: 2,
                       borderRadius: 1,
                       textTransform: 'none',
                       fontWeight: 600,
                     }}
+                    endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                   >
-                    다른 맛집 보기
+                    {isImageListExpanded ? '접기' : `${photos[selectedPhotoCategory].length - 6}장 더보기`}
                   </Button>
-                </Stack>
+                )}
               </Box>
-
-              {/* 이미지 목록 섹션 */}
-              {photos.all.length > 0 && (
-                <Box
-                  sx={{
-                    p: 2.5,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 2,
-                    maxHeight: 'calc(100vh - 450px)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                    <Typography variant="subtitle1" fontWeight={700}>
-                      사진 ({photos[selectedPhotoCategory].length})
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsImageListExpanded(!isImageListExpanded)}
-                      sx={{
-                        backgroundColor: 'background.paper',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        '&:hover': {
-                          backgroundColor: 'action.hover',
-                        }
-                      }}
-                    >
-                      {isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                    </IconButton>
-                  </Box>
-
-                  {/* 카테고리 필터 */}
-                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
-                    {[
-                      { key: 'all', label: '전체', count: photos.all.length },
-                      { key: 'food', label: '음식', count: photos.food.length },
-                      { key: 'interior', label: '내부', count: photos.interior.length },
-                      { key: 'exterior', label: '외부', count: photos.exterior.length },
-                      { key: 'menu', label: '메뉴판', count: photos.menu.length },
-                    ].map((category) => (
-                      category.count > 0 && (
-                        <Chip
-                          key={category.key}
-                          label={`${category.label} ${category.count}`}
-                          onClick={() => {
-                            setSelectedPhotoCategory(category.key as any);
-                            setSelectedImage(0);
-                            setThumbnailScrollIndex(0);
-                          }}
-                          size="small"
-                          color={selectedPhotoCategory === category.key ? 'primary' : 'default'}
-                          sx={{
-                            borderRadius: 1,
-                            fontWeight: selectedPhotoCategory === category.key ? 600 : 400,
-                            fontSize: '0.75rem',
-                          }}
-                        />
-                      )
-                    ))}
-                  </Box>
-
-                  <Divider sx={{ my: 1.5 }} />
-
-                  {/* 이미지 그리드 */}
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(2, 1fr)',
-                      gap: 1,
-                      overflowY: 'auto',
-                      flex: 1,
-                      // 스크롤바 스타일링
-                      '&::-webkit-scrollbar': {
-                        width: '6px',
-                      },
-                      '&::-webkit-scrollbar-track': {
-                        backgroundColor: 'transparent',
-                      },
-                      '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.3),
-                        borderRadius: '3px',
-                        '&:hover': {
-                          backgroundColor: alpha(theme.palette.primary.main, 0.5),
-                        },
-                      },
-                    }}
-                  >
-                    {photos[selectedPhotoCategory]
-                      .slice(0, isImageListExpanded ? undefined : 4)
-                      .map((photo: any, idx: number) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            width: '100%',
-                            paddingTop: '100%',
-                            position: 'relative',
-                            borderRadius: 1,
-                            overflow: 'hidden',
-                            cursor: 'pointer',
-                            border: selectedImage === idx ? '2px solid' : '1px solid',
-                            borderColor: selectedImage === idx ? 'primary.main' : 'divider',
-                            '&:hover': {
-                              opacity: 0.8,
-                              transform: 'scale(0.98)',
-                            },
-                            transition: 'all 0.2s ease',
-                          }}
-                          onClick={() => setSelectedImage(idx)}
-                        >
-                          <Box
-                            component="img"
-                            src={photo.photo_url}
-                            alt={`사진 ${idx + 1}`}
-                            sx={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                        </Box>
-                      ))}
-                  </Box>
-
-                  {/* 펼치기/접기 버튼 */}
-                  {photos[selectedPhotoCategory].length > 4 && (
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      onClick={() => setIsImageListExpanded(!isImageListExpanded)}
-                      sx={{
-                        mt: 1.5,
-                        borderRadius: 1,
-                        textTransform: 'none',
-                        fontWeight: 600,
-                      }}
-                      endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                    >
-                      {isImageListExpanded ? '접기' : `${photos[selectedPhotoCategory].length - 4}장 더보기`}
-                    </Button>
-                  )}
-                </Box>
-              )}
-            </Box>
+            )}
           </Box>
         </Box>
       </Container>
