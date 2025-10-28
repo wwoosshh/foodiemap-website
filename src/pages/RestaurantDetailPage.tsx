@@ -1236,15 +1236,15 @@ const RestaurantDetailPage: React.FC = () => {
                 sx={{
                   position: 'sticky',
                   top: 80,
-                  p: 3,
+                  p: 2,
                   border: '1px solid',
                   borderColor: 'divider',
                   borderRadius: 2,
                   backgroundColor: 'background.paper',
                 }}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" fontWeight={700}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Typography variant="subtitle1" fontWeight={700}>
                     사진 ({photos[selectedPhotoCategory].length})
                   </Typography>
                   <IconButton
@@ -1264,7 +1264,7 @@ const RestaurantDetailPage: React.FC = () => {
                 </Box>
 
                 {/* 카테고리 필터 */}
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
                   {[
                     { key: 'all', label: '전체', count: photos.all.length },
                     { key: 'food', label: '음식', count: photos.food.length },
@@ -1287,20 +1287,22 @@ const RestaurantDetailPage: React.FC = () => {
                         sx={{
                           borderRadius: 1,
                           fontWeight: selectedPhotoCategory === category.key ? 600 : 400,
+                          fontSize: '0.75rem',
+                          height: 24,
                         }}
                       />
                     )
                   ))}
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 1.5 }} />
 
                 {/* 이미지 그리드 */}
                 <Box
                   sx={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: 1,
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 0.75,
                   }}
                 >
                   {photos[selectedPhotoCategory]
@@ -1347,9 +1349,10 @@ const RestaurantDetailPage: React.FC = () => {
                   <Button
                     fullWidth
                     variant="outlined"
+                    size="small"
                     onClick={() => setIsImageListExpanded(!isImageListExpanded)}
                     sx={{
-                      mt: 2,
+                      mt: 1.5,
                       borderRadius: 1,
                       textTransform: 'none',
                       fontWeight: 600,
