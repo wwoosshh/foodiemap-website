@@ -444,22 +444,25 @@ const RestaurantDetailPage: React.FC = () => {
                 <Box
                   sx={{
                     width: '100%',
-                    maxHeight: 600,
-                    minHeight: 400,
+                    height: 500,
                     backgroundColor: '#f5f5f5',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 2,
                     overflow: 'hidden',
+                    position: 'relative',
                   }}
                 >
-                  <img
+                  <Box
+                    component="img"
                     src={photos[selectedPhotoCategory][selectedImage]?.photo_url || photos.all[selectedImage]?.photo_url}
                     alt="맛집 사진"
-                    style={{
-                      width: '100%',
-                      height: '100%',
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      width: 'auto',
+                      height: 'auto',
                       objectFit: 'contain',
                       cursor: 'pointer',
                     }}
@@ -1174,42 +1177,26 @@ const RestaurantDetailPage: React.FC = () => {
               sx={{
                 position: 'sticky',
                 top: 20,
-                maxHeight: 'calc(100vh - 40px)',
-                overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 3,
-                // 스크롤바 스타일링
-                '&::-webkit-scrollbar': {
-                  width: '8px',
-                },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: 'transparent',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.3),
-                  borderRadius: '4px',
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.5),
-                  },
-                },
+                gap: 2,
               }}
             >
               {/* 통계 섹션 */}
               <Box
                 sx={{
-                  p: 3,
+                  p: 2.5,
                   border: '1px solid',
                   borderColor: 'divider',
                   borderRadius: 2,
                 }}
               >
-                <Typography variant="h6" fontWeight={700} gutterBottom>
+                <Typography variant="subtitle1" fontWeight={700} gutterBottom>
                   통계
                 </Typography>
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 1.5 }} />
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" color="text.secondary">
                       평균 평점
@@ -1250,7 +1237,7 @@ const RestaurantDetailPage: React.FC = () => {
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 1.5 }} />
 
                 <Stack spacing={1.5}>
                   {restaurant.phone && (
@@ -1288,14 +1275,17 @@ const RestaurantDetailPage: React.FC = () => {
               {photos.all.length > 0 && (
                 <Box
                   sx={{
-                    p: 3,
+                    p: 2.5,
                     border: '1px solid',
                     borderColor: 'divider',
                     borderRadius: 2,
+                    maxHeight: 'calc(100vh - 450px)',
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" fontWeight={700}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                    <Typography variant="subtitle1" fontWeight={700}>
                       사진 ({photos[selectedPhotoCategory].length})
                     </Typography>
                     <IconButton
@@ -1315,7 +1305,7 @@ const RestaurantDetailPage: React.FC = () => {
                   </Box>
 
                   {/* 카테고리 필터 */}
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
                     {[
                       { key: 'all', label: '전체', count: photos.all.length },
                       { key: 'food', label: '음식', count: photos.food.length },
@@ -1337,13 +1327,14 @@ const RestaurantDetailPage: React.FC = () => {
                           sx={{
                             borderRadius: 1,
                             fontWeight: selectedPhotoCategory === category.key ? 600 : 400,
+                            fontSize: '0.75rem',
                           }}
                         />
                       )
                     ))}
                   </Box>
 
-                  <Divider sx={{ my: 2 }} />
+                  <Divider sx={{ my: 1.5 }} />
 
                   {/* 이미지 그리드 */}
                   <Box
@@ -1351,10 +1342,26 @@ const RestaurantDetailPage: React.FC = () => {
                       display: 'grid',
                       gridTemplateColumns: 'repeat(2, 1fr)',
                       gap: 1,
+                      overflowY: 'auto',
+                      flex: 1,
+                      // 스크롤바 스타일링
+                      '&::-webkit-scrollbar': {
+                        width: '6px',
+                      },
+                      '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'transparent',
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.3),
+                        borderRadius: '3px',
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.5),
+                        },
+                      },
                     }}
                   >
                     {photos[selectedPhotoCategory]
-                      .slice(0, isImageListExpanded ? undefined : 6)
+                      .slice(0, isImageListExpanded ? undefined : 4)
                       .map((photo: any, idx: number) => (
                         <Box
                           key={idx}
@@ -1393,20 +1400,20 @@ const RestaurantDetailPage: React.FC = () => {
                   </Box>
 
                   {/* 펼치기/접기 버튼 */}
-                  {photos[selectedPhotoCategory].length > 6 && (
+                  {photos[selectedPhotoCategory].length > 4 && (
                     <Button
                       fullWidth
                       variant="outlined"
                       onClick={() => setIsImageListExpanded(!isImageListExpanded)}
                       sx={{
-                        mt: 2,
+                        mt: 1.5,
                         borderRadius: 1,
                         textTransform: 'none',
                         fontWeight: 600,
                       }}
                       endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                     >
-                      {isImageListExpanded ? '접기' : `${photos[selectedPhotoCategory].length - 6}장 더보기`}
+                      {isImageListExpanded ? '접기' : `${photos[selectedPhotoCategory].length - 4}장 더보기`}
                     </Button>
                   )}
                 </Box>
