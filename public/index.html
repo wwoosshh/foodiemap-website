@@ -11,9 +11,11 @@
       content="Cube와 함께 주변의 숨은 맛집을 발견하고, 리뷰를 공유하세요."
     />
     <!-- Content Security Policy (보안 강화) -->
-    <!-- ⚠️ 개발 중에는 주석 처리하여 CSP 비활성화 -->
-    <!-- 프로덕션 배포 시 주석 해제하여 활성화 -->
     <!--
+      개발/프로덕션 모두 활성화
+      - img-src에 https: 추가로 모든 HTTPS 이미지 허용
+      - script-src에 unsafe-inline, unsafe-eval 필요 (React 빌드)
+    -->
     <meta
       http-equiv="Content-Security-Policy"
       content="
@@ -29,15 +31,7 @@
         font-src 'self'
           https://fonts.gstatic.com
           data:;
-        img-src 'self'
-          https://res.cloudinary.com
-          https://cloudinary.com
-          https://*.supabase.co
-          https://oapi.map.naver.com
-          https://ssl.pstatic.net
-          https://k.kakaocdn.net
-          data:
-          blob:;
+        img-src 'self' https: data: blob:;
         connect-src 'self'
           https://foodiemap-backend.onrender.com
           https://*.supabase.co
@@ -54,7 +48,6 @@
         form-action 'self';
       "
     />
-    -->
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
