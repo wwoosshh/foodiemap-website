@@ -83,7 +83,7 @@ const RestaurantDetailPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedPhotoCategory, setSelectedPhotoCategory] = useState<'all' | 'food' | 'interior' | 'exterior' | 'menu'>('all');
-  const [thumbnailScrollIndex, setThumbnailScrollIndex] = useState(0);
+  const [thumbnailScrollIndex, setThumbnailScrollIndex] = useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [isImageListExpanded, setIsImageListExpanded] = useState(false);
 
   // 리뷰 작성 상태
