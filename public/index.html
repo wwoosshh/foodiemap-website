@@ -11,6 +11,9 @@
       content="Cube와 함께 주변의 숨은 맛집을 발견하고, 리뷰를 공유하세요."
     />
     <!-- Content Security Policy (보안 강화) -->
+    <!-- ⚠️ 개발 중에는 주석 처리하여 CSP 비활성화 -->
+    <!-- 프로덕션 배포 시 주석 해제하여 활성화 -->
+    <!--
     <meta
       http-equiv="Content-Security-Policy"
       content="
@@ -49,9 +52,9 @@
         object-src 'none';
         base-uri 'self';
         form-action 'self';
-        upgrade-insecure-requests;
       "
     />
+    -->
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a

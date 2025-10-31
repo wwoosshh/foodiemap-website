@@ -48,7 +48,7 @@ export const validatePassword = (password: string): {
     errors.push('숫자를 최소 1개 포함해야 합니다.');
   }
 
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     errors.push('특수문자를 최소 1개 포함해야 합니다.');
   }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom'; // TODO: 추후 사용 예정
 import {
   Container,
   Box,
@@ -66,7 +67,7 @@ import { openCloudinaryWidget } from '../lib/cloudinary';
 
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // TODO: 추후 사용 예정
   const theme = useTheme();
   const { user } = useAuth();
 
@@ -82,7 +83,7 @@ const RestaurantDetailPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedPhotoCategory, setSelectedPhotoCategory] = useState<'all' | 'food' | 'interior' | 'exterior' | 'menu'>('all');
-  const [thumbnailScrollIndex, setThumbnailScrollIndex] = useState(0);
+  // const [thumbnailScrollIndex, setThumbnailScrollIndex] = useState(0); // TODO: 추후 사용 예정
   const [isImageListExpanded, setIsImageListExpanded] = useState(false);
 
   // 리뷰 작성 상태
