@@ -3,9 +3,9 @@
  * Upload Widget을 사용하여 이미지를 업로드합니다.
  */
 
-// Cloudinary 설정 (환경변수에서 읽어오거나 직접 설정)
-export const CLOUDINARY_CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'dnmwvwnrv'
-export const CLOUDINARY_UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'restaurants_upload'
+// Cloudinary 설정 (환경변수에서 읽어오기)
+export const CLOUDINARY_CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME
+export const CLOUDINARY_UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET
 
 interface CloudinaryUploadResult {
   url: string
@@ -39,6 +39,12 @@ export const openCloudinaryWidget = (
   }
 
   function openWidget() {
+    // 환경변수 검증
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      console.error('❌ Cloudinary 설정이 누락되었습니다. 환경변수를 확인해주세요.');
+      return;
+    }
+
     const widget = (window as any).cloudinary.createUploadWidget(
       {
         cloudName: CLOUDINARY_CLOUD_NAME,

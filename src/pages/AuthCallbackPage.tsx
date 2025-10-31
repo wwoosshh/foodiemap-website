@@ -16,8 +16,24 @@ const AuthCallbackPage: React.FC = () => {
         // 카카오 로그인 콜백 처리 (팝업 창인 경우 - code 파라미터)
         const urlParams = new URLSearchParams(window.location.search);
         const kakaoCode = urlParams.get('code');
+        const kakaoState = urlParams.get('state');
 
         if (kakaoCode && window.opener) {
+          // CSRF 방어: state 파라미터 검증
+          const savedState = sessionStorage.getItem('kakao_oauth_state');
+          if (!kakaoState || kakaoState !== savedState) {
+            console.error('❌ CSRF 공격 감지: state 파라미터 불일치');
+            window.opener.postMessage({
+              type: 'KAKAO_LOGIN_FAILED',
+              error: 'CSRF 공격이 감지되었습니다.'
+            }, window.location.origin);
+            window.close();
+            return;
+          }
+
+          // state 검증 성공, sessionStorage에서 제거
+          sessionStorage.removeItem('kakao_oauth_state');
+
           // 팝업 창에서 카카오 코드를 부모 창으로 전송
           window.opener.postMessage({
             type: 'KAKAO_LOGIN_SUCCESS',
@@ -33,13 +49,28 @@ const AuthCallbackPage: React.FC = () => {
           // 팝업 창에서 네이버 토큰을 부모 창으로 전송
           const params = new URLSearchParams(hash.substring(1));
           const accessToken = params.get('access_token');
-          const state = params.get('state');
+          const naverState = params.get('state');
 
           if (accessToken) {
+            // CSRF 방어: state 파라미터 검증
+            const savedState = sessionStorage.getItem('naver_oauth_state');
+            if (!naverState || naverState !== savedState) {
+              console.error('❌ CSRF 공격 감지: state 파라미터 불일치');
+              window.opener.postMessage({
+                type: 'NAVER_LOGIN_FAILED',
+                error: 'CSRF 공격이 감지되었습니다.'
+              }, window.location.origin);
+              window.close();
+              return;
+            }
+
+            // state 검증 성공, sessionStorage에서 제거
+            sessionStorage.removeItem('naver_oauth_state');
+
             window.opener.postMessage({
               type: 'NAVER_LOGIN_SUCCESS',
               accessToken,
-              state
+              state: naverState
             }, window.location.origin);
             window.close();
             return;

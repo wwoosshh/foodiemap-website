@@ -23,6 +23,7 @@ import { supabase } from '../config/supabase';
 import { initKakao, loginWithKakao } from '../utils/kakao';
 import { loginWithNaver } from '../utils/naver';
 import { ApiService } from '../services/api';
+import { validateEmail, validatePassword, validateName, validatePhoneNumber } from '../utils/validation';
 
 interface LoginModalProps {
   open: boolean;
@@ -94,8 +95,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
     e.preventDefault();
     setError('');
 
+    // 입력 검증
     if (!loginData.email || !loginData.password) {
       setError('이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    if (!validateEmail(loginData.email)) {
+      setError('올바른 이메일 형식이 아닙니다.');
       return;
     }
 
@@ -117,13 +124,34 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
     e.preventDefault();
     setError('');
 
+    // 필수 필드 확인
     if (!registerData.email || !registerData.password || !registerData.name) {
       setError('이메일, 비밀번호, 이름은 필수 입력 항목입니다.');
       return;
     }
 
-    if (registerData.password.length < 6) {
-      setError('비밀번호는 6자 이상이어야 합니다.');
+    // 이메일 형식 검증
+    if (!validateEmail(registerData.email)) {
+      setError('올바른 이메일 형식이 아닙니다.');
+      return;
+    }
+
+    // 비밀번호 강도 검증
+    const passwordValidation = validatePassword(registerData.password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors.join(' '));
+      return;
+    }
+
+    // 이름 검증
+    if (!validateName(registerData.name)) {
+      setError('이름은 2자 이상 50자 이하여야 하며, 특수문자는 제한됩니다.');
+      return;
+    }
+
+    // 전화번호 검증 (선택사항)
+    if (registerData.phone && !validatePhoneNumber(registerData.phone)) {
+      setError('올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)');
       return;
     }
 

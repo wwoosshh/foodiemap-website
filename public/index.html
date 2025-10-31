@@ -10,6 +10,48 @@
       name="description"
       content="Cube와 함께 주변의 숨은 맛집을 발견하고, 리뷰를 공유하세요."
     />
+    <!-- Content Security Policy (보안 강화) -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval'
+          https://oapi.map.naver.com
+          https://t1.kakaocdn.net
+          https://upload-widget.cloudinary.com
+          https://static.nid.naver.com
+          https://kauth.kakao.com;
+        style-src 'self' 'unsafe-inline'
+          https://fonts.googleapis.com;
+        font-src 'self'
+          https://fonts.gstatic.com
+          data:;
+        img-src 'self'
+          https://res.cloudinary.com
+          https://cloudinary.com
+          https://*.supabase.co
+          https://oapi.map.naver.com
+          https://ssl.pstatic.net
+          https://k.kakaocdn.net
+          data:
+          blob:;
+        connect-src 'self'
+          https://foodiemap-backend.onrender.com
+          https://*.supabase.co
+          https://api.cloudinary.com
+          https://kauth.kakao.com
+          https://nid.naver.com
+          https://openapi.naver.com
+          wss://*.supabase.co;
+        frame-src 'self'
+          https://kauth.kakao.com
+          https://nid.naver.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        upgrade-insecure-requests;
+      "
+    />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a

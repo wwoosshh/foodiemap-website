@@ -2,8 +2,16 @@
 declare global {
   interface Window {
     Kakao: any;
+    crypto: Crypto;
   }
 }
+
+// 암호학적으로 안전한 state 파라미터 생성
+const generateSecureState = (): string => {
+  const array = new Uint8Array(16);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+};
 
 // 카카오 SDK 초기화
 export const initKakao = () => {
@@ -21,7 +29,11 @@ export const initKakao = () => {
         clearInterval(checkKakaoLoaded);
 
         if (!window.Kakao.isInitialized()) {
-          const kakaoKey = process.env.REACT_APP_KAKAO_JS_KEY || '361fbd23bff0c10f74b2df82729b0756';
+          const kakaoKey = process.env.REACT_APP_KAKAO_JS_KEY;
+          if (!kakaoKey) {
+            reject(new Error('Kakao JS Key가 설정되지 않았습니다. 환경변수를 확인해주세요.'));
+            return;
+          }
           window.Kakao.init(kakaoKey);
           console.log('✅ Kakao SDK initialized:', window.Kakao.isInitialized());
         }
@@ -43,11 +55,19 @@ export const initKakao = () => {
 // 카카오 로그인 (OAuth 리다이렉트 방식)
 export const loginWithKakao = (): Promise<any> => {
   return new Promise((resolve, reject) => {
-    const clientId = process.env.REACT_APP_KAKAO_JS_KEY || '361fbd23bff0c10f74b2df82729b0756';
+    const clientId = process.env.REACT_APP_KAKAO_JS_KEY;
+    if (!clientId) {
+      reject(new Error('Kakao JS Key가 설정되지 않았습니다. 환경변수를 확인해주세요.'));
+      return;
+    }
     const redirectUri = `${window.location.origin}/auth/callback`;
 
+    // CSRF 방어를 위한 state 파라미터 생성 (암호학적으로 안전한 방법)
+    const state = generateSecureState();
+    sessionStorage.setItem('kakao_oauth_state', state);
+
     // 카카오 OAuth URL 생성 (prompt=login으로 매번 로그인 화면 표시)
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&prompt=login`;
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&prompt=login&state=${state}`;
 
     // 팝업 창 열기
     const width = 500;

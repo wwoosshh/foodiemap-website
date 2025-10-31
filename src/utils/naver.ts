@@ -2,15 +2,30 @@
 declare global {
   interface Window {
     naver: any;
+    crypto: Crypto;
   }
 }
+
+// 암호학적으로 안전한 state 파라미터 생성
+const generateSecureState = (): string => {
+  const array = new Uint8Array(16);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+};
 
 // 네이버 로그인 (간편한 팝업 방식)
 export const loginWithNaver = (): Promise<any> => {
   return new Promise((resolve, reject) => {
-    const clientId = process.env.REACT_APP_NAVER_CLIENT_ID || 'zV0gfacULb5LJcX7WiwW';
+    const clientId = process.env.REACT_APP_NAVER_CLIENT_ID;
+    if (!clientId) {
+      reject(new Error('Naver Client ID가 설정되지 않았습니다. 환경변수를 확인해주세요.'));
+      return;
+    }
     const callbackUrl = `${window.location.origin}/auth/callback`;
-    const state = Math.random().toString(36).substring(2, 15);
+
+    // CSRF 방어를 위한 state 파라미터 생성 (암호학적으로 안전한 방법)
+    const state = generateSecureState();
+    sessionStorage.setItem('naver_oauth_state', state);
 
     // 네이버 로그인 URL 생성 (auth_type=reauthenticate로 매번 로그인 요구)
     const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&state=${state}&auth_type=reauthenticate`;
