@@ -15,6 +15,7 @@ import {
 import { Campaign, Visibility } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
+import { stripMarkdown } from '../utils/markdown';
 
 const NoticeListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -181,7 +182,7 @@ const NoticeListPage: React.FC = () => {
                           WebkitBoxOrient: 'vertical',
                         }}
                       >
-                        {notice.content}
+                        {stripMarkdown(notice.content)}
                       </Typography>
                     )}
                   </Box>

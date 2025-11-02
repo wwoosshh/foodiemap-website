@@ -16,6 +16,7 @@ import { AccessTime, Event as EventIcon } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 import { DEFAULT_EVENT_IMAGE, handleImageError } from '../constants/images';
+import { stripMarkdown } from '../utils/markdown';
 
 const EventListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -199,7 +200,7 @@ const EventListPage: React.FC = () => {
                       WebkitBoxOrient: 'vertical',
                     }}
                   >
-                    {event.description}
+                    {stripMarkdown(event.description)}
                   </Typography>
 
                   {/* 기간 */}
