@@ -559,7 +559,7 @@ const RestaurantsListPage: React.FC = () => {
                   page={pagination.page}
                   onChange={handlePageChange}
                   color="primary"
-                  size={{ xs: 'medium', md: 'large' } as any}
+                  size="medium"
                   showFirstButton={pagination.totalPages > 5}
                   showLastButton={pagination.totalPages > 5}
                 />
