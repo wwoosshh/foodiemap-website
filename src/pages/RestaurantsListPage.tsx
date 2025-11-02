@@ -145,6 +145,7 @@ const RestaurantsListPage: React.FC = () => {
     navigate(`/restaurants/${restaurantId}`);
   };
 
+  // 데스크탑용 카드형 컴포넌트
   const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
     <Card
       sx={{
@@ -298,15 +299,124 @@ const RestaurantsListPage: React.FC = () => {
     </Card>
   );
 
+  // 모바일용 리스트형 컴포넌트
+  const RestaurantListItem: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
+    <Card
+      onClick={() => handleRestaurantClick(restaurant.id)}
+      sx={{
+        display: 'flex',
+        mb: 1.5,
+        overflow: 'hidden',
+        borderRadius: 2,
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'all 0.2s ease',
+        cursor: 'pointer',
+        '&:hover': {
+          boxShadow: theme.shadows[4],
+          borderColor: 'primary.main',
+        },
+      }}
+    >
+      {/* 이미지 - 왼쪽 고정 크기 */}
+      <CardMedia
+        component="img"
+        sx={{
+          width: 100,
+          height: 100,
+          objectFit: 'cover',
+          flexShrink: 0,
+        }}
+        image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+        alt={restaurant.name}
+        onError={handleImageError}
+      />
+
+      {/* 정보 영역 - 오른쪽 */}
+      <CardContent sx={{ flex: 1, p: 1.5, '&:last-child': { pb: 1.5 } }}>
+        {/* 제목과 카테고리 */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            sx={{
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.3,
+            }}
+          >
+            {restaurant.name}
+          </Typography>
+          {restaurant.categories && (
+            <Chip
+              label={restaurant.categories.name}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.7rem',
+                fontWeight: 600,
+              }}
+            />
+          )}
+        </Box>
+
+        {/* 평점 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <StarFilledIcon sx={{ fontSize: 14, color: '#FFD93D' }} />
+          <Typography variant="body2" fontWeight={600}>
+            {restaurant.rating.toFixed(1)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            ({restaurant.review_count || 0})
+          </Typography>
+        </Box>
+
+        {/* 주소 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <LocationIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {restaurant.address}
+          </Typography>
+        </Box>
+
+        {/* 설명 (1줄만) */}
+        {restaurant.description && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'block',
+            }}
+          >
+            {restaurant.description}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <MainLayout>
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}>
         {/* 페이지 헤더 */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" fontWeight={800} gutterBottom>
+        <Box sx={{ mb: { xs: 2, md: 4 } }}>
+          <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', md: '3rem' } }}>
             맛집 찾기
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
             전국의 맛집을 검색하고 탐색해보세요
           </Typography>
         </Box>
@@ -314,19 +424,20 @@ const RestaurantsListPage: React.FC = () => {
         {/* 필터 & 검색 섹션 */}
         <Box
           sx={{
-            mb: 4,
-            p: 3,
+            mb: { xs: 2, md: 4 },
+            p: { xs: 2, md: 3 },
             backgroundColor: 'background.paper',
             borderRadius: 2,
             boxShadow: 1,
           }}
         >
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: 2, alignItems: "center" }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: { xs: 1.5, md: 2 }, alignItems: "center" }}>
             {/* 검색 */}
-            <Box>
+            <Box sx={{ gridColumn: { xs: '1', sm: '1 / -1', md: 'auto' } }}>
               <Box component="form" onSubmit={handleSearch}>
                 <TextField
                   fullWidth
+                  size="small"
                   placeholder="맛집 검색..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -337,22 +448,30 @@ const RestaurantsListPage: React.FC = () => {
                       </InputAdornment>
                     ),
                   }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      fontSize: { xs: '0.9rem', md: '1rem' },
+                    },
+                  }}
                 />
               </Box>
             </Box>
 
             {/* 카테고리 필터 */}
             <Box>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 <Select
                   value={selectedCategory}
                   onChange={(e) => handleCategoryChange(e.target.value as number | '')}
                   displayEmpty
                   startAdornment={
                     <InputAdornment position="start">
-                      <RestaurantIcon />
+                      <RestaurantIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
                     </InputAdornment>
                   }
+                  sx={{
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                  }}
                 >
                   <MenuItem value="">
                     <em>전체 카테고리</em>
@@ -368,15 +487,18 @@ const RestaurantsListPage: React.FC = () => {
 
             {/* 정렬 */}
             <Box>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 <Select
                   value={sortBy}
                   onChange={(e) => handleSortChange(e.target.value)}
                   startAdornment={
                     <InputAdornment position="start">
-                      <FilterIcon />
+                      <FilterIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
                     </InputAdornment>
                   }
+                  sx={{
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                  }}
                 >
                   <MenuItem value="created_at_desc">최신순</MenuItem>
                   <MenuItem value="rating_desc">평점 높은순</MenuItem>
@@ -390,13 +512,13 @@ const RestaurantsListPage: React.FC = () => {
         </Box>
 
         {/* 결과 정보 */}
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ mb: { xs: 2, md: 3 }, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.85rem', md: '0.875rem' } }}>
             총 <strong>{pagination.total}</strong>개의 맛집
           </Typography>
         </Box>
 
-        {/* 맛집 그리드 */}
+        {/* 맛집 목록 */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
@@ -407,7 +529,21 @@ const RestaurantsListPage: React.FC = () => {
           </Alert>
         ) : (
           <>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }, gap: 3 }}>
+            {/* 모바일: 리스트형 (xs, sm) */}
+            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+              {restaurants.map((restaurant) => (
+                <RestaurantListItem key={restaurant.id} restaurant={restaurant} />
+              ))}
+            </Box>
+
+            {/* 데스크탑/태블릿: 카드형 그리드 (md 이상) */}
+            <Box
+              sx={{
+                display: { xs: 'none', md: 'grid' },
+                gridTemplateColumns: { md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                gap: 3,
+              }}
+            >
               {restaurants.map((restaurant) => (
                 <Box key={restaurant.id}>
                   <RestaurantCard restaurant={restaurant} />
@@ -417,15 +553,15 @@ const RestaurantsListPage: React.FC = () => {
 
             {/* 페이지네이션 */}
             {pagination.totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 4, md: 6 } }}>
                 <Pagination
                   count={pagination.totalPages}
                   page={pagination.page}
                   onChange={handlePageChange}
                   color="primary"
-                  size="large"
-                  showFirstButton
-                  showLastButton
+                  size={{ xs: 'medium', md: 'large' } as any}
+                  showFirstButton={pagination.totalPages > 5}
+                  showLastButton={pagination.totalPages > 5}
                 />
               </Box>
             )}
