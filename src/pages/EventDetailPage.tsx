@@ -18,6 +18,8 @@ import {
   ArrowBack,
   OpenInNew,
 } from '@mui/icons-material';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 import { DEFAULT_EVENT_IMAGE, handleImageError } from '../constants/images';
@@ -159,16 +161,42 @@ const EventDetailPage: React.FC = () => {
           {/* 이벤트 설명 */}
           <Card sx={{ mb: 4 }}>
             <CardContent>
-              <Typography
-                variant="body1"
+              <Box
                 sx={{
-                  whiteSpace: 'pre-wrap',
-                  lineHeight: 1.8,
-                  fontSize: '1.1rem',
+                  '& p': { lineHeight: 1.8, fontSize: '1.1rem', mb: 2 },
+                  '& h1': { fontSize: '2rem', fontWeight: 700, mt: 3, mb: 2 },
+                  '& h2': { fontSize: '1.75rem', fontWeight: 700, mt: 3, mb: 2 },
+                  '& h3': { fontSize: '1.5rem', fontWeight: 700, mt: 2, mb: 1 },
+                  '& ul, & ol': { pl: 3, mb: 2 },
+                  '& li': { mb: 1 },
+                  '& code': {
+                    backgroundColor: '#f5f5f5',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '0.9em'
+                  },
+                  '& pre': {
+                    backgroundColor: '#f5f5f5',
+                    padding: 2,
+                    borderRadius: 1,
+                    overflow: 'auto',
+                    mb: 2
+                  },
+                  '& blockquote': {
+                    borderLeft: '4px solid #e0e0e0',
+                    pl: 2,
+                    ml: 0,
+                    fontStyle: 'italic',
+                    color: 'text.secondary',
+                  },
+                  '& a': { color: 'primary.main', textDecoration: 'underline' },
+                  '& img': { maxWidth: '100%', height: 'auto', borderRadius: 1 },
                 }}
               >
-                {event.description}
-              </Typography>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {event.description}
+                </ReactMarkdown>
+              </Box>
             </CardContent>
           </Card>
 

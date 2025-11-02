@@ -17,6 +17,8 @@ import {
   ArrowBack,
   Visibility,
 } from '@mui/icons-material';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 
@@ -148,17 +150,57 @@ const NoticeDetailPage: React.FC = () => {
           {/* 공지사항 내용 */}
           <Card>
             <CardContent sx={{ p: 4 }}>
-              <Typography
-                variant="body1"
+              <Box
                 sx={{
-                  whiteSpace: 'pre-wrap',
-                  lineHeight: 1.8,
-                  fontSize: '1.1rem',
                   minHeight: 200,
+                  '& p': { lineHeight: 1.8, fontSize: '1.1rem', mb: 2 },
+                  '& h1': { fontSize: '2rem', fontWeight: 700, mt: 3, mb: 2 },
+                  '& h2': { fontSize: '1.75rem', fontWeight: 700, mt: 3, mb: 2 },
+                  '& h3': { fontSize: '1.5rem', fontWeight: 700, mt: 2, mb: 1 },
+                  '& ul, & ol': { pl: 3, mb: 2 },
+                  '& li': { mb: 1 },
+                  '& code': {
+                    backgroundColor: '#f5f5f5',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '0.9em'
+                  },
+                  '& pre': {
+                    backgroundColor: '#f5f5f5',
+                    padding: 2,
+                    borderRadius: 1,
+                    overflow: 'auto',
+                    mb: 2
+                  },
+                  '& blockquote': {
+                    borderLeft: '4px solid #e0e0e0',
+                    pl: 2,
+                    ml: 0,
+                    fontStyle: 'italic',
+                    color: 'text.secondary',
+                  },
+                  '& a': { color: 'primary.main', textDecoration: 'underline' },
+                  '& img': { maxWidth: '100%', height: 'auto', borderRadius: 1 },
+                  '& table': {
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    mb: 2,
+                    '& th, & td': {
+                      border: '1px solid #e0e0e0',
+                      padding: '8px 12px',
+                      textAlign: 'left',
+                    },
+                    '& th': {
+                      backgroundColor: '#f5f5f5',
+                      fontWeight: 600,
+                    },
+                  },
                 }}
               >
-                {notice.content}
-              </Typography>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {notice.content}
+                </ReactMarkdown>
+              </Box>
             </CardContent>
           </Card>
 
