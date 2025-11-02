@@ -529,18 +529,18 @@ const RestaurantsListPage: React.FC = () => {
           </Alert>
         ) : (
           <>
-            {/* 모바일: 리스트형 (xs, sm) */}
-            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            {/* 모바일/작은 태블릿: 리스트형 (xs, sm, md - 1200px 미만) */}
+            <Box sx={{ display: { xs: 'block', lg: 'none' } }}>
               {restaurants.map((restaurant) => (
                 <RestaurantListItem key={restaurant.id} restaurant={restaurant} />
               ))}
             </Box>
 
-            {/* 데스크탑/태블릿: 카드형 그리드 (md 이상) */}
+            {/* 데스크탑/큰 태블릿: 카드형 그리드 (lg 이상 - 1200px+) */}
             <Box
               sx={{
-                display: { xs: 'none', md: 'grid' },
-                gridTemplateColumns: { md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                display: { xs: 'none', lg: 'grid' },
+                gridTemplateColumns: { lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' },
                 gap: 3,
               }}
             >
