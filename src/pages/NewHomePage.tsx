@@ -156,21 +156,21 @@ const NewHomePage: React.FC = () => {
       <CardActionArea onClick={() => handleRestaurantClick(restaurant.id)}>
         <CardMedia
           component="img"
-          height="200"
-          image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-          alt={restaurant.name}
-          onError={handleImageError}
           sx={{
+            height: { xs: 140, sm: 180, md: 200 },
             objectFit: 'cover',
             transition: 'transform 0.3s ease',
             '&:hover': {
               transform: 'scale(1.05)',
             },
           }}
+          image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+          alt={restaurant.name}
+          onError={handleImageError}
         />
-        <CardContent sx={{ flexGrow: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ flex: 1 }}>
+        <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, md: 2 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 0.5 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ flex: 1, fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
               {restaurant.name}
             </Typography>
             {renderRating(restaurant.rating)}
@@ -186,6 +186,8 @@ const NewHomePage: React.FC = () => {
                 color: '#FFFFFF',
                 fontWeight: 600,
                 border: 'none',
+                height: { xs: 20, md: 24 },
+                fontSize: { xs: '0.7rem', md: '0.8125rem' },
               }}
             />
           )}
@@ -198,26 +200,27 @@ const NewHomePage: React.FC = () => {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
-              WebkitLineClamp: 2,
+              WebkitLineClamp: { xs: 1, md: 2 },
               WebkitBoxOrient: 'vertical',
-              minHeight: '40px',
+              minHeight: { xs: '20px', md: '40px' },
+              fontSize: { xs: '0.8rem', md: '0.875rem' },
             }}
           >
             {restaurant.description || '맛있는 음식을 만나보세요'}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-            <LocationIcon sx={{ fontSize: 16 }} />
-            <Typography variant="caption" noWrap>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', mb: 0.5 }}>
+            <LocationIcon sx={{ fontSize: { xs: 12, md: 16 } }} />
+            <Typography variant="caption" noWrap sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
               {restaurant.address}
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">
+          <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
               리뷰 {restaurant.review_count || 0}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
               조회 {restaurant.view_count || 0}
             </Typography>
           </Box>
@@ -236,7 +239,7 @@ const NewHomePage: React.FC = () => {
 
     const scroll = (direction: 'left' | 'right') => {
       if (scrollRef.current) {
-        const scrollAmount = 320; // 카드 너비 + gap
+        const scrollAmount = 240; // 카드 너비 + gap
         scrollRef.current.scrollBy({
           left: direction === 'left' ? -scrollAmount : scrollAmount,
           behavior: 'smooth',
@@ -247,16 +250,16 @@ const NewHomePage: React.FC = () => {
     if (restaurants.length === 0) return null;
 
     return (
-      <Box sx={{ mb: 8, position: 'relative' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ mb: { xs: 4, md: 8 }, position: 'relative' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.5 } }}>
             <Box
               sx={{
-                display: 'flex',
+                display: { xs: 'none', sm: 'flex' },
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 40,
-                height: 40,
+                width: { xs: 32, md: 40 },
+                height: { xs: 32, md: 40 },
                 borderRadius: '50%',
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 color: 'primary.main',
@@ -264,7 +267,7 @@ const NewHomePage: React.FC = () => {
             >
               {icon}
             </Box>
-            <Typography variant="h4" fontWeight={700}>
+            <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}>
               {title}
             </Typography>
           </Box>
@@ -274,6 +277,10 @@ const NewHomePage: React.FC = () => {
               const categoryParam = selectedCategoryId ? `&category=${selectedCategoryId}` : '';
               navigate(`/restaurants?sort=${sortParam}${categoryParam}`);
             }}
+            sx={{
+              fontSize: { xs: '0.8rem', md: '0.875rem' },
+              px: { xs: 1, md: 2 },
+            }}
           >
             더보기
           </Button>
@@ -281,10 +288,11 @@ const NewHomePage: React.FC = () => {
 
         {/* 캐러셀 컨트롤 */}
         <Box sx={{ position: 'relative' }}>
-          {/* 왼쪽 버튼 */}
+          {/* 왼쪽 버튼 - 모바일에서 숨김 */}
           <IconButton
             onClick={() => scroll('left')}
             sx={{
+              display: { xs: 'none', md: 'flex' },
               position: 'absolute',
               left: -20,
               top: '50%',
@@ -306,13 +314,13 @@ const NewHomePage: React.FC = () => {
             ref={scrollRef}
             sx={{
               display: 'flex',
-              gap: 3,
+              gap: { xs: 2, md: 3 },
               overflowX: 'auto',
               overflowY: 'hidden',
               pb: 2,
-              scrollbarWidth: 'thin',
+              scrollbarWidth: { xs: 'none', md: 'thin' },
               '&::-webkit-scrollbar': {
-                height: 8,
+                height: { xs: 0, md: 8 },
               },
               '&::-webkit-scrollbar-track': {
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
@@ -331,8 +339,8 @@ const NewHomePage: React.FC = () => {
               <Box
                 key={restaurant.id}
                 sx={{
-                  minWidth: { xs: '280px', sm: '320px', md: '280px' },
-                  maxWidth: { xs: '280px', sm: '320px', md: '280px' },
+                  minWidth: { xs: '220px', sm: '240px', md: '280px' },
+                  maxWidth: { xs: '220px', sm: '240px', md: '280px' },
                   flex: '0 0 auto',
                 }}
               >
@@ -341,10 +349,11 @@ const NewHomePage: React.FC = () => {
             ))}
           </Box>
 
-          {/* 오른쪽 버튼 */}
+          {/* 오른쪽 버튼 - 모바일에서 숨김 */}
           <IconButton
             onClick={() => scroll('right')}
             sx={{
+              display: { xs: 'none', md: 'flex' },
               position: 'absolute',
               right: -20,
               top: '50%',
@@ -368,12 +377,12 @@ const NewHomePage: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2, mb: 4 }} />
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3 }}>
+        <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}>
+          <Skeleton variant="rectangular" sx={{ height: { xs: 200, md: 400 }, borderRadius: 2, mb: { xs: 2, md: 4 } }} />
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: { xs: 2, md: 3 } }}>
             {[1, 2, 3, 4].map((i) => (
               <Box key={i}>
-                <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
+                <Skeleton variant="rectangular" sx={{ height: { xs: 200, md: 300 }, borderRadius: 2 }} />
               </Box>
             ))}
           </Box>
@@ -385,7 +394,7 @@ const NewHomePage: React.FC = () => {
   if (error) {
     return (
       <MainLayout>
-        <Container maxWidth="xl" sx={{ py: 8 }}>
+        <Container maxWidth="xl" sx={{ py: { xs: 4, md: 8 }, px: { xs: 2, md: 3 } }}>
           <Alert severity="error">{error}</Alert>
         </Container>
       </MainLayout>
@@ -397,18 +406,19 @@ const NewHomePage: React.FC = () => {
   return (
     <MainLayout>
       {/* 히어로 텍스트 - 최상단 배치 */}
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
         <Box
           sx={{
             textAlign: 'center',
-            py: 8,
+            py: { xs: 4, sm: 6, md: 8 },
+            px: { xs: 2, md: 4 },
             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
               theme.palette.secondary.main,
               0.05
             )} 100%)`,
-            borderRadius: 4,
-            mb: 8,
-            mt: 3,
+            borderRadius: { xs: 2, md: 4 },
+            mb: { xs: 4, md: 8 },
+            mt: { xs: 2, md: 3 },
           }}
         >
           <Typography
@@ -420,11 +430,12 @@ const NewHomePage: React.FC = () => {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               mb: 2,
+              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' },
             }}
           >
             당신의 맛있는 순간
           </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
+          <Typography variant="h5" color="text.secondary" sx={{ mb: { xs: 3, md: 4 }, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>
             전국의 숨은 맛집을 찾아보세요
           </Typography>
           <Button
@@ -433,9 +444,9 @@ const NewHomePage: React.FC = () => {
             endIcon={<ArrowRightIcon />}
             onClick={() => navigate('/restaurants')}
             sx={{
-              px: 4,
-              py: 1.5,
-              fontSize: '1.1rem',
+              px: { xs: 3, md: 4 },
+              py: { xs: 1, md: 1.5 },
+              fontSize: { xs: '0.9rem', md: '1.1rem' },
             }}
           >
             맛집 탐색하기
@@ -451,8 +462,8 @@ const NewHomePage: React.FC = () => {
               theme.palette.secondary.main,
               0.08
             )} 100%)`,
-            py: 6,
-            mb: 6,
+            py: { xs: 3, md: 6 },
+            mb: { xs: 3, md: 6 },
           }}
         >
           <Container maxWidth="xl">
@@ -465,7 +476,8 @@ const NewHomePage: React.FC = () => {
                 background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                mb: 5,
+                mb: { xs: 3, md: 5 },
+                fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' },
               }}
             >
               지금 꼭 가봐야 할 맛집
@@ -474,7 +486,7 @@ const NewHomePage: React.FC = () => {
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-                gap: 4,
+                gap: { xs: 2, md: 4 },
               }}
             >
               {pushedRestaurants.map((pushed, index) => (
@@ -486,7 +498,7 @@ const NewHomePage: React.FC = () => {
                     cursor: 'pointer',
                     transition: 'all 0.4s ease',
                     '&:hover': {
-                      transform: 'translateY(-12px)',
+                      transform: { xs: 'translateY(-4px)', md: 'translateY(-12px)' },
                       boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.25)',
                     },
                   }}
@@ -498,13 +510,13 @@ const NewHomePage: React.FC = () => {
                       label={pushed.badge_text}
                       sx={{
                         position: 'absolute',
-                        top: 16,
-                        right: 16,
+                        top: { xs: 12, md: 16 },
+                        right: { xs: 12, md: 16 },
                         zIndex: 2,
                         backgroundColor: pushed.badge_color || '#FF6B6B',
                         color: 'white',
                         fontWeight: 700,
-                        fontSize: '0.85rem',
+                        fontSize: { xs: '0.75rem', md: '0.85rem' },
                         boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                       }}
                     />
@@ -512,38 +524,38 @@ const NewHomePage: React.FC = () => {
 
                   <CardMedia
                     component="img"
-                    height="250"
-                    image={pushed.restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-                    alt={pushed.restaurant.name}
-                    onError={handleImageError}
                     sx={{
+                      height: { xs: 180, sm: 220, md: 250 },
                       objectFit: 'cover',
                       transition: 'transform 0.4s ease',
                       '&:hover': {
                         transform: 'scale(1.1)',
                       },
                     }}
+                    image={pushed.restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                    alt={pushed.restaurant.name}
+                    onError={handleImageError}
                   />
 
-                  <CardContent>
-                    <Typography variant="overline" color="primary" fontWeight={700} sx={{ display: 'block', mb: 1 }}>
+                  <CardContent sx={{ p: { xs: 2, md: 2 } }}>
+                    <Typography variant="overline" color="primary" fontWeight={700} sx={{ display: 'block', mb: 1, fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
                       {pushed.title}
                     </Typography>
-                    <Typography variant="h5" fontWeight={700} gutterBottom>
+                    <Typography variant="h5" fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
                       {pushed.restaurant.name}
                     </Typography>
                     {pushed.subtitle && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: { xs: '0.85rem', md: '0.875rem' } }}>
                         {pushed.subtitle}
                       </Typography>
                     )}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
                       {renderRating(pushed.restaurant.rating)}
-                      <Box sx={{ display: 'flex', gap: 2 }}>
-                        <Typography variant="caption" color="text.secondary">
+                      <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 } }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
                           리뷰 {pushed.restaurant.review_count || 0}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
                           조회 {pushed.restaurant.view_count || 0}
                         </Typography>
                       </Box>
@@ -558,22 +570,22 @@ const NewHomePage: React.FC = () => {
 
       {/* 배너 캐러셀 - 세 번째 배치 */}
       {banners.length > 0 && (
-        <Box sx={{ mb: 8 }}>
+        <Box sx={{ mb: { xs: 4, md: 8 } }}>
           <BannerCarousel banners={banners} />
         </Box>
       )}
 
       {/* 메인 콘텐츠 */}
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
 
         {/* 메인 레이아웃: 콘텐츠 + 카테고리 사이드바 */}
-        <Box sx={{ display: 'flex', gap: 4, position: 'relative' }}>
+        <Box sx={{ display: 'flex', gap: { xs: 2, md: 4 }, position: 'relative' }}>
           {/* 메인 콘텐츠 영역 */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             {/* 선택된 카테고리 표시 */}
             {selectedCategoryId && selectedCategory && (
-              <Box sx={{ mb: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, mb: 2 }}>
                   <Chip
                     label={selectedCategory.name}
                     onDelete={() => handleCategoryClick(null)}
@@ -581,14 +593,14 @@ const NewHomePage: React.FC = () => {
                       backgroundColor: theme.palette.primary.main,
                       color: 'white',
                       fontWeight: 700,
-                      fontSize: '1rem',
-                      py: 2.5,
+                      fontSize: { xs: '0.85rem', md: '1rem' },
+                      py: { xs: 2, md: 2.5 },
                       '& .MuiChip-deleteIcon': {
                         color: 'white',
                       },
                     }}
                   />
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                     선택된 카테고리
                   </Typography>
                 </Box>
@@ -702,33 +714,33 @@ const NewHomePage: React.FC = () => {
         {/* 통계 섹션 */}
         <Box
           sx={{
-            py: 6,
-            px: 4,
-            borderRadius: 4,
+            py: { xs: 3, sm: 4, md: 6 },
+            px: { xs: 2, sm: 3, md: 4 },
+            borderRadius: { xs: 2, md: 4 },
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
             color: 'white',
-            mb: 8,
-            mt: 8,
+            mb: { xs: 4, md: 8 },
+            mt: { xs: 4, md: 8 },
           }}
         >
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 4, textAlign: 'center' }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: { xs: 3, md: 4 }, textAlign: 'center' }}>
             <Box>
-              <Typography variant="h3" fontWeight={800} gutterBottom>
+              <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
                 {stats.totalRestaurants.toLocaleString()}+
               </Typography>
-              <Typography variant="h6">등록된 맛집</Typography>
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>등록된 맛집</Typography>
             </Box>
             <Box>
-              <Typography variant="h3" fontWeight={800} gutterBottom>
+              <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
                 {stats.totalReviews.toLocaleString()}+
               </Typography>
-              <Typography variant="h6">작성된 리뷰</Typography>
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>작성된 리뷰</Typography>
             </Box>
             <Box>
-              <Typography variant="h3" fontWeight={800} gutterBottom>
+              <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
                 {stats.totalUsers.toLocaleString()}+
               </Typography>
-              <Typography variant="h6">활성 사용자</Typography>
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>활성 사용자</Typography>
             </Box>
           </Box>
         </Box>
