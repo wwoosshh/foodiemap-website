@@ -378,11 +378,17 @@ const RestaurantDetailPage: React.FC = () => {
       { key: 'delivery_available', label: '배달', icon: <DeliveryDining sx={{ fontSize: 18 }} /> },
       { key: 'takeout_available', label: '포장', icon: <ShoppingBag sx={{ fontSize: 18 }} /> },
       { key: 'reservation_available', label: '예약', icon: <EventAvailable sx={{ fontSize: 18 }} /> },
+      { key: 'pet_friendly', label: '반려동물 동반', icon: null },
+      { key: 'group_seating', label: '단체석', icon: null },
+      { key: 'private_room', label: '룸/프라이빗', icon: null },
+      { key: 'wheelchair_accessible', label: '휠체어 접근', icon: null },
+      { key: 'nursing_room', label: '수유실', icon: null },
+      { key: 'kids_menu', label: '어린이 메뉴', icon: null },
     ];
 
     const availableFacilities = facilities.filter(f => restaurant[f.key]);
 
-    if (availableFacilities.length === 0 && !restaurant.parking_info) {
+    if (availableFacilities.length === 0 && !restaurant.parking_info && !restaurant.valet_parking) {
       return <Typography variant="body2" color="text.secondary">정보 없음</Typography>;
     }
 
@@ -391,16 +397,24 @@ const RestaurantDetailPage: React.FC = () => {
         {availableFacilities.map((facility) => (
           <Chip
             key={facility.key}
-            icon={facility.icon}
+            {...(facility.icon ? { icon: facility.icon } : {})}
             label={facility.label}
             size="small"
             variant="outlined"
             sx={{ borderRadius: 1 }}
           />
         ))}
-        {restaurant.parking_info && (
+        {restaurant.parking_available && (
           <Chip
-            label={`주차 가능`}
+            label={`주차 가능${restaurant.parking_spaces ? ` (${restaurant.parking_spaces}대)` : ''}`}
+            size="small"
+            variant="outlined"
+            sx={{ borderRadius: 1 }}
+          />
+        )}
+        {restaurant.valet_parking && (
+          <Chip
+            label="발렛파킹"
             size="small"
             variant="outlined"
             sx={{ borderRadius: 1 }}
@@ -702,6 +716,45 @@ const RestaurantDetailPage: React.FC = () => {
                   </Typography>
                 )}
               </Box>
+
+              {/* 배달/포장 정보 */}
+              {(restaurant.delivery_available || restaurant.delivery_apps || restaurant.takeout_available) && (
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <DeliveryDining sx={{ fontSize: 20, color: 'primary.main' }} />
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
+                      배달/포장
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    {restaurant.delivery_available && (
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>배달 가능</Typography>
+                        {restaurant.delivery_apps && restaurant.delivery_apps.length > 0 && (
+                          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                            {restaurant.delivery_apps.map((app: string, idx: number) => (
+                              <Chip key={idx} label={app} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                            ))}
+                          </Box>
+                        )}
+                        {restaurant.delivery_fee !== null && restaurant.delivery_fee !== undefined && (
+                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                            배달비: {restaurant.delivery_fee === 0 ? '무료' : `${restaurant.delivery_fee.toLocaleString()}원`}
+                          </Typography>
+                        )}
+                        {restaurant.min_order_amount && (
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            최소 주문금액: {restaurant.min_order_amount.toLocaleString()}원
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                    {restaurant.takeout_available && (
+                      <Typography variant="body2">포장 가능</Typography>
+                    )}
+                  </Box>
+                </Box>
+              )}
             </Box>
 
             <Divider sx={{ my: 3 }} />
@@ -926,17 +979,96 @@ const RestaurantDetailPage: React.FC = () => {
                               <Avatar src={review.is_anonymous ? undefined : review.avatar_url} sx={{ width: 48, height: 48 }}>
                                 {review.username?.[0] || '익'}
                               </Avatar>
-                              <Box>
-                                <Typography variant="body1" fontWeight={600}>
-                                  {review.username || '익명'}
-                                </Typography>
+                              <Box sx={{ flex: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography variant="body1" fontWeight={600}>
+                                    {review.username || '익명'}
+                                  </Typography>
+                                  {review.visit_count && review.visit_count > 1 && (
+                                    <Chip
+                                      label={`${review.visit_count}번째 방문`}
+                                      size="small"
+                                      sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }}
+                                    />
+                                  )}
+                                </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                                   <Rating value={review.rating || 0} size="small" readOnly />
                                   <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
                                   <Typography variant="caption" color="text.secondary">
                                     {new Date(review.created_at).toLocaleDateString()}
                                   </Typography>
+                                  {review.visit_date && (
+                                    <>
+                                      <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+                                      <Typography variant="caption" color="text.secondary">
+                                        방문일: {new Date(review.visit_date).toLocaleDateString()}
+                                      </Typography>
+                                    </>
+                                  )}
                                 </Box>
+
+                                {/* 상세 평점 */}
+                                {(review.taste_rating || review.quantity_rating || review.service_rating || review.atmosphere_rating || review.cleanliness_rating) && (
+                                  <Box sx={{ display: 'flex', gap: 2, mt: 1, flexWrap: 'wrap' }}>
+                                    {review.taste_rating && (
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Typography variant="caption" color="text.secondary">맛</Typography>
+                                        <Rating value={review.taste_rating} size="small" readOnly sx={{ fontSize: '0.9rem' }} />
+                                      </Box>
+                                    )}
+                                    {review.quantity_rating && (
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Typography variant="caption" color="text.secondary">양</Typography>
+                                        <Rating value={review.quantity_rating} size="small" readOnly sx={{ fontSize: '0.9rem' }} />
+                                      </Box>
+                                    )}
+                                    {review.service_rating && (
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Typography variant="caption" color="text.secondary">서비스</Typography>
+                                        <Rating value={review.service_rating} size="small" readOnly sx={{ fontSize: '0.9rem' }} />
+                                      </Box>
+                                    )}
+                                    {review.atmosphere_rating && (
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Typography variant="caption" color="text.secondary">분위기</Typography>
+                                        <Rating value={review.atmosphere_rating} size="small" readOnly sx={{ fontSize: '0.9rem' }} />
+                                      </Box>
+                                    )}
+                                    {review.cleanliness_rating && (
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Typography variant="caption" color="text.secondary">청결</Typography>
+                                        <Rating value={review.cleanliness_rating} size="small" readOnly sx={{ fontSize: '0.9rem' }} />
+                                      </Box>
+                                    )}
+                                  </Box>
+                                )}
+
+                                {/* 방문 목적 및 키워드 태그 */}
+                                {(review.visit_purpose || (review.keyword_tags && review.keyword_tags.length > 0)) && (
+                                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                                    {review.visit_purpose && (
+                                      <Chip label={review.visit_purpose} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                    )}
+                                    {review.keyword_tags && review.keyword_tags.map((tag: string, idx: number) => (
+                                      <Chip key={idx} label={tag} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                    ))}
+                                  </Box>
+                                )}
+
+                                {/* 메뉴 태그 */}
+                                {review.menu_tags && review.menu_tags.length > 0 && (
+                                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                                    {review.menu_tags.map((menu: string, idx: number) => (
+                                      <Chip
+                                        key={idx}
+                                        label={menu}
+                                        size="small"
+                                        sx={{ height: 20, fontSize: '0.7rem', backgroundColor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}
+                                      />
+                                    ))}
+                                  </Box>
+                                )}
                               </Box>
                             </Box>
 
@@ -1054,31 +1186,100 @@ const RestaurantDetailPage: React.FC = () => {
                             <Box
                               key={menu.id}
                               sx={{
-                                p: 2,
                                 border: '2px solid',
                                 borderColor: 'primary.main',
                                 backgroundColor: alpha(theme.palette.primary.main, 0.02),
-                                borderRadius: 1,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'start',
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                opacity: menu.is_available === false || menu.sold_out ? 0.6 : 1,
                               }}
                             >
-                              <Box>
-                                <Typography variant="subtitle1" fontWeight={600}>
-                                  {menu.name}
-                                </Typography>
+                              {/* 메뉴 이미지 */}
+                              {menu.image_url && (
+                                <Box
+                                  component="img"
+                                  src={menu.image_url}
+                                  alt={menu.name}
+                                  sx={{
+                                    width: '100%',
+                                    height: 200,
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                              )}
+
+                              <Box sx={{ p: 2 }}>
+                                {/* 메뉴명 및 배지 */}
+                                <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', mb: 1 }}>
+                                  <Box sx={{ flex: 1 }}>
+                                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
+                                      {menu.is_signature && (
+                                        <Chip label="시그니처" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                      {menu.is_seasonal && (
+                                        <Chip label="시즌 한정" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }} />
+                                      )}
+                                      {menu.category && (
+                                        <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                      {menu.sold_out && (
+                                        <Chip label="품절" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                    </Box>
+                                    <Typography variant="subtitle1" fontWeight={700}>
+                                      {menu.name}
+                                    </Typography>
+                                  </Box>
+
+                                  {/* 가격 */}
+                                  <Box sx={{ textAlign: 'right', ml: 2 }}>
+                                    {menu.original_price && menu.original_price > menu.price && (
+                                      <Typography variant="caption" color="text.secondary" sx={{ textDecoration: 'line-through', display: 'block' }}>
+                                        {menu.original_price.toLocaleString()}원
+                                      </Typography>
+                                    )}
+                                    <Typography variant="h6" fontWeight={700} color="primary.main">
+                                      {menu.price?.toLocaleString()}원
+                                    </Typography>
+                                  </Box>
+                                </Box>
+
+                                {/* 설명 */}
                                 {menu.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                                     {menu.description}
                                   </Typography>
                                 )}
+
+                                {/* 추가 정보 */}
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                  {menu.portion_size && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      용량: {menu.portion_size}
+                                    </Typography>
+                                  )}
+                                  {menu.spicy_level && menu.spicy_level > 0 && (
+                                    <Typography variant="caption" color="error.main">
+                                      맵기: {menu.spicy_level}/5
+                                    </Typography>
+                                  )}
+                                  {menu.calories && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      칼로리: {menu.calories} kcal
+                                    </Typography>
+                                  )}
+                                  {menu.allergens && menu.allergens.length > 0 && (
+                                    <Typography variant="caption" color="warning.main">
+                                      알러지: {menu.allergens.join(', ')}
+                                    </Typography>
+                                  )}
+                                  {menu.ingredients && menu.ingredients.length > 0 && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      재료: {menu.ingredients.join(', ')}
+                                    </Typography>
+                                  )}
+                                </Box>
                               </Box>
-                              {menu.price && (
-                                <Typography variant="h6" fontWeight={700} color="primary.main">
-                                  {menu.price?.toLocaleString()}원
-                                </Typography>
-                              )}
                             </Box>
                           ))}
                         </Box>
@@ -1096,30 +1297,89 @@ const RestaurantDetailPage: React.FC = () => {
                             <Box
                               key={menu.id}
                               sx={{
-                                p: 2,
                                 border: '1px solid',
                                 borderColor: 'divider',
-                                borderRadius: 1,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'start',
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                opacity: menu.is_available === false || menu.sold_out ? 0.6 : 1,
                               }}
                             >
-                              <Box>
-                                <Typography variant="subtitle1" fontWeight={600}>
-                                  {menu.name}
-                                </Typography>
+                              {menu.image_url && (
+                                <Box
+                                  component="img"
+                                  src={menu.image_url}
+                                  alt={menu.name}
+                                  sx={{
+                                    width: '100%',
+                                    height: 180,
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                              )}
+
+                              <Box sx={{ p: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', mb: 1 }}>
+                                  <Box sx={{ flex: 1 }}>
+                                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
+                                      {menu.is_popular && (
+                                        <Chip label="인기" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#FFD93D', color: '#2C3E50' }} />
+                                      )}
+                                      {menu.is_seasonal && (
+                                        <Chip label="시즌 한정" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }} />
+                                      )}
+                                      {menu.category && (
+                                        <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                      {menu.sold_out && (
+                                        <Chip label="품절" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                    </Box>
+                                    <Typography variant="subtitle1" fontWeight={700}>
+                                      {menu.name}
+                                    </Typography>
+                                  </Box>
+
+                                  <Box sx={{ textAlign: 'right', ml: 2 }}>
+                                    {menu.original_price && menu.original_price > menu.price && (
+                                      <Typography variant="caption" color="text.secondary" sx={{ textDecoration: 'line-through', display: 'block' }}>
+                                        {menu.original_price.toLocaleString()}원
+                                      </Typography>
+                                    )}
+                                    <Typography variant="h6" fontWeight={700} color="primary.main">
+                                      {menu.price?.toLocaleString()}원
+                                    </Typography>
+                                  </Box>
+                                </Box>
+
                                 {menu.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                                     {menu.description}
                                   </Typography>
                                 )}
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                  {menu.portion_size && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      용량: {menu.portion_size}
+                                    </Typography>
+                                  )}
+                                  {menu.spicy_level && menu.spicy_level > 0 && (
+                                    <Typography variant="caption" color="error.main">
+                                      맵기: {menu.spicy_level}/5
+                                    </Typography>
+                                  )}
+                                  {menu.calories && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      칼로리: {menu.calories} kcal
+                                    </Typography>
+                                  )}
+                                  {menu.allergens && menu.allergens.length > 0 && (
+                                    <Typography variant="caption" color="warning.main">
+                                      알러지: {menu.allergens.join(', ')}
+                                    </Typography>
+                                  )}
+                                </Box>
                               </Box>
-                              {menu.price && (
-                                <Typography variant="h6" fontWeight={700} color="primary.main">
-                                  {menu.price?.toLocaleString()}원
-                                </Typography>
-                              )}
                             </Box>
                           ))}
                         </Box>
@@ -1137,30 +1397,92 @@ const RestaurantDetailPage: React.FC = () => {
                             <Box
                               key={menu.id}
                               sx={{
-                                p: 2,
                                 border: '1px solid',
                                 borderColor: 'divider',
-                                borderRadius: 1,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'start',
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                opacity: menu.is_available === false || menu.sold_out ? 0.6 : 1,
                               }}
                             >
-                              <Box>
-                                <Typography variant="subtitle1" fontWeight={600}>
-                                  {menu.name}
-                                </Typography>
+                              {menu.image_url && (
+                                <Box
+                                  component="img"
+                                  src={menu.image_url}
+                                  alt={menu.name}
+                                  sx={{
+                                    width: '100%',
+                                    height: 180,
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                              )}
+
+                              <Box sx={{ p: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', mb: 1 }}>
+                                  <Box sx={{ flex: 1 }}>
+                                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
+                                      {menu.is_signature && (
+                                        <Chip label="시그니처" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                      {menu.is_popular && (
+                                        <Chip label="인기" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#FFD93D', color: '#2C3E50' }} />
+                                      )}
+                                      {menu.is_seasonal && (
+                                        <Chip label="시즌 한정" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }} />
+                                      )}
+                                      {menu.category && (
+                                        <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                      {menu.sold_out && (
+                                        <Chip label="품절" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                      )}
+                                    </Box>
+                                    <Typography variant="subtitle1" fontWeight={700}>
+                                      {menu.name}
+                                    </Typography>
+                                  </Box>
+
+                                  <Box sx={{ textAlign: 'right', ml: 2 }}>
+                                    {menu.original_price && menu.original_price > menu.price && (
+                                      <Typography variant="caption" color="text.secondary" sx={{ textDecoration: 'line-through', display: 'block' }}>
+                                        {menu.original_price.toLocaleString()}원
+                                      </Typography>
+                                    )}
+                                    <Typography variant="h6" fontWeight={700} color="primary.main">
+                                      {menu.price?.toLocaleString()}원
+                                    </Typography>
+                                  </Box>
+                                </Box>
+
                                 {menu.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                                     {menu.description}
                                   </Typography>
                                 )}
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                  {menu.portion_size && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      용량: {menu.portion_size}
+                                    </Typography>
+                                  )}
+                                  {menu.spicy_level && menu.spicy_level > 0 && (
+                                    <Typography variant="caption" color="error.main">
+                                      맵기: {menu.spicy_level}/5
+                                    </Typography>
+                                  )}
+                                  {menu.calories && (
+                                    <Typography variant="caption" color="text.secondary">
+                                      칼로리: {menu.calories} kcal
+                                    </Typography>
+                                  )}
+                                  {menu.allergens && menu.allergens.length > 0 && (
+                                    <Typography variant="caption" color="warning.main">
+                                      알러지: {menu.allergens.join(', ')}
+                                    </Typography>
+                                  )}
+                                </Box>
                               </Box>
-                              {menu.price && (
-                                <Typography variant="h6" fontWeight={700} color="primary.main">
-                                  {menu.price?.toLocaleString()}원
-                                </Typography>
-                              )}
                             </Box>
                           ))}
                         </Box>
