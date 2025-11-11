@@ -771,28 +771,6 @@ const RestaurantDetailPage: React.FC = () => {
               </Box>
             )}
 
-            {/* 시그니처 메뉴 */}
-            {restaurant.signature_menu && restaurant.signature_menu.length > 0 && (
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <RestaurantIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                  <Typography variant="h6" fontWeight={600}>
-                    시그니처 메뉴
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {restaurant.signature_menu.map((menu: string, index: number) => (
-                    <Chip
-                      key={index}
-                      label={menu}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ borderRadius: 1, fontWeight: 500 }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            )}
 
             {/* 소셜 링크 */}
             {(restaurant.website_url || restaurant.blog_url || restaurant.instagram_url || restaurant.facebook_url) && (
@@ -1168,7 +1146,7 @@ const RestaurantDetailPage: React.FC = () => {
                 <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
                   메뉴
                 </Typography>
-                {menus.all.length === 0 && !restaurant.menu_info ? (
+                {menus.all.length === 0 ? (
                   <Alert severity="info" sx={{ borderRadius: 1 }}>등록된 메뉴가 없습니다.</Alert>
                 ) : (
                   <Box>
@@ -1483,47 +1461,6 @@ const RestaurantDetailPage: React.FC = () => {
                                   )}
                                 </Box>
                               </Box>
-                            </Box>
-                          ))}
-                        </Box>
-                      </Box>
-                    )}
-
-                    {/* 구 menu_info 구조도 fallback으로 지원 */}
-                    {menus.all.length === 0 && restaurant.menu_info && (
-                      <Box>
-                        <Typography variant="h6" fontWeight={600} gutterBottom>
-                          전체 메뉴
-                        </Typography>
-                        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
-                          {(Array.isArray(restaurant.menu_info) ? restaurant.menu_info : restaurant.menu_info.items || []).map((item: any, index: number) => (
-                            <Box
-                              key={index}
-                              sx={{
-                                p: 2,
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                borderRadius: 1,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'start',
-                              }}
-                            >
-                              <Box>
-                                <Typography variant="subtitle1" fontWeight={600}>
-                                  {item.name}
-                                </Typography>
-                                {item.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                    {item.description}
-                                  </Typography>
-                                )}
-                              </Box>
-                              {item.price && (
-                                <Typography variant="h6" fontWeight={700} color="primary.main">
-                                  {typeof item.price === 'number' ? item.price.toLocaleString() : item.price}원
-                                </Typography>
-                              )}
                             </Box>
                           ))}
                         </Box>
