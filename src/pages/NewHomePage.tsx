@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   CardMedia,
-  CardActionArea,
   Button,
   Chip,
   Alert,
@@ -16,7 +15,6 @@ import {
   Skeleton,
   Paper,
   Divider,
-  IconButton,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
@@ -27,8 +25,6 @@ import {
   LocationIcon,
   RestaurantIcon,
   ArrowRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ReviewIcon,
   EyeIcon,
   HeartFilledIcon,
@@ -146,86 +142,106 @@ const NewHomePage: React.FC = () => {
   const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
     <Card
       sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
         position: 'relative',
+        height: { xs: 180, sm: 200, md: 220 },
         overflow: 'hidden',
+        cursor: 'pointer',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0px 12px 32px rgba(255, 107, 107, 0.2)',
+        },
       }}
+      onClick={() => handleRestaurantClick(restaurant.id)}
     >
-      <CardActionArea onClick={() => handleRestaurantClick(restaurant.id)}>
-        <CardMedia
-          component="img"
-          sx={{
-            height: { xs: 140, sm: 180, md: 200 },
-            objectFit: 'cover',
-            transition: 'transform 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-            },
-          }}
-          image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-          alt={restaurant.name}
-          onError={handleImageError}
-        />
-        <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, md: 2 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={700} sx={{ flex: 1, fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
-              {restaurant.name}
+      {/* 배경 이미지 */}
+      <CardMedia
+        component="img"
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transition: 'transform 0.3s ease',
+          '&:hover': {
+            transform: 'scale(1.05)',
+          },
+        }}
+        image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+        alt={restaurant.name}
+        onError={handleImageError}
+      />
+
+      {/* 그라데이션 오버레이 */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
+        }}
+      />
+
+      {/* 정보 오버레이 */}
+      <CardContent
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          color: 'white',
+          p: { xs: 2, md: 2.5 },
+          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+          <Typography variant="h6" fontWeight={700} sx={{ flex: 1, color: 'white', fontSize: { xs: '1rem', md: '1.25rem' } }}>
+            {restaurant.name}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+            <StarFilledIcon sx={{ fontSize: 18, color: '#FFD93D' }} />
+            <Typography variant="body2" fontWeight={600} sx={{ color: 'white' }}>
+              {restaurant.rating.toFixed(1)}
             </Typography>
-            {renderRating(restaurant.rating)}
           </Box>
+        </Box>
 
-          {restaurant.categories && (
-            <Chip
-              label={restaurant.categories.name}
-              size="small"
-              sx={{
-                mb: 1,
-                backgroundColor: theme.palette.primary.main,
-                color: '#FFFFFF',
-                fontWeight: 600,
-                border: 'none',
-                height: { xs: 20, md: 24 },
-                fontSize: { xs: '0.7rem', md: '0.8125rem' },
-              }}
-            />
-          )}
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
+        {restaurant.categories && (
+          <Chip
+            label={restaurant.categories.name}
+            size="small"
             sx={{
               mb: 1,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: { xs: 1, md: 2 },
-              WebkitBoxOrient: 'vertical',
-              minHeight: { xs: '20px', md: '40px' },
-              fontSize: { xs: '0.8rem', md: '0.875rem' },
+              backgroundColor: alpha(theme.palette.primary.main, 0.9),
+              color: '#FFFFFF',
+              fontWeight: 600,
+              border: 'none',
+              height: { xs: 22, md: 24 },
+              fontSize: { xs: '0.7rem', md: '0.8rem' },
             }}
-          >
-            {restaurant.description || '맛있는 음식을 만나보세요'}
+          />
+        )}
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <LocationIcon sx={{ fontSize: { xs: 14, md: 16 }, color: 'white' }} />
+          <Typography variant="caption" noWrap sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, color: 'white' }}>
+            {restaurant.address}
           </Typography>
+        </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', mb: 0.5 }}>
-            <LocationIcon sx={{ fontSize: { xs: 12, md: 16 } }} />
-            <Typography variant="caption" noWrap sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-              {restaurant.address}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-              리뷰 {restaurant.review_count || 0}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-              조회 {restaurant.view_count || 0}
-            </Typography>
-          </Box>
-        </CardContent>
-      </CardActionArea>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' }, color: 'rgba(255,255,255,0.9)' }}>
+            리뷰 {restaurant.review_count || 0}
+          </Typography>
+          <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' }, color: 'rgba(255,255,255,0.9)' }}>
+            조회 {restaurant.view_count || 0}
+          </Typography>
+        </Box>
+      </CardContent>
     </Card>
   );
 
@@ -235,22 +251,10 @@ const NewHomePage: React.FC = () => {
     restaurants: Restaurant[];
     sortParam: string;
   }> = ({ title, icon, restaurants, sortParam }) => {
-    const scrollRef = useRef<HTMLDivElement>(null);
-
-    const scroll = (direction: 'left' | 'right') => {
-      if (scrollRef.current) {
-        const scrollAmount = 240; // 카드 너비 + gap
-        scrollRef.current.scrollBy({
-          left: direction === 'left' ? -scrollAmount : scrollAmount,
-          behavior: 'smooth',
-        });
-      }
-    };
-
     if (restaurants.length === 0) return null;
 
     return (
-      <Box sx={{ mb: { xs: 4, md: 8 }, position: 'relative' }}>
+      <Box sx={{ mb: { xs: 4, md: 8 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.5 } }}>
             <Box
@@ -286,89 +290,22 @@ const NewHomePage: React.FC = () => {
           </Button>
         </Box>
 
-        {/* 캐러셀 컨트롤 */}
-        <Box sx={{ position: 'relative' }}>
-          {/* 왼쪽 버튼 - 모바일에서 숨김 */}
-          <IconButton
-            onClick={() => scroll('left')}
-            sx={{
-              display: { xs: 'none', md: 'flex' },
-              position: 'absolute',
-              left: -20,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 2,
-              backgroundColor: 'white',
-              boxShadow: 3,
-              '&:hover': {
-                backgroundColor: 'white',
-                boxShadow: 6,
-              },
-            }}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-
-          {/* 가로 스크롤 캐러셀 */}
-          <Box
-            ref={scrollRef}
-            sx={{
-              display: 'flex',
-              gap: { xs: 2, md: 3 },
-              overflowX: 'auto',
-              overflowY: 'hidden',
-              pb: 2,
-              scrollbarWidth: { xs: 'none', md: 'thin' },
-              '&::-webkit-scrollbar': {
-                height: { xs: 0, md: 8 },
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                borderRadius: 4,
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.5),
-                borderRadius: 4,
-                '&:hover': {
-                  backgroundColor: theme.palette.primary.main,
-                },
-              },
-            }}
-          >
-            {restaurants.slice(0, 10).map((restaurant) => (
-              <Box
-                key={restaurant.id}
-                sx={{
-                  minWidth: { xs: '220px', sm: '240px', md: '280px' },
-                  maxWidth: { xs: '220px', sm: '240px', md: '280px' },
-                  flex: '0 0 auto',
-                }}
-              >
-                <RestaurantCard restaurant={restaurant} />
-              </Box>
-            ))}
-          </Box>
-
-          {/* 오른쪽 버튼 - 모바일에서 숨김 */}
-          <IconButton
-            onClick={() => scroll('right')}
-            sx={{
-              display: { xs: 'none', md: 'flex' },
-              position: 'absolute',
-              right: -20,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 2,
-              backgroundColor: 'white',
-              boxShadow: 3,
-              '&:hover': {
-                backgroundColor: 'white',
-                boxShadow: 6,
-              },
-            }}
-          >
-            <ChevronRightIcon />
-          </IconButton>
+        {/* 리스트 레이아웃 */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(4, 1fr)',
+            },
+            gap: { xs: 2, md: 3 },
+          }}
+        >
+          {restaurants.slice(0, 8).map((restaurant) => (
+            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+          ))}
         </Box>
       </Box>
     );
@@ -405,7 +342,14 @@ const NewHomePage: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* 히어로 텍스트 - 최상단 배치 */}
+      {/* 배너 캐러셀 - 최상단 배치 */}
+      {banners.length > 0 && (
+        <Box sx={{ mb: { xs: 4, md: 8 } }}>
+          <BannerCarousel banners={banners} />
+        </Box>
+      )}
+
+      {/* 히어로 텍스트 */}
       <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
         <Box
           sx={{
@@ -565,13 +509,6 @@ const NewHomePage: React.FC = () => {
               ))}
             </Box>
           </Container>
-        </Box>
-      )}
-
-      {/* 배너 캐러셀 - 세 번째 배치 */}
-      {banners.length > 0 && (
-        <Box sx={{ mb: { xs: 4, md: 8 } }}>
-          <BannerCarousel banners={banners} />
         </Box>
       )}
 
