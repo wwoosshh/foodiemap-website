@@ -39,10 +39,9 @@ import {
   Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
   Add as AddIcon,
-  MoreVert as MoreVertIcon,
   DriveFileMove as MoveIcon,
 } from '@mui/icons-material';
-import { HeartFilledIcon, RestaurantIcon } from './icons/CustomIcons';
+import { RestaurantIcon } from './icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE } from '../constants/images';
 import { ApiService } from '../services/api';
 

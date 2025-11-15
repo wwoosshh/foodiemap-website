@@ -13,9 +13,6 @@ import {
   Chip,
   CircularProgress,
   Alert,
-  useTheme,
-  CardMedia,
-  CardActionArea,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -39,18 +36,11 @@ import {
   UserIcon,
   EmailIcon,
   PhoneIcon,
-  HeartFilledIcon,
-  ReviewIcon,
   SettingsIcon,
-  StarFilledIcon,
-  LocationIcon,
-  RestaurantIcon,
 } from '../components/icons/CustomIcons';
-import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 
 const UserProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
   const { user, refreshUser, logout } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -156,16 +146,6 @@ const UserProfilePage: React.FC = () => {
     return null;
   }
 
-  const renderRating = (rating: number) => {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <StarFilledIcon sx={{ fontSize: 16, color: '#FFD93D' }} />
-        <Typography variant="body2" fontWeight={600}>
-          {rating.toFixed(1)}
-        </Typography>
-      </Box>
-    );
-  };
 
   return (
     <MainLayout>

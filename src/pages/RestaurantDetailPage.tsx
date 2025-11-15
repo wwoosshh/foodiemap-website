@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,9 +11,6 @@ import {
   Button,
   Rating,
   IconButton,
-  Avatar,
-  Card,
-  CardContent,
   Grid,
 } from '@mui/material';
 
@@ -34,7 +31,6 @@ import {
   Pets as PetsIcon,
   CreditCard as PaymentIcon,
   DeliveryDining as DeliveryIcon,
-  Restaurant as MenuIcon,
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Share as ShareIcon,
@@ -67,9 +63,9 @@ const RestaurantDetailPageNew: React.FC = () => {
     if (id) {
       loadRestaurantDetail();
     }
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadRestaurantDetail = async () => {
+  const loadRestaurantDetail = useCallback(async () => {
     try {
       setLoading(true);
       const response = await ApiService.getRestaurantDetailsComplete(id!);
@@ -80,7 +76,7 @@ const RestaurantDetailPageNew: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const handleFavoriteToggle = async () => {
     try {
@@ -103,7 +99,7 @@ const RestaurantDetailPageNew: React.FC = () => {
     );
   }
 
-  const { restaurant, contacts, facilities, operations, services, menus, photos, tags, reviews, mapInfo } = data;
+  const { restaurant, contacts, facilities, operations, services, menus, photos, tags, mapInfo } = data;
 
   // 대표 이미지
   const representativeImage = photos.representative[0]?.url || photos.all[0]?.url || '/placeholder.jpg';

@@ -23,7 +23,6 @@ import { Restaurant, Category, Banner } from '../types';
 import {
   StarFilledIcon,
   LocationIcon,
-  RestaurantIcon,
   ArrowRightIcon,
   ReviewIcon,
   EyeIcon,

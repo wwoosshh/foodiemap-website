@@ -17,7 +17,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Button,
   Stack,
   Tooltip,
   Rating,
@@ -28,7 +27,7 @@ import {
   Edit as EditIcon,
   Visibility as ViewIcon,
 } from '@mui/icons-material';
-import { RestaurantIcon, StarFilledIcon } from './icons/CustomIcons';
+import { RestaurantIcon } from './icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE } from '../constants/images';
 
 interface ReviewsListViewProps {
