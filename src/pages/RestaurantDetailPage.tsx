@@ -10,8 +10,6 @@ import {
   Divider,
   CircularProgress,
   Alert,
-  useTheme,
-  alpha,
   Rating,
   Avatar,
   TextField,
@@ -25,7 +23,6 @@ import {
   Checkbox,
   Stack,
   Link,
-  LinearProgress,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import NaverMap from '../components/NaverMap';
@@ -44,14 +41,6 @@ import {
   Report,
   Edit,
   Delete,
-  Wifi,
-  DeliveryDining,
-  ShoppingBag,
-  EventAvailable,
-  Language,
-  Article,
-  Instagram,
-  Facebook,
   CloudUpload,
   Close,
   KeyboardArrowUp,
@@ -61,7 +50,6 @@ import { openCloudinaryWidget } from '../lib/cloudinary';
 
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const theme = useTheme();
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -69,7 +57,7 @@ const RestaurantDetailPage: React.FC = () => {
   const [restaurant, setRestaurant] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [menus, setMenus] = useState<any>({ all: [], signature: [], popular: [] });
-  const [photos, setPhotos] = useState<any>({ all: [], representative: [], food: [], interior: [], exterior: [], menu: [] });
+  const [photos, setPhotos] = useState<any>({ all: [], representative: [] });
   const [tags, setTags] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any>({});
   const [facilities, setFacilities] = useState<any>({});
@@ -79,7 +67,6 @@ const RestaurantDetailPage: React.FC = () => {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedPhotoCategory, setSelectedPhotoCategory] = useState<'all' | 'food' | 'interior' | 'exterior' | 'menu'>('all');
   const [isImageListExpanded, setIsImageListExpanded] = useState(false);
 
   // 리뷰 작성 상태
@@ -121,7 +108,7 @@ const RestaurantDetailPage: React.FC = () => {
         }
 
         // 사진 데이터
-        setPhotos(response.data.photos || { all: [], representative: [], food: [], interior: [], exterior: [], menu: [] });
+        setPhotos(response.data.photos || { all: [], representative: [] });
 
         // 태그 데이터
         setTags(response.data.tags || []);
@@ -326,6 +313,17 @@ const RestaurantDetailPage: React.FC = () => {
     }
   };
 
+  // 가격대 번역
+  const translatePriceRange = (range: string) => {
+    const priceRangeMap: { [key: string]: string } = {
+      'low': '저가',
+      'medium': '중가',
+      'high': '고가',
+      'very_high': '최고가'
+    };
+    return priceRangeMap[range] || range;
+  };
+
   // 영업시간 렌더링
   const renderBusinessHours = () => {
     const hours = operations?.business_hours;
@@ -382,61 +380,35 @@ const RestaurantDetailPage: React.FC = () => {
             </Typography>
           </Box>
         )}
+        {operations?.regular_holidays && operations.regular_holidays.length > 0 && (
+          <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="caption" color="error.main">
+              정기 휴무: {operations.regular_holidays.join(', ')}
+            </Typography>
+          </Box>
+        )}
+        {operations?.holiday_notice && (
+          <Box>
+            <Typography variant="caption" color="text.secondary">
+              휴무 안내: {operations.holiday_notice}
+            </Typography>
+          </Box>
+        )}
       </Stack>
     );
   };
 
-  // 편의시설 렌더링
-  const renderFacilities = () => {
-    const facilityList = [
-      { key: 'wifi_available', label: '무료 와이파이', icon: <Wifi sx={{ fontSize: 18 }} /> },
-      { key: 'delivery_available', label: '배달', icon: <DeliveryDining sx={{ fontSize: 18 }} /> },
-      { key: 'takeout_available', label: '포장', icon: <ShoppingBag sx={{ fontSize: 18 }} /> },
-      { key: 'reservation_available', label: '예약', icon: <EventAvailable sx={{ fontSize: 18 }} /> },
-      { key: 'pet_friendly', label: '반려동물 동반', icon: null },
-      { key: 'group_seating', label: '단체석', icon: null },
-      { key: 'private_room', label: '룸/프라이빗', icon: null },
-      { key: 'wheelchair_accessible', label: '휠체어 접근', icon: null },
-      { key: 'nursing_room', label: '수유실', icon: null },
-      { key: 'kids_menu', label: '어린이 메뉴', icon: null },
-    ];
-
-    const availableFacilities = facilityList.filter(f => facilities?.[f.key] || restaurant?.[f.key]);
-
-    if (availableFacilities.length === 0 && !(facilities?.parking_info || restaurant?.parking_info) && !(facilities?.valet_parking ?? restaurant?.valet_parking)) {
-      return <Typography variant="body2" color="text.secondary">정보 없음</Typography>;
-    }
-
-    return (
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {availableFacilities.map((facility) => (
-          <Chip
-            key={facility.key}
-            {...(facility.icon ? { icon: facility.icon } : {})}
-            label={facility.label}
-            size="small"
-            variant="outlined"
-            sx={{ borderRadius: 1 }}
-          />
-        ))}
-        {(facilities?.parking_available ?? restaurant?.parking_available) && (
-          <Chip
-            label={`주차 가능${(facilities?.parking_spaces || restaurant?.parking_spaces) ? ` (${(facilities?.parking_spaces || restaurant?.parking_spaces)}대)` : ''}`}
-            size="small"
-            variant="outlined"
-            sx={{ borderRadius: 1 }}
-          />
-        )}
-        {(facilities?.valet_parking ?? restaurant?.valet_parking) && (
-          <Chip
-            label="발렛파킹"
-            size="small"
-            variant="outlined"
-            sx={{ borderRadius: 1 }}
-          />
-        )}
-      </Box>
-    );
+  // 태그를 카테고리별로 그룹화
+  const groupTagsByCategory = () => {
+    const grouped: { [key: string]: any[] } = {};
+    tags.forEach(tag => {
+      const category = tag.category || 'other';
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(tag);
+    });
+    return grouped;
   };
 
   if (loading) {
@@ -461,6 +433,8 @@ const RestaurantDetailPage: React.FC = () => {
     );
   }
 
+  const groupedTags = groupTagsByCategory();
+
   return (
     <MainLayout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -472,7 +446,7 @@ const RestaurantDetailPage: React.FC = () => {
               <Box sx={{ mb: 4, position: 'relative' }}>
                 <Box
                   component="img"
-                  src={photos[selectedPhotoCategory][selectedImage]?.url || photos.all[selectedImage]?.url}
+                  src={photos.all[selectedImage]?.url}
                   alt="맛집 사진"
                   sx={{
                     width: '100%',
@@ -480,7 +454,7 @@ const RestaurantDetailPage: React.FC = () => {
                     objectFit: 'cover',
                     cursor: 'pointer',
                   }}
-                  onClick={() => window.open(photos[selectedPhotoCategory][selectedImage]?.url || photos.all[selectedImage]?.url, '_blank')}
+                  onClick={() => window.open(photos.all[selectedImage]?.url, '_blank')}
                 />
               </Box>
             )}
@@ -500,6 +474,7 @@ const RestaurantDetailPage: React.FC = () => {
                     }}
                   >
                     {restaurant.categories.icon} {restaurant.categories.name}
+                    {restaurant.sub_category && ` / ${restaurant.sub_category}`}
                   </Typography>
                 </Box>
               )}
@@ -517,6 +492,13 @@ const RestaurantDetailPage: React.FC = () => {
                 {restaurant.name}
               </Typography>
 
+              {/* 간단 소개 */}
+              {restaurant.introduction && (
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 2, fontWeight: 400 }}>
+                  {restaurant.introduction}
+                </Typography>
+              )}
+
               {/* 평점 및 메타 정보 */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -528,11 +510,19 @@ const RestaurantDetailPage: React.FC = () => {
                 <Typography variant="body1" color="text.secondary">
                   리뷰 {restaurant.review_count || 0}
                 </Typography>
+                {restaurant.avg_price_per_person && (
+                  <>
+                    <Typography color="text.secondary">•</Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      1인 평균 {restaurant.avg_price_per_person.toLocaleString()}원
+                    </Typography>
+                  </>
+                )}
                 {restaurant.price_range && (
                   <>
                     <Typography color="text.secondary">•</Typography>
                     <Typography variant="body1" color="text.secondary">
-                      {restaurant.price_range}
+                      {translatePriceRange(restaurant.price_range)}
                     </Typography>
                   </>
                 )}
@@ -587,37 +577,34 @@ const RestaurantDetailPage: React.FC = () => {
 
             <Divider sx={{ my: 4 }} />
 
-            {/* 태그 섹션 - 신문 스타일 */}
+            {/* 태그 섹션 - 카테고리별 분류 */}
             {tags && tags.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
-                  평가
+                  태그
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                  {tags.slice(0, 6).map((tag) => (
-                    <Box key={tag.id} sx={{ flex: '1 1 calc(33.333% - 16px)', minWidth: 150 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
-                        <Typography variant="body2" fontWeight={600} color="text.secondary">
-                          {tag.icon} {tag.name}
-                        </Typography>
-                        <Typography variant="h6" fontWeight={700}>
-                          {tag.score?.toFixed(1) || '0.0'}
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={((tag.score || 0) / 10) * 100}
-                        sx={{
-                          height: 4,
-                          backgroundColor: alpha(tag.color || theme.palette.primary.main, 0.1),
-                          '& .MuiLinearProgress-bar': {
-                            backgroundColor: tag.color || 'primary.main',
-                          }
-                        }}
-                      />
+                {Object.entries(groupedTags).map(([category, categoryTags]) => (
+                  <Box key={category} sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      {category}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {categoryTags.map((tag: any) => (
+                        <Chip
+                          key={tag.id}
+                          label={`${tag.icon || ''} ${tag.name}`}
+                          size="small"
+                          sx={{
+                            backgroundColor: tag.color ? `${tag.color}20` : undefined,
+                            borderColor: tag.color || undefined,
+                            color: tag.color || undefined,
+                          }}
+                          variant="outlined"
+                        />
+                      ))}
                     </Box>
-                  ))}
-                </Box>
+                  </Box>
+                ))}
               </Box>
             )}
 
@@ -639,25 +626,58 @@ const RestaurantDetailPage: React.FC = () => {
                     {restaurant.address}
                   </Typography>
                   {restaurant.road_address && (
-                    <Typography variant="caption" color="text.secondary">
-                      {restaurant.road_address}
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      도로명: {restaurant.road_address}
+                    </Typography>
+                  )}
+                  {restaurant.jibun_address && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      지번: {restaurant.jibun_address}
+                    </Typography>
+                  )}
+                  {restaurant.building_name && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      건물명: {restaurant.building_name}
+                    </Typography>
+                  )}
+                  {restaurant.detailed_address && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      상세주소: {restaurant.detailed_address}
+                    </Typography>
+                  )}
+                  {restaurant.postal_code && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      우편번호: {restaurant.postal_code}
                     </Typography>
                   )}
                 </Box>
 
-                {/* 전화번호 */}
-                {(contacts?.phone || restaurant?.phone) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      전화번호
+                {/* 연락처 */}
+                <Box>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                    연락처
+                  </Typography>
+                  {(contacts?.phone || restaurant?.phone) && (
+                    <Typography variant="body2" display="block">
+                      대표: {(contacts?.phone || restaurant?.phone)}
                     </Typography>
-                    <Link href={`tel:${(contacts?.phone || restaurant?.phone)}`} underline="hover" color="inherit">
-                      <Typography variant="body2">
-                        {(contacts?.phone || restaurant?.phone)}
-                      </Typography>
-                    </Link>
-                  </Box>
-                )}
+                  )}
+                  {contacts?.secondary_phone && (
+                    <Typography variant="body2" display="block">
+                      보조: {contacts.secondary_phone}
+                    </Typography>
+                  )}
+                  {contacts?.email && (
+                    <Typography variant="body2" display="block">
+                      이메일: {contacts.email}
+                    </Typography>
+                  )}
+                  {contacts?.fax && (
+                    <Typography variant="body2" display="block">
+                      팩스: {contacts.fax}
+                    </Typography>
+                  )}
+                </Box>
 
                 {/* 영업시간 */}
                 <Box>
@@ -667,77 +687,200 @@ const RestaurantDetailPage: React.FC = () => {
                   {renderBusinessHours()}
                 </Box>
 
-                {/* 편의시설 */}
-                <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    편의시설
-                  </Typography>
-                  {renderFacilities()}
-                </Box>
+                {/* SNS / 링크 */}
+                {((contacts?.website_url || restaurant?.website_url) || contacts?.blog_url || contacts?.instagram_url || contacts?.facebook_url || contacts?.youtube_url || contacts?.kakao_channel_url || contacts?.naver_place_url || contacts?.booking_url || contacts?.naver_booking_url) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      SNS / 링크
+                    </Typography>
+                    <Stack spacing={0.5}>
+                      {(contacts?.website_url || restaurant?.website_url) && (
+                        <Link href={(contacts?.website_url || restaurant?.website_url)} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">웹사이트: {(contacts?.website_url || restaurant?.website_url)}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.blog_url && (
+                        <Link href={contacts.blog_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">블로그: {contacts.blog_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.instagram_url && (
+                        <Link href={contacts.instagram_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">인스타그램: {contacts.instagram_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.facebook_url && (
+                        <Link href={contacts.facebook_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">페이스북: {contacts.facebook_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.youtube_url && (
+                        <Link href={contacts.youtube_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">유튜브: {contacts.youtube_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.kakao_channel_url && (
+                        <Link href={contacts.kakao_channel_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">카카오톡: {contacts.kakao_channel_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.naver_place_url && (
+                        <Link href={contacts.naver_place_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">네이버 플레이스: {contacts.naver_place_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.booking_url && (
+                        <Link href={contacts.booking_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">예약: {contacts.booking_url}</Typography>
+                        </Link>
+                      )}
+                      {contacts?.naver_booking_url && (
+                        <Link href={contacts.naver_booking_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">네이버 예약: {contacts.naver_booking_url}</Typography>
+                        </Link>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
               </Box>
+            </Box>
 
-              {/* 배달/포장 정보 */}
-              {((services?.delivery_available ?? restaurant?.delivery_available) || (services?.takeout_available ?? restaurant?.takeout_available)) && (
-                <Box sx={{ mt: 4 }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    배달/포장
-                  </Typography>
-                  <Stack spacing={1}>
-                    {(services?.delivery_available ?? restaurant?.delivery_available) && (
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>배달 가능</Typography>
-                        {(services?.delivery_fee ?? restaurant?.delivery_fee) !== null && (services?.delivery_fee ?? restaurant?.delivery_fee) !== undefined && (
-                          <Typography variant="caption" color="text.secondary">
-                            배달비: {(services?.delivery_fee ?? restaurant?.delivery_fee) === 0 ? '무료' : `${(services?.delivery_fee ?? restaurant?.delivery_fee).toLocaleString()}원`}
-                          </Typography>
-                        )}
-                      </Box>
-                    )}
-                    {(services?.takeout_available ?? restaurant?.takeout_available) && (
-                      <Typography variant="body2">포장 가능</Typography>
-                    )}
-                  </Stack>
-                </Box>
-              )}
+            <Divider sx={{ my: 4 }} />
 
-              {/* 소셜 링크 */}
-              {((contacts?.website_url || restaurant?.website_url) || (contacts?.blog_url || restaurant?.blog_url) || (contacts?.instagram_url || restaurant?.instagram_url) || (contacts?.facebook_url || restaurant?.facebook_url)) && (
-                <Box sx={{ mt: 4 }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    링크
-                  </Typography>
-                  <Stack direction="row" spacing={1}>
-                    {(contacts?.website_url || restaurant?.website_url) && (
-                      <Link href={(contacts?.website_url || restaurant?.website_url)} target="_blank" rel="noopener">
-                        <IconButton size="small">
-                          <Language fontSize="small" />
-                        </IconButton>
-                      </Link>
-                    )}
-                    {(contacts?.blog_url || restaurant?.blog_url) && (
-                      <Link href={(contacts?.blog_url || restaurant?.blog_url)} target="_blank" rel="noopener">
-                        <IconButton size="small">
-                          <Article fontSize="small" />
-                        </IconButton>
-                      </Link>
-                    )}
-                    {(contacts?.instagram_url || restaurant?.instagram_url) && (
-                      <Link href={(contacts?.instagram_url || restaurant?.instagram_url)} target="_blank" rel="noopener">
-                        <IconButton size="small">
-                          <Instagram fontSize="small" />
-                        </IconButton>
-                      </Link>
-                    )}
-                    {(contacts?.facebook_url || restaurant?.facebook_url) && (
-                      <Link href={(contacts?.facebook_url || restaurant?.facebook_url)} target="_blank" rel="noopener">
-                        <IconButton size="small">
-                          <Facebook fontSize="small" />
-                        </IconButton>
-                      </Link>
-                    )}
-                  </Stack>
-                </Box>
-              )}
+            {/* 시설 / 서비스 정보 */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
+                시설 / 서비스
+              </Typography>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 4 }}>
+                {/* 주차 시설 */}
+                {((facilities?.parking_available ?? restaurant?.parking_available) || (facilities?.valet_parking ?? restaurant?.valet_parking) || (facilities?.parking_spaces || restaurant?.parking_spaces) || (facilities?.parking_info || restaurant?.parking_info)) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      주차 시설
+                    </Typography>
+                    <Stack spacing={0.5}>
+                      {(facilities?.parking_available ?? restaurant?.parking_available) && (
+                        <Typography variant="body2">주차 가능</Typography>
+                      )}
+                      {(facilities?.valet_parking ?? restaurant?.valet_parking) && (
+                        <Typography variant="body2">발렛파킹</Typography>
+                      )}
+                      {(facilities?.parking_spaces || restaurant?.parking_spaces) && (
+                        <Typography variant="body2">주차 공간: {(facilities?.parking_spaces || restaurant?.parking_spaces)}대</Typography>
+                      )}
+                      {(facilities?.parking_info || restaurant?.parking_info) && (
+                        <Typography variant="caption" color="text.secondary">{(facilities?.parking_info || restaurant?.parking_info)}</Typography>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* 편의 시설 */}
+                {((facilities?.wifi_available ?? restaurant?.wifi_available) || (facilities?.wheelchair_accessible ?? restaurant?.wheelchair_accessible) || (facilities?.elevator_available ?? restaurant?.elevator_available) || (facilities?.nursing_room ?? restaurant?.nursing_room) || (facilities?.kids_zone ?? restaurant?.kids_zone) || (facilities?.pet_friendly ?? restaurant?.pet_friendly) || (facilities?.kids_menu ?? restaurant?.kids_menu)) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      편의 시설
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {(facilities?.wifi_available ?? restaurant?.wifi_available) && <Chip label="무료 와이파이" size="small" variant="outlined" />}
+                      {(facilities?.wheelchair_accessible ?? restaurant?.wheelchair_accessible) && <Chip label="휠체어 접근" size="small" variant="outlined" />}
+                      {(facilities?.elevator_available ?? restaurant?.elevator_available) && <Chip label="엘리베이터" size="small" variant="outlined" />}
+                      {(facilities?.nursing_room ?? restaurant?.nursing_room) && <Chip label="수유실" size="small" variant="outlined" />}
+                      {(facilities?.kids_zone ?? restaurant?.kids_zone) && <Chip label="키즈존" size="small" variant="outlined" />}
+                      {(facilities?.pet_friendly ?? restaurant?.pet_friendly) && <Chip label="반려동물 동반" size="small" variant="outlined" />}
+                      {(facilities?.kids_menu ?? restaurant?.kids_menu) && <Chip label="키즈 메뉴" size="small" variant="outlined" />}
+                    </Box>
+                  </Box>
+                )}
+
+                {/* 좌석 정보 */}
+                {((facilities?.group_seating ?? restaurant?.group_seating) || (facilities?.private_room ?? restaurant?.private_room) || (facilities?.outdoor_seating ?? restaurant?.outdoor_seating) || (facilities?.bar_seating ?? restaurant?.bar_seating) || (facilities?.total_seats || restaurant?.total_seats)) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      좌석 정보
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {(facilities?.group_seating ?? restaurant?.group_seating) && <Chip label="단체석" size="small" variant="outlined" />}
+                      {(facilities?.private_room ?? restaurant?.private_room) && <Chip label="프라이빗 룸" size="small" variant="outlined" />}
+                      {(facilities?.outdoor_seating ?? restaurant?.outdoor_seating) && <Chip label="야외 좌석" size="small" variant="outlined" />}
+                      {(facilities?.bar_seating ?? restaurant?.bar_seating) && <Chip label="바 좌석" size="small" variant="outlined" />}
+                      {(facilities?.total_seats || restaurant?.total_seats) && (
+                        <Typography variant="body2" sx={{ mt: 1 }}>총 좌석 수: {(facilities?.total_seats || restaurant?.total_seats)}석</Typography>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+
+                {/* 예약 서비스 */}
+                {((services?.reservation_available ?? restaurant?.reservation_available) || (services?.online_booking_available ?? restaurant?.online_booking_available) || services?.reservation_phone || services?.reservation_url) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      예약 서비스
+                    </Typography>
+                    <Stack spacing={0.5}>
+                      {(services?.reservation_available ?? restaurant?.reservation_available) && (
+                        <Typography variant="body2">예약 가능</Typography>
+                      )}
+                      {(services?.online_booking_available ?? restaurant?.online_booking_available) && (
+                        <Typography variant="body2">온라인 예약 가능</Typography>
+                      )}
+                      {services?.reservation_phone && (
+                        <Typography variant="body2">예약 전화: {services.reservation_phone}</Typography>
+                      )}
+                      {services?.reservation_url && (
+                        <Link href={services.reservation_url} target="_blank" rel="noopener" underline="hover">
+                          <Typography variant="body2">예약 URL: {services.reservation_url}</Typography>
+                        </Link>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* 배달/포장 */}
+                {((services?.delivery_available ?? restaurant?.delivery_available) || (services?.takeout_available ?? restaurant?.takeout_available)) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      배달/포장
+                    </Typography>
+                    <Stack spacing={0.5}>
+                      {(services?.delivery_available ?? restaurant?.delivery_available) && (
+                        <Box>
+                          <Typography variant="body2">배달 가능</Typography>
+                          {(services?.delivery_fee ?? restaurant?.delivery_fee) !== null && (services?.delivery_fee ?? restaurant?.delivery_fee) !== undefined && (
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              배달비: {(services?.delivery_fee ?? restaurant?.delivery_fee) === 0 ? '무료' : `${(services?.delivery_fee ?? restaurant?.delivery_fee).toLocaleString()}원`}
+                            </Typography>
+                          )}
+                          {(services?.min_order_amount || restaurant?.min_order_amount) && (
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              최소 주문금액: {(services?.min_order_amount || restaurant?.min_order_amount).toLocaleString()}원
+                            </Typography>
+                          )}
+                        </Box>
+                      )}
+                      {(services?.takeout_available ?? restaurant?.takeout_available) && (
+                        <Typography variant="body2">포장 가능</Typography>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* 결제 수단 */}
+                {((services?.card_payment ?? restaurant?.card_payment) || (services?.cash_payment ?? restaurant?.cash_payment) || (services?.mobile_payment ?? restaurant?.mobile_payment)) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                      결제 수단
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {(services?.card_payment ?? restaurant?.card_payment) && <Chip label="카드 결제" size="small" variant="outlined" />}
+                      {(services?.cash_payment ?? restaurant?.cash_payment) && <Chip label="현금 결제" size="small" variant="outlined" />}
+                      {(services?.mobile_payment ?? restaurant?.mobile_payment) && <Chip label="모바일 결제" size="small" variant="outlined" />}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
             </Box>
 
             <Divider sx={{ my: 4 }} />
@@ -1173,37 +1316,8 @@ const RestaurantDetailPage: React.FC = () => {
               >
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6" fontWeight={700} gutterBottom>
-                    사진 ({photos[selectedPhotoCategory].length})
+                    사진 ({photos.all.length})
                   </Typography>
-                </Box>
-
-                {/* 카테고리 필터 */}
-                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 2 }}>
-                  {[
-                    { key: 'all', label: '전체', count: photos.all.length },
-                    { key: 'food', label: '음식', count: photos.food.length },
-                    { key: 'interior', label: '내부', count: photos.interior.length },
-                    { key: 'exterior', label: '외부', count: photos.exterior.length },
-                    { key: 'menu', label: '메뉴판', count: photos.menu.length },
-                  ].map((category) => (
-                    category.count > 0 && (
-                      <Chip
-                        key={category.key}
-                        label={`${category.label} ${category.count}`}
-                        onClick={() => {
-                          setSelectedPhotoCategory(category.key as any);
-                          setSelectedImage(0);
-                          setIsImageListExpanded(false);
-                        }}
-                        size="small"
-                        color={selectedPhotoCategory === category.key ? 'primary' : 'default'}
-                        sx={{
-                          fontWeight: selectedPhotoCategory === category.key ? 600 : 400,
-                          fontSize: '0.75rem',
-                        }}
-                      />
-                    )
-                  ))}
                 </Box>
 
                 {/* 이미지 그리드 */}
@@ -1214,7 +1328,7 @@ const RestaurantDetailPage: React.FC = () => {
                     gap: 0.5,
                   }}
                 >
-                  {photos[selectedPhotoCategory]
+                  {photos.all
                     .slice(0, isImageListExpanded ? undefined : 12)
                     .map((photo: any, idx: number) => (
                       <Box
@@ -1251,7 +1365,7 @@ const RestaurantDetailPage: React.FC = () => {
                 </Box>
 
                 {/* 더보기 버튼 */}
-                {photos[selectedPhotoCategory].length > 12 && (
+                {photos.all.length > 12 && (
                   <Button
                     fullWidth
                     variant="text"
@@ -1264,7 +1378,7 @@ const RestaurantDetailPage: React.FC = () => {
                     }}
                     endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                   >
-                    {isImageListExpanded ? '접기' : `${photos[selectedPhotoCategory].length - 12}장 더보기`}
+                    {isImageListExpanded ? '접기' : `${photos.all.length - 12}장 더보기`}
                   </Button>
                 )}
               </Box>
