@@ -332,13 +332,13 @@ const RestaurantDetailPage: React.FC = () => {
     }
 
     const weekdays = [
-      { key: 'monday', label: '월' },
-      { key: 'tuesday', label: '화' },
-      { key: 'wednesday', label: '수' },
-      { key: 'thursday', label: '목' },
-      { key: 'friday', label: '금' },
-      { key: 'saturday', label: '토' },
-      { key: 'sunday', label: '일' },
+      { key: 'mon', label: '월' },
+      { key: 'tue', label: '화' },
+      { key: 'wed', label: '수' },
+      { key: 'thu', label: '목' },
+      { key: 'fri', label: '금' },
+      { key: 'sat', label: '토' },
+      { key: 'sun', label: '일' },
     ];
 
     return (
@@ -348,7 +348,7 @@ const RestaurantDetailPage: React.FC = () => {
           let displayText = '정보 없음';
 
           if (dayData) {
-            if (dayData.is_closed) {
+            if (dayData.closed) {
               displayText = '휴무';
             } else if (dayData.open && dayData.close) {
               displayText = `${dayData.open} - ${dayData.close}`;
@@ -360,7 +360,7 @@ const RestaurantDetailPage: React.FC = () => {
               <Typography variant="body2" color="text.secondary" sx={{ minWidth: 40 }}>
                 {day.label}
               </Typography>
-              <Typography variant="body2" color={dayData?.is_closed ? 'error.main' : 'text.primary'}>
+              <Typography variant="body2" color={dayData?.closed ? 'error.main' : 'text.primary'}>
                 {displayText}
               </Typography>
             </Box>
