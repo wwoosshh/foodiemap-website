@@ -370,6 +370,12 @@ export class ApiService {
     return response.data;
   }
 
+  // 맛집 상세 정보 완전판 조회 (모든 데이터 포함)
+  static async getRestaurantDetailsComplete(restaurantId: string): Promise<ApiResponse<any>> {
+    const response = await api.get(`/api/restaurant-details/${restaurantId}/complete`);
+    return response.data;
+  }
+
   // === 즐겨찾기 API ===
 
   // 즐겨찾기 추가
