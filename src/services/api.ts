@@ -418,6 +418,18 @@ export class ApiService {
     return response.data;
   }
 
+  // 폴더 목록 조회
+  static async getFolders(): Promise<ApiResponse<{ folders: any[] }>> {
+    const response = await api.get('/api/restaurants/favorites/folders');
+    return response.data;
+  }
+
+  // 폴더 생성
+  static async createFolder(folder_name: string, description?: string): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/restaurants/favorites/folders', { folder_name, description });
+    return response.data;
+  }
+
   // 폴더명 변경
   static async renameFolder(old_name: string, new_name: string): Promise<ApiResponse<any>> {
     const response = await api.patch('/api/restaurants/favorites/folders/rename', { old_name, new_name });

@@ -155,9 +155,17 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
       alert('이미 존재하는 폴더 이름입니다.');
       return;
     }
-    setFolderDialogOpen(false);
-    setNewFolderName('');
-    alert('폴더가 생성되었습니다. 즐겨찾기를 이동하여 폴더를 사용하세요.');
+    try {
+      const response = await ApiService.createFolder(newFolderName);
+      if (response.success) {
+        alert(response.message);
+        setFolderDialogOpen(false);
+        setNewFolderName('');
+        if (onRefresh) onRefresh();
+      }
+    } catch (error: any) {
+      alert(error.userMessage || '폴더 생성에 실패했습니다.');
+    }
   };
 
   // 폴더 이름 변경
