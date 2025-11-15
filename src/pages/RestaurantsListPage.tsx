@@ -47,8 +47,8 @@ const RestaurantsListPage: React.FC = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState<number | ''>(
-    searchParams.get('category') ? Number(searchParams.get('category')) : ''
+  const [selectedCategory, setSelectedCategory] = useState<string | ''>(
+    searchParams.get('category') || ''
   );
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'created_at_desc');
 
@@ -84,7 +84,7 @@ const RestaurantsListPage: React.FC = () => {
         page,
         limit: pagination.limit,
         search: search || undefined,
-        category_id: category ? Number(category) : undefined,
+        category_id: category || undefined,
         sort: sort as any,
       });
 
@@ -109,10 +109,10 @@ const RestaurantsListPage: React.FC = () => {
     updateFilters({ search: searchQuery, page: '1' });
   };
 
-  const handleCategoryChange = (categoryId: number | '') => {
+  const handleCategoryChange = (categoryId: string | '') => {
     setSelectedCategory(categoryId);
     updateFilters({
-      category: categoryId ? String(categoryId) : undefined,
+      category: categoryId || undefined,
       page: '1',
     });
   };

@@ -138,7 +138,7 @@ export class ApiService {
     page?: number;
     limit?: number;
     search?: string;
-    category_id?: number;
+    category_id?: string;
   } = {}): Promise<ApiResponse<PaginationData<Restaurant>>> {
     const response = await api.get('/api/restaurants', { params });
     return response.data;
@@ -148,7 +148,7 @@ export class ApiService {
   static async getRestaurants(params: {
     page?: number;
     limit?: number;
-    category_id?: number;
+    category_id?: string;
     search?: string;
     sort?: 'view_count_desc' | 'review_count_desc' | 'rating_desc' | 'created_at_desc' | 'favorite_count_desc';
   } = {}): Promise<ApiResponse<{
@@ -162,7 +162,7 @@ export class ApiService {
       hasPrev: boolean;
     };
     filters: {
-      categoryId: number | null;
+      categoryId: string | null;
       search: string | null;
       sort: string;
     };
@@ -174,7 +174,7 @@ export class ApiService {
   // 다중 정렬 맛집 목록 조회 (한 번의 요청으로 모든 정렬 방식 반환)
   static async getRestaurantsMultiSort(params: {
     limit?: number;
-    category_id?: number;
+    category_id?: string;
   } = {}): Promise<ApiResponse<{
     byRating: Restaurant[];
     byReviewCount: Restaurant[];
@@ -183,7 +183,7 @@ export class ApiService {
     byLatest: Restaurant[];
     filters: {
       limit: number;
-      categoryId: number | null;
+      categoryId: string | null;
     };
   }>> {
     const response = await api.get('/api/restaurants/multi-sort', { params });

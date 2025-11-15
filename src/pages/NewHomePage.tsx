@@ -50,7 +50,7 @@ const NewHomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
   const [stats, setStats] = useState({
     totalRestaurants: 0,
@@ -66,7 +66,7 @@ const NewHomePage: React.FC = () => {
   const [favoriteRestaurants, setFavoriteRestaurants] = useState<Restaurant[]>([]);
   const [latestRestaurants, setLatestRestaurants] = useState<Restaurant[]>([]);
 
-  const loadRestaurantsByCategory = useCallback(async (categoryId: number | null) => {
+  const loadRestaurantsByCategory = useCallback(async (categoryId: string | null) => {
     try {
       // 통합 API로 한 번에 모든 정렬 방식의 맛집 로드
       const params = categoryId ? { category_id: categoryId, limit: 10 } : { limit: 10 };
@@ -119,7 +119,7 @@ const NewHomePage: React.FC = () => {
     }
   }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory]);
 
-  const handleCategoryClick = (categoryId: number | null) => {
+  const handleCategoryClick = (categoryId: string | null) => {
     setSelectedCategoryId(categoryId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
