@@ -79,8 +79,11 @@ const RestaurantDetailPage: React.FC = () => {
   const [photos, setPhotos] = useState<any>({ all: [], representative: [], food: [], interior: [], exterior: [], menu: [] });
   const [tags, setTags] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any>({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [facilities, setFacilities] = useState<any>({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [operations, setOperations] = useState<any>({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [services, setServices] = useState<any>({});
   const [isFavorited, setIsFavorited] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -343,27 +346,40 @@ const RestaurantDetailPage: React.FC = () => {
     }
 
     const weekdays = [
-      { key: 'mon', label: '월' },
-      { key: 'tue', label: '화' },
-      { key: 'wed', label: '수' },
-      { key: 'thu', label: '목' },
-      { key: 'fri', label: '금' },
-      { key: 'sat', label: '토' },
-      { key: 'sun', label: '일' },
+      { key: 'monday', label: '월' },
+      { key: 'tuesday', label: '화' },
+      { key: 'wednesday', label: '수' },
+      { key: 'thursday', label: '목' },
+      { key: 'friday', label: '금' },
+      { key: 'saturday', label: '토' },
+      { key: 'sunday', label: '일' },
     ];
 
     return (
       <Stack spacing={0.5}>
-        {weekdays.map((day) => (
-          <Box key={day.key} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 40 }}>
-              {day.label}
-            </Typography>
-            <Typography variant="body2">
-              {hours[day.key] || '휴무'}
-            </Typography>
-          </Box>
-        ))}
+        {weekdays.map((day) => {
+          const dayData = hours[day.key];
+          let displayText = '정보 없음';
+
+          if (dayData) {
+            if (dayData.is_closed) {
+              displayText = '휴무';
+            } else if (dayData.open && dayData.close) {
+              displayText = `${dayData.open} - ${dayData.close}`;
+            }
+          }
+
+          return (
+            <Box key={day.key} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 40 }}>
+                {day.label}
+              </Typography>
+              <Typography variant="body2" color={dayData?.is_closed ? 'error.main' : 'text.primary'}>
+                {displayText}
+              </Typography>
+            </Box>
+          );
+        })}
         {restaurant.break_time && (
           <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
             <Typography variant="caption" color="text.secondary">
