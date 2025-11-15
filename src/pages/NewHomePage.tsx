@@ -113,15 +113,15 @@ const NewHomePage: React.FC = () => {
   }, [loadInitialData]);
 
   useEffect(() => {
-    // 초기 로드가 완료되고, 카테고리가 실제로 변경되었을 때만 실행
-    if (!isInitialLoad && selectedCategoryId !== null) {
+    // 초기 로드가 완료되고, 카테고리가 변경되었을 때 실행 (null 포함)
+    if (!isInitialLoad) {
       loadRestaurantsByCategory(selectedCategoryId);
     }
   }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory]);
 
   const handleCategoryClick = (categoryId: string | null) => {
     setSelectedCategoryId(categoryId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 자동 스크롤 제거
   };
 
   const handleRestaurantClick = (restaurantId: string) => {
@@ -625,7 +625,6 @@ const NewHomePage: React.FC = () => {
                     key={category.id}
                     variant={selectedCategoryId === category.id ? 'contained' : 'outlined'}
                     onClick={() => handleCategoryClick(category.id)}
-                    startIcon={<RestaurantIcon sx={{ fontSize: 16 }} />}
                     sx={{
                       py: 1,
                       px: 1.5,
