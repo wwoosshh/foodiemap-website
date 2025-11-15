@@ -32,6 +32,7 @@ import {
 import MainLayout from '../components/layout/MainLayout';
 import ProfileEditModal from '../components/ProfileEditModal';
 import FavoritesListView from '../components/FavoritesListView';
+import ReviewsListView from '../components/ReviewsListView';
 import { useAuth } from '../context/AuthContext';
 import { ApiService } from '../services/api';
 import {
@@ -223,60 +224,6 @@ const UserProfilePage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* 통계 카드 */}
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 3, mb: 4 }}>
-          <Box>
-            <Card
-              sx={{
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                color: 'white',
-              }}
-            >
-              <CardContent sx={{ textAlign: 'center' }}>
-                <HeartFilledIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
-                <Typography variant="h4" fontWeight={800}>
-                  {favorites.length}
-                </Typography>
-                <Typography variant="body2">즐겨찾기</Typography>
-              </CardContent>
-            </Card>
-          </Box>
-
-          <Box>
-            <Card
-              sx={{
-                background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
-                color: 'white',
-              }}
-            >
-              <CardContent sx={{ textAlign: 'center' }}>
-                <ReviewIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
-                <Typography variant="h4" fontWeight={800}>
-                  {myReviews.length}
-                </Typography>
-                <Typography variant="body2">작성한 리뷰</Typography>
-              </CardContent>
-            </Card>
-          </Box>
-
-          <Box>
-            <Card
-              sx={{
-                background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, #FFB84D 100%)`,
-                color: 'white',
-              }}
-            >
-              <CardContent sx={{ textAlign: 'center' }}>
-                <RestaurantIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
-                <Typography variant="h4" fontWeight={800}>
-                  {favorites.length + myReviews.length}
-                </Typography>
-                <Typography variant="body2">활동 점수</Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        </Box>
-
         {/* 탈퇴 대기 알림 */}
         {deletionStatus?.is_deletion_scheduled && (
           <Alert
@@ -337,12 +284,14 @@ const UserProfilePage: React.FC = () => {
                 }}
                 onEditMemo={async (id, memo) => {
                   try {
-                    // TODO: API 호출하여 메모 수정
-                    setFavorites(favorites.map(f =>
-                      f.id === id ? { ...f, memo } : f
-                    ));
-                  } catch (error) {
-                    console.error('메모 수정 실패:', error);
+                    const response = await ApiService.updateFavoriteMemo(id, memo);
+                    if (response.success) {
+                      setFavorites(favorites.map(f =>
+                        f.id === id ? { ...f, memo } : f
+                      ));
+                    }
+                  } catch (error: any) {
+                    alert(error.userMessage || '메모 수정에 실패했습니다.');
                   }
                 }}
               />
@@ -350,78 +299,21 @@ const UserProfilePage: React.FC = () => {
 
             {/* 내 리뷰 탭 */}
             {selectedTab === 1 && (
-              <Box>
-                {myReviews.length === 0 ? (
-                  <Alert severity="info">작성한 리뷰가 없습니다.</Alert>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {myReviews.map((review) => (
-                      <Card key={review.id} variant="outlined">
-                        <CardContent>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Box>
-                              <Typography
-                                variant="h6"
-                                fontWeight={700}
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': { color: 'primary.main' },
-                                }}
-                                onClick={() => navigate(`/restaurants/${review.restaurant_id}`)}
-                              >
-                                {review.restaurant?.name || '맛집'}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                {renderRating(review.rating || 0)}
-                                <Typography variant="caption" color="text.secondary">
-                                  {new Date(review.created_at).toLocaleDateString()}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-
-                          {review.title && (
-                            <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                              {review.title}
-                            </Typography>
-                          )}
-
-                          <Typography variant="body2" color="text.secondary">
-                            {review.content}
-                          </Typography>
-
-                          {review.images && review.images.length > 0 && (
-                            <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
-                              {review.images.map((img: string, idx: number) => (
-                                <Box
-                                  key={idx}
-                                  sx={{
-                                    width: 100,
-                                    height: 100,
-                                    borderRadius: 2,
-                                    overflow: 'hidden',
-                                  }}
-                                >
-                                  <img
-                                    src={img}
-                                    alt={`리뷰 이미지 ${idx + 1}`}
-                                    onError={handleImageError}
-                                    style={{
-                                      width: '100%',
-                                      height: '100%',
-                                      objectFit: 'cover',
-                                    }}
-                                  />
-                                </Box>
-                              ))}
-                            </Box>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </Box>
-                )}
-              </Box>
+              <ReviewsListView
+                reviews={myReviews}
+                onDeleteReview={async (id) => {
+                  try {
+                    await ApiService.deleteReview(id);
+                    setMyReviews(myReviews.filter(r => r.id !== id));
+                  } catch (error: any) {
+                    alert(error.userMessage || '리뷰 삭제에 실패했습니다.');
+                  }
+                }}
+                onEditReview={(id) => {
+                  // TODO: 리뷰 수정 모달 열기
+                  alert('리뷰 수정 기능은 준비 중입니다.');
+                }}
+              />
             )}
 
             {/* 설정 탭 */}

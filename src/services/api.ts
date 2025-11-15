@@ -396,6 +396,12 @@ export class ApiService {
     return response.data;
   }
 
+  // 즐겨찾기 메모 수정
+  static async updateFavoriteMemo(favoriteId: string, memo: string): Promise<ApiResponse<any>> {
+    const response = await api.patch(`/api/restaurants/favorites/${favoriteId}/memo`, { memo });
+    return response.data;
+  }
+
   // 사용자 리뷰 목록 조회
   static async getUserReviews(params: {
     page?: number;

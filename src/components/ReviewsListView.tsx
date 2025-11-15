@@ -26,64 +26,54 @@ import {
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
-  LocationOn as LocationIcon,
-  Phone as PhoneIcon,
-  Star as StarIcon,
+  Visibility as ViewIcon,
 } from '@mui/icons-material';
-import { HeartFilledIcon, RestaurantIcon } from './icons/CustomIcons';
+import { RestaurantIcon, StarFilledIcon } from './icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE } from '../constants/images';
 
-interface FavoritesListViewProps {
-  favorites: any[];
-  onRemoveFavorite?: (id: string) => void;
-  onEditMemo?: (id: string, memo: string) => void;
+interface ReviewsListViewProps {
+  reviews: any[];
+  onDeleteReview?: (id: string) => void;
+  onEditReview?: (id: string) => void;
 }
 
-const FavoritesListView: React.FC<FavoritesListViewProps> = ({
-  favorites,
-  onRemoveFavorite,
-  onEditMemo,
+const ReviewsListView: React.FC<ReviewsListViewProps> = ({
+  reviews,
+  onDeleteReview,
+  onEditReview,
 }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterFolder, setFilterFolder] = useState<string>('all');
+  const [filterRating, setFilterRating] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('created_at');
 
-  // 폴더 목록 추출
-  const folders = useMemo(() => {
-    const folderSet = new Set<string>();
-    favorites.forEach(fav => {
-      if (fav.folder_name) {
-        folderSet.add(fav.folder_name);
-      }
-    });
-    return Array.from(folderSet);
-  }, [favorites]);
-
   // 필터링 및 정렬
-  const filteredFavorites = useMemo(() => {
-    let result = favorites;
+  const filteredReviews = useMemo(() => {
+    let result = reviews;
 
     // 검색 필터
     if (searchTerm) {
-      result = result.filter(fav =>
-        fav.restaurant?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fav.memo?.toLowerCase().includes(searchTerm.toLowerCase())
+      result = result.filter(review =>
+        review.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        review.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        review.restaurants?.name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // 폴더 필터
-    if (filterFolder !== 'all') {
-      result = result.filter(fav => fav.folder_name === filterFolder);
+    // 평점 필터
+    if (filterRating !== 'all') {
+      result = result.filter(review => review.rating === parseInt(filterRating));
     }
 
     // 정렬
     result.sort((a, b) => {
       switch (sortBy) {
-        case 'name':
-          return (a.restaurant?.name || '').localeCompare(b.restaurant?.name || '');
-        case 'rating':
-          return (b.restaurant?.rating || 0) - (a.restaurant?.rating || 0);
+        case 'rating_desc':
+          return b.rating - a.rating;
+        case 'rating_asc':
+          return a.rating - b.rating;
+        case 'restaurant_name':
+          return (a.restaurants?.name || '').localeCompare(b.restaurants?.name || '');
         case 'created_at':
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -91,38 +81,37 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
     });
 
     return result;
-  }, [favorites, searchTerm, filterFolder, sortBy]);
+  }, [reviews, searchTerm, filterRating, sortBy]);
 
-  // 카테고리별 통계
-  const categoryStats = useMemo(() => {
-    const stats: { [key: string]: number } = {};
-    favorites.forEach(fav => {
-      const categoryName = fav.restaurant?.categories?.name || '기타';
-      stats[categoryName] = (stats[categoryName] || 0) + 1;
+  // 평점별 통계
+  const ratingStats = useMemo(() => {
+    const stats = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach(review => {
+      stats[review.rating as keyof typeof stats]++;
     });
-    return Object.entries(stats).sort((a, b) => b[1] - a[1]);
-  }, [favorites]);
+    return stats;
+  }, [reviews]);
 
-  // 평균 평점 계산
+  // 평균 평점
   const averageRating = useMemo(() => {
-    if (favorites.length === 0) return 0;
-    const sum = favorites.reduce((acc, fav) => acc + (fav.restaurant?.rating || 0), 0);
-    return sum / favorites.length;
-  }, [favorites]);
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, review) => acc + (review.rating || 0), 0);
+    return sum / reviews.length;
+  }, [reviews]);
 
   return (
     <Box>
       {/* 통계 대시보드 */}
-      <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+      <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
         <Typography variant="h6" gutterBottom fontWeight={600}>
-          즐겨찾기 통계
+          리뷰 통계
         </Typography>
         <Stack direction="row" spacing={4} sx={{ mt: 2 }}>
           <Box>
             <Typography variant="h3" fontWeight={800}>
-              {favorites.length}
+              {reviews.length}
             </Typography>
-            <Typography variant="body2">전체 맛집</Typography>
+            <Typography variant="body2">전체 리뷰</Typography>
           </Box>
           <Box>
             <Typography variant="h3" fontWeight={800}>
@@ -132,21 +121,21 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
           </Box>
           <Box>
             <Typography variant="h3" fontWeight={800}>
-              {categoryStats.length}
+              {ratingStats[5]}
             </Typography>
-            <Typography variant="body2">카테고리</Typography>
+            <Typography variant="body2">5점 리뷰</Typography>
           </Box>
         </Stack>
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="body2" gutterBottom>
-            선호 카테고리 TOP 3
+            평점 분포
           </Typography>
           <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-            {categoryStats.slice(0, 3).map(([name, count], index) => (
+            {Object.entries(ratingStats).reverse().map(([rating, count]) => (
               <Chip
-                key={name}
-                label={`${index + 1}. ${name} (${count})`}
+                key={rating}
+                label={`${rating}★ ${count}`}
                 size="small"
                 sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
               />
@@ -164,25 +153,27 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="맛집 이름, 메모 검색..."
+            placeholder="제목, 내용, 맛집 이름 검색..."
             sx={{ flex: 1 }}
           />
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>폴더</InputLabel>
-            <Select value={filterFolder} onChange={(e) => setFilterFolder(e.target.value)} label="폴더">
+            <InputLabel>평점</InputLabel>
+            <Select value={filterRating} onChange={(e) => setFilterRating(e.target.value)} label="평점">
               <MenuItem value="all">전체</MenuItem>
-              {folders.map(folder => (
-                <MenuItem key={folder} value={folder}>{folder}</MenuItem>
-              ))}
-              <MenuItem value="">미분류</MenuItem>
+              <MenuItem value="5">5점</MenuItem>
+              <MenuItem value="4">4점</MenuItem>
+              <MenuItem value="3">3점</MenuItem>
+              <MenuItem value="2">2점</MenuItem>
+              <MenuItem value="1">1점</MenuItem>
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>정렬</InputLabel>
             <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)} label="정렬">
-              <MenuItem value="created_at">추가 순</MenuItem>
-              <MenuItem value="name">이름 순</MenuItem>
-              <MenuItem value="rating">평점 순</MenuItem>
+              <MenuItem value="created_at">작성 순</MenuItem>
+              <MenuItem value="rating_desc">평점 높은 순</MenuItem>
+              <MenuItem value="rating_asc">평점 낮은 순</MenuItem>
+              <MenuItem value="restaurant_name">맛집 이름 순</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -193,33 +184,33 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell width="40%"><strong>맛집 정보</strong></TableCell>
-              <TableCell width="15%" align="center"><strong>평점</strong></TableCell>
-              <TableCell width="15%"><strong>카테고리</strong></TableCell>
-              <TableCell width="20%"><strong>메모</strong></TableCell>
+              <TableCell width="35%"><strong>맛집 정보</strong></TableCell>
+              <TableCell width="10%" align="center"><strong>평점</strong></TableCell>
+              <TableCell width="30%"><strong>리뷰 내용</strong></TableCell>
+              <TableCell width="15%"><strong>작성일</strong></TableCell>
               <TableCell width="10%" align="center"><strong>관리</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredFavorites.length === 0 ? (
+            {filteredReviews.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                   <Typography color="text.secondary">
-                    즐겨찾기한 맛집이 없습니다
+                    작성한 리뷰가 없습니다
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              filteredFavorites.map((fav) => (
+              filteredReviews.map((review) => (
                 <TableRow
-                  key={fav.id}
+                  key={review.id}
                   hover
                   sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
                 >
-                  <TableCell onClick={() => navigate(`/restaurants/${fav.restaurant_id}`)}>
+                  <TableCell onClick={() => navigate(`/restaurants/${review.restaurant_id}`)}>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar
-                        src={fav.restaurant?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                        src={review.restaurants?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
                         variant="rounded"
                         sx={{ width: 60, height: 60 }}
                       >
@@ -227,47 +218,59 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
                       </Avatar>
                       <Box>
                         <Typography variant="body1" fontWeight={600}>
-                          {fav.restaurant?.name || '알 수 없음'}
+                          {review.restaurants?.name || '알 수 없음'}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                          <LocationIcon sx={{ fontSize: 14 }} />
-                          {fav.restaurant?.address || '-'}
+                        <Typography variant="caption" color="text.secondary">
+                          {review.restaurants?.address || '-'}
                         </Typography>
                       </Box>
                     </Stack>
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <Rating value={fav.restaurant?.rating || 0} readOnly precision={0.1} size="small" />
+                      <Rating value={review.rating} readOnly size="small" />
                       <Typography variant="body2" fontWeight={600}>
-                        {(fav.restaurant?.rating || 0).toFixed(1)}
+                        {review.rating}.0
                       </Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={fav.restaurant?.categories?.name || '기타'}
-                      size="small"
+                    <Typography variant="body2" fontWeight={600} gutterBottom>
+                      {review.title || '-'}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
                       sx={{
-                        bgcolor: fav.restaurant?.categories?.color || '#ccc',
-                        color: 'white',
-                        fontWeight: 600,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
                       }}
-                    />
+                    >
+                      {review.content || '-'}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                      {fav.memo || '-'}
+                    <Typography variant="body2" color="text.secondary">
+                      {new Date(review.created_at).toLocaleDateString()}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
                     <Stack direction="row" spacing={0.5} justifyContent="center">
-                      <Tooltip title="메모 수정">
+                      <Tooltip title="상세보기">
                         <IconButton size="small" onClick={(e) => {
                           e.stopPropagation();
-                          const newMemo = prompt('메모를 입력하세요', fav.memo || '');
-                          if (newMemo !== null && onEditMemo) {
-                            onEditMemo(fav.id, newMemo);
+                          navigate(`/restaurants/${review.restaurant_id}`);
+                        }}>
+                          <ViewIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="수정">
+                        <IconButton size="small" onClick={(e) => {
+                          e.stopPropagation();
+                          if (onEditReview) {
+                            onEditReview(review.id);
                           }
                         }}>
                           <EditIcon fontSize="small" />
@@ -276,8 +279,8 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
                       <Tooltip title="삭제">
                         <IconButton size="small" color="error" onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm('즐겨찾기에서 제거하시겠습니까?') && onRemoveFavorite) {
-                            onRemoveFavorite(fav.id);
+                          if (window.confirm('리뷰를 삭제하시겠습니까?') && onDeleteReview) {
+                            onDeleteReview(review.id);
                           }
                         }}>
                           <DeleteIcon fontSize="small" />
@@ -292,10 +295,10 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
         </Table>
       </TableContainer>
 
-      {filteredFavorites.length > 0 && (
+      {filteredReviews.length > 0 && (
         <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            총 {filteredFavorites.length}개의 맛집
+            총 {filteredReviews.length}개의 리뷰
           </Typography>
         </Box>
       )}
@@ -303,4 +306,4 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
   );
 };
 
-export default FavoritesListView;
+export default ReviewsListView;
