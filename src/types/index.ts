@@ -18,7 +18,7 @@ export interface Restaurant {
   description?: string;
   address: string;
   phone?: string;
-  category_id: number;
+  category_id: string; // UUID로 변경
   rating: number;
   review_count: number;
   view_count?: number;
@@ -26,7 +26,7 @@ export interface Restaurant {
   images: string[];
   created_at: string;
   categories?: {
-    id: number;
+    id: string; // UUID로 변경
     name: string;
     icon?: string;
   };
@@ -34,7 +34,7 @@ export interface Restaurant {
 
 // Category types
 export interface Category {
-  id: number;
+  id: string; // UUID로 변경
   name: string;
   icon?: string;
   color?: string;
