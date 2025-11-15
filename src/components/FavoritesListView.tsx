@@ -116,6 +116,8 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
   // 폴더별로 그룹화
   const favoritesByFolder = useMemo(() => {
     const grouped = new Map<string, any[]>();
+
+    // 1. 즐겨찾기를 폴더별로 그룹화
     favorites.forEach(fav => {
       const folderName = fav.folder_name || '미분류';
       if (!grouped.has(folderName)) {
@@ -124,7 +126,14 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
       grouped.get(folderName)!.push(fav);
     });
 
-    // 각 그룹 내에서 정렬
+    // 2. DB에 저장된 폴더도 추가 (빈 폴더 포함)
+    dbFolders.forEach(folder => {
+      if (!grouped.has(folder.folder_name)) {
+        grouped.set(folder.folder_name, []);
+      }
+    });
+
+    // 3. 각 그룹 내에서 정렬
     grouped.forEach((items, folder) => {
       items.sort((a, b) => {
         switch (sortBy) {
@@ -140,7 +149,7 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
     });
 
     return grouped;
-  }, [favorites, sortBy]);
+  }, [favorites, dbFolders, sortBy]);
 
   // 검색 필터링
   const filteredFavoritesByFolder = useMemo(() => {
