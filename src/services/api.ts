@@ -402,6 +402,24 @@ export class ApiService {
     return response.data;
   }
 
+  // 즐겨찾기 폴더 변경
+  static async updateFavoriteFolder(favoriteId: string, folder_name: string | null): Promise<ApiResponse<any>> {
+    const response = await api.patch(`/api/restaurants/favorites/${favoriteId}/folder`, { folder_name });
+    return response.data;
+  }
+
+  // 폴더명 변경
+  static async renameFolder(old_name: string, new_name: string): Promise<ApiResponse<any>> {
+    const response = await api.patch('/api/restaurants/favorites/folders/rename', { old_name, new_name });
+    return response.data;
+  }
+
+  // 폴더 삭제
+  static async deleteFolder(folderName: string): Promise<ApiResponse<any>> {
+    const response = await api.delete(`/api/restaurants/favorites/folders/${encodeURIComponent(folderName)}`);
+    return response.data;
+  }
+
   // 사용자 리뷰 목록 조회
   static async getUserReviews(params: {
     page?: number;

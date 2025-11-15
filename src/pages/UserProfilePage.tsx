@@ -294,6 +294,7 @@ const UserProfilePage: React.FC = () => {
                     alert(error.userMessage || '메모 수정에 실패했습니다.');
                   }
                 }}
+                onRefresh={loadUserData}
               />
             )}
 
