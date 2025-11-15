@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import ProfileEditModal from '../components/ProfileEditModal';
+import FavoritesListView from '../components/FavoritesListView';
 import { useAuth } from '../context/AuthContext';
 import { ApiService } from '../services/api';
 import {
@@ -324,61 +325,27 @@ const UserProfilePage: React.FC = () => {
           <>
             {/* 즐겨찾기 탭 */}
             {selectedTab === 0 && (
-              <Box>
-                {favorites.length === 0 ? (
-                  <Alert severity="info">즐겨찾기한 맛집이 없습니다.</Alert>
-                ) : (
-                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: 3 }}>
-                    {favorites.map((fav) => (
-                      <Box key={fav.id}>
-                        <Card>
-                          <CardActionArea
-                            onClick={() => navigate(`/restaurants/${fav.restaurant?.id}`)}
-                          >
-                            <CardMedia
-                              component="img"
-                              height="200"
-                              image={
-                                fav.restaurant?.images?.[0] || DEFAULT_RESTAURANT_IMAGE
-                              }
-                              alt={fav.restaurant?.name}
-                              onError={handleImageError}
-                            />
-                            <CardContent>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="h6" fontWeight={700}>
-                                  {fav.restaurant?.name}
-                                </Typography>
-                                {renderRating(fav.restaurant?.rating || 0)}
-                              </Box>
-
-                              {fav.restaurant?.categories && (
-                                <Chip
-                                  label={fav.restaurant.categories.name}
-                                  size="small"
-                                  sx={{
-                                    mb: 1,
-                                    backgroundColor: theme.palette.primary.main,
-                                    color: '#FFFFFF',
-                                    fontWeight: 600,
-                                  }}
-                                />
-                              )}
-
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <LocationIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                                <Typography variant="caption" color="text.secondary" noWrap>
-                                  {fav.restaurant?.address}
-                                </Typography>
-                              </Box>
-                            </CardContent>
-                          </CardActionArea>
-                        </Card>
-                      </Box>
-                    ))}
-                  </Box>
-                )}
-              </Box>
+              <FavoritesListView
+                favorites={favorites}
+                onRemoveFavorite={async (id) => {
+                  try {
+                    // TODO: API 호출하여 즐겨찾기 제거
+                    setFavorites(favorites.filter(f => f.id !== id));
+                  } catch (error) {
+                    console.error('즐겨찾기 제거 실패:', error);
+                  }
+                }}
+                onEditMemo={async (id, memo) => {
+                  try {
+                    // TODO: API 호출하여 메모 수정
+                    setFavorites(favorites.map(f =>
+                      f.id === id ? { ...f, memo } : f
+                    ));
+                  } catch (error) {
+                    console.error('메모 수정 실패:', error);
+                  }
+                }}
+              />
             )}
 
             {/* 내 리뷰 탭 */}
