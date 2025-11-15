@@ -380,17 +380,17 @@ const RestaurantDetailPage: React.FC = () => {
             </Box>
           );
         })}
-        {restaurant.break_time && (
+        {(operations?.break_time || restaurant.break_time) && (
           <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
             <Typography variant="caption" color="text.secondary">
-              브레이크 타임: {restaurant.break_time}
+              브레이크 타임: {(operations?.break_time || restaurant.break_time)}
             </Typography>
           </Box>
         )}
-        {restaurant.last_order && (
+        {(operations?.last_order || restaurant.last_order) && (
           <Box>
             <Typography variant="caption" color="text.secondary">
-              라스트 오더: {restaurant.last_order}
+              라스트 오더: {(operations?.last_order || restaurant.last_order)}
             </Typography>
           </Box>
         )}
@@ -400,7 +400,7 @@ const RestaurantDetailPage: React.FC = () => {
 
   // 편의시설 렌더링
   const renderFacilities = () => {
-    const facilities = [
+    const facilityList = [
       { key: 'wifi_available', label: '무료 와이파이', icon: <Wifi sx={{ fontSize: 18 }} /> },
       { key: 'delivery_available', label: '배달', icon: <DeliveryDining sx={{ fontSize: 18 }} /> },
       { key: 'takeout_available', label: '포장', icon: <ShoppingBag sx={{ fontSize: 18 }} /> },
@@ -413,9 +413,9 @@ const RestaurantDetailPage: React.FC = () => {
       { key: 'kids_menu', label: '어린이 메뉴', icon: null },
     ];
 
-    const availableFacilities = facilities.filter(f => restaurant[f.key]);
+    const availableFacilities = facilityList.filter(f => restaurant[f.key]);
 
-    if (availableFacilities.length === 0 && !restaurant.parking_info && !restaurant.valet_parking) {
+    if (availableFacilities.length === 0 && !(facilities?.parking_info || restaurant.parking_info) && !(facilities?.valet_parking ?? restaurant.valet_parking)) {
       return <Typography variant="body2" color="text.secondary">정보 없음</Typography>;
     }
 
@@ -431,15 +431,15 @@ const RestaurantDetailPage: React.FC = () => {
             sx={{ borderRadius: 1 }}
           />
         ))}
-        {restaurant.parking_available && (
+        {(facilities?.parking_available ?? restaurant.parking_available) && (
           <Chip
-            label={`주차 가능${restaurant.parking_spaces ? ` (${restaurant.parking_spaces}대)` : ''}`}
+            label={`주차 가능${(facilities?.parking_spaces || restaurant.parking_spaces) ? ` (${(facilities?.parking_spaces || restaurant.parking_spaces)}대)` : ''}`}
             size="small"
             variant="outlined"
             sx={{ borderRadius: 1 }}
           />
         )}
-        {restaurant.valet_parking && (
+        {(facilities?.valet_parking ?? restaurant.valet_parking) && (
           <Chip
             label="발렛파킹"
             size="small"
@@ -737,15 +737,15 @@ const RestaurantDetailPage: React.FC = () => {
                   </Typography>
                 </Box>
                 {renderFacilities()}
-                {restaurant.parking_info && (
+                {(facilities?.parking_info || restaurant.parking_info) && (
                   <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-                    {restaurant.parking_info}
+                    {(facilities?.parking_info || restaurant.parking_info)}
                   </Typography>
                 )}
               </Box>
 
               {/* 배달/포장 정보 */}
-              {(restaurant.delivery_available || restaurant.delivery_apps || restaurant.takeout_available) && (
+              {((services?.delivery_available ?? restaurant.delivery_available) || restaurant.delivery_apps || (services?.takeout_available ?? restaurant.takeout_available)) && (
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <DeliveryDining sx={{ fontSize: 20, color: 'primary.main' }} />
@@ -754,7 +754,7 @@ const RestaurantDetailPage: React.FC = () => {
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    {restaurant.delivery_available && (
+                    {(services?.delivery_available ?? restaurant.delivery_available) && (
                       <Box>
                         <Typography variant="body2" fontWeight={600}>배달 가능</Typography>
                         {restaurant.delivery_apps && restaurant.delivery_apps.length > 0 && (
@@ -764,19 +764,19 @@ const RestaurantDetailPage: React.FC = () => {
                             ))}
                           </Box>
                         )}
-                        {restaurant.delivery_fee !== null && restaurant.delivery_fee !== undefined && (
+                        {(services?.delivery_fee ?? restaurant.delivery_fee) !== null && (services?.delivery_fee ?? restaurant.delivery_fee) !== undefined && (
                           <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
-                            배달비: {restaurant.delivery_fee === 0 ? '무료' : `${restaurant.delivery_fee.toLocaleString()}원`}
+                            배달비: {(services?.delivery_fee ?? restaurant.delivery_fee) === 0 ? '무료' : `${(services?.delivery_fee ?? restaurant.delivery_fee).toLocaleString()}원`}
                           </Typography>
                         )}
-                        {restaurant.min_order_amount && (
+                        {(services?.min_order_amount || restaurant.min_order_amount) && (
                           <Typography variant="caption" color="text.secondary" display="block">
-                            최소 주문금액: {restaurant.min_order_amount.toLocaleString()}원
+                            최소 주문금액: {(services?.min_order_amount || restaurant.min_order_amount).toLocaleString()}원
                           </Typography>
                         )}
                       </Box>
                     )}
-                    {restaurant.takeout_available && (
+                    {(services?.takeout_available ?? restaurant.takeout_available) && (
                       <Typography variant="body2">포장 가능</Typography>
                     )}
                   </Box>
@@ -800,15 +800,15 @@ const RestaurantDetailPage: React.FC = () => {
 
 
             {/* 소셜 링크 */}
-            {(restaurant.website_url || restaurant.blog_url || restaurant.instagram_url || restaurant.facebook_url) && (
+            {((contacts?.website_url || restaurant.website_url) || (contacts?.blog_url || restaurant.blog_url) || (contacts?.instagram_url || restaurant.instagram_url) || (contacts?.facebook_url || restaurant.facebook_url)) && (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" fontWeight={600} gutterBottom>
                   링크
                 </Typography>
                 <Stack spacing={1}>
-                  {restaurant.website_url && (
+                  {(contacts?.website_url || restaurant.website_url) && (
                     <Link
-                      href={restaurant.website_url}
+                      href={(contacts?.website_url || restaurant.website_url)}
                       target="_blank"
                       rel="noopener"
                       underline="hover"
@@ -818,9 +818,9 @@ const RestaurantDetailPage: React.FC = () => {
                       <Typography variant="body2">웹사이트</Typography>
                     </Link>
                   )}
-                  {restaurant.blog_url && (
+                  {(contacts?.blog_url || restaurant.blog_url) && (
                     <Link
-                      href={restaurant.blog_url}
+                      href={(contacts?.blog_url || restaurant.blog_url)}
                       target="_blank"
                       rel="noopener"
                       underline="hover"
@@ -830,9 +830,9 @@ const RestaurantDetailPage: React.FC = () => {
                       <Typography variant="body2">블로그</Typography>
                     </Link>
                   )}
-                  {restaurant.instagram_url && (
+                  {(contacts?.instagram_url || restaurant.instagram_url) && (
                     <Link
-                      href={restaurant.instagram_url}
+                      href={(contacts?.instagram_url || restaurant.instagram_url)}
                       target="_blank"
                       rel="noopener"
                       underline="hover"
@@ -842,9 +842,9 @@ const RestaurantDetailPage: React.FC = () => {
                       <Typography variant="body2">인스타그램</Typography>
                     </Link>
                   )}
-                  {restaurant.facebook_url && (
+                  {(contacts?.facebook_url || restaurant.facebook_url) && (
                     <Link
-                      href={restaurant.facebook_url}
+                      href={(contacts?.facebook_url || restaurant.facebook_url)}
                       target="_blank"
                       rel="noopener"
                       underline="hover"
