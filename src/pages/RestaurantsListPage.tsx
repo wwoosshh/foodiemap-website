@@ -462,7 +462,7 @@ const RestaurantsListPage: React.FC = () => {
               <FormControl fullWidth size="small">
                 <Select
                   value={selectedCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value as number | '')}
+                  onChange={(e) => handleCategoryChange(e.target.value as string | '')}
                   displayEmpty
                   startAdornment={
                     <InputAdornment position="start">
