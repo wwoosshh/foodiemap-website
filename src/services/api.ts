@@ -572,6 +572,75 @@ export class ApiService {
     const response = await api.get('/api/auth/deletion-status');
     return response.data;
   }
+
+  // === 사용자 설정 API ===
+
+  // 사용자 설정 조회
+  static async getUserPreferences(): Promise<ApiResponse<{
+    user_id: string;
+    preferred_language: string;
+    notification_enabled: boolean;
+    email_notification: boolean;
+    theme: string;
+    preferences: any;
+    updated_at: string;
+  }>> {
+    const response = await api.get('/api/preferences');
+    return response.data;
+  }
+
+  // 사용자 설정 업데이트
+  static async updateUserPreferences(data: {
+    preferred_language?: string;
+    notification_enabled?: boolean;
+    email_notification?: boolean;
+    theme?: string;
+    preferences?: any;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.put('/api/preferences', data);
+    return response.data;
+  }
+
+  // 언어 설정 변경
+  static async changeLanguage(language: string): Promise<ApiResponse<any>> {
+    const response = await api.put('/api/preferences/language', { language });
+    return response.data;
+  }
+
+  // 테마 설정 변경
+  static async changeTheme(theme: string): Promise<ApiResponse<any>> {
+    const response = await api.put('/api/preferences/theme', { theme });
+    return response.data;
+  }
+
+  // 알림 설정 변경
+  static async changeNotificationSettings(data: {
+    notification_enabled: boolean;
+    email_notification?: boolean;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.put('/api/preferences/notifications', data);
+    return response.data;
+  }
+
+  // === 다국어 지원 카테고리 API ===
+
+  // 카테고리 목록 조회 (다국어 지원)
+  static async getCategoriesWithLang(lang: string = 'ko'): Promise<ApiResponse<{
+    categories: any[];
+    language: string;
+  }>> {
+    const response = await api.get(`/api/categories?lang=${lang}`);
+    return response.data;
+  }
+
+  // 카테고리 상세 조회 (다국어 지원)
+  static async getCategoryWithLang(id: string, lang: string = 'ko'): Promise<ApiResponse<{
+    category: any;
+    language: string;
+  }>> {
+    const response = await api.get(`/api/categories/${id}?lang=${lang}`);
+    return response.data;
+  }
 }
 
 export default api;
