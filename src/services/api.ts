@@ -232,6 +232,10 @@ export class ApiService {
   // 맛집 상세정보 모든 데이터 한 번에 조회 (정보, 메뉴, 리뷰, 지도 등)
   static async getRestaurantCompleteData(restaurantId: string): Promise<ApiResponse<{
     restaurant: any;
+    contacts?: any;
+    facilities?: any;
+    operations?: any;
+    services?: any;
     reviews: {
       items: any[];
       stats: any;
