@@ -73,15 +73,45 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
   const [moveMenuAnchor, setMoveMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedFavorite, setSelectedFavorite] = useState<any>(null);
 
-  // 폴더 목록 추출
+  // DB에서 폴더 목록 가져오기
+  const [dbFolders, setDbFolders] = useState<any[]>([]);
+
+  // 폴더 목록 로드
+  const loadFolders = async () => {
+    try {
+      const response = await ApiService.getFolders();
+      if (response.success && response.data) {
+        setDbFolders(response.data.folders || []);
+      }
+    } catch (error) {
+      console.error('폴더 목록 로드 실패:', error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 폴더 목록 로드
+  React.useEffect(() => {
+    loadFolders();
+  }, []);
+
+  // 폴더 목록 병합 (DB 폴더 + 즐겨찾기에서 추출한 폴더)
   const folders = useMemo(() => {
     const folderMap = new Map<string, number>();
+
+    // 1. 즐겨찾기에서 폴더별 카운트 추출
     favorites.forEach(fav => {
       const folderName = fav.folder_name || '미분류';
       folderMap.set(folderName, (folderMap.get(folderName) || 0) + 1);
     });
+
+    // 2. DB에 저장된 폴더 추가 (카운트가 없으면 0으로)
+    dbFolders.forEach(folder => {
+      if (!folderMap.has(folder.folder_name)) {
+        folderMap.set(folder.folder_name, 0);
+      }
+    });
+
     return Array.from(folderMap.entries()).map(([name, count]) => ({ name, count }));
-  }, [favorites]);
+  }, [favorites, dbFolders]);
 
   // 폴더별로 그룹화
   const favoritesByFolder = useMemo(() => {
@@ -161,6 +191,7 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
         alert(response.message);
         setFolderDialogOpen(false);
         setNewFolderName('');
+        await loadFolders(); // 폴더 목록 다시 로드
         if (onRefresh) onRefresh();
       }
     } catch (error: any) {
@@ -181,6 +212,7 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
         setFolderDialogOpen(false);
         setNewFolderName('');
         setSelectedFolder('');
+        await loadFolders(); // 폴더 목록 다시 로드
         if (onRefresh) onRefresh();
       }
     } catch (error: any) {
@@ -201,6 +233,7 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
       const response = await ApiService.deleteFolder(folderName);
       if (response.success) {
         alert(response.message);
+        await loadFolders(); // 폴더 목록 다시 로드
         if (onRefresh) onRefresh();
       }
     } catch (error: any) {
