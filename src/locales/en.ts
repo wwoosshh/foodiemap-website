@@ -121,6 +121,18 @@ export const en: TranslationKeys = {
     reviewEditComingSoon: 'Review editing feature is coming soon.',
   },
 
+  // Home
+  home: {
+    heroTitle: 'Your Delicious Moments',
+    heroSubtitle: 'Discover Hidden Gem Restaurants Across the Country',
+    categories: 'Categories',
+    allCategories: 'All',
+    highRatedRestaurants: 'Top Rated Restaurants',
+    popularRestaurants: 'Popular Restaurants',
+    newRestaurants: 'New Restaurants',
+    featuredRestaurants: 'Featured Restaurants',
+  },
+
   // Restaurant
   restaurant: {
     viewDetails: 'View Details',
@@ -132,6 +144,46 @@ export const en: TranslationKeys = {
     location: 'Location',
     hours: 'Hours',
     contact: 'Contact',
+    searchResults: 'Search Results',
+    noResults: 'No results found',
+    filterByCategory: 'Filter by Category',
+    sortBy: 'Sort By',
+    sortByRating: 'By Rating',
+    sortByReviews: 'By Reviews',
+    sortByNewest: 'Newest First',
+  },
+
+  // Event
+  event: {
+    title: 'Events',
+    ongoing: 'Ongoing',
+    ended: 'Ended',
+    viewDetail: 'View Details',
+    period: 'Period',
+    noEvents: 'No ongoing events',
+  },
+
+  // Notice
+  notice: {
+    title: 'Notices',
+    important: 'Important',
+    viewDetail: 'View Details',
+    noNotices: 'No notices available',
+    postedAt: 'Posted',
+  },
+
+  // Terms
+  terms: {
+    title: 'Terms of Service',
+    legalNotice: 'Legal Notice',
+    legalNoticeContent: 'Only the Korean version of these Terms of Service has legal effect. Translations in other languages are for reference only, and in case of any discrepancy, the Korean original shall prevail.',
+  },
+
+  // Privacy
+  privacy: {
+    title: 'Privacy Policy',
+    legalNotice: 'Legal Notice',
+    legalNoticeContent: 'Only the Korean version of this Privacy Policy has legal effect. Translations in other languages are for reference only, and in case of any discrepancy, the Korean original shall prevail.',
   },
 
   // Review

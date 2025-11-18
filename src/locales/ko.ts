@@ -119,6 +119,18 @@ export const ko = {
     reviewEditComingSoon: '리뷰 수정 기능은 준비 중입니다.',
   },
 
+  // 홈페이지
+  home: {
+    heroTitle: '당신의 맛있는 순간',
+    heroSubtitle: '전국의 숨은 맛집을 찾아보세요',
+    categories: '카테고리',
+    allCategories: '전체',
+    highRatedRestaurants: '별점이 높은 맛집',
+    popularRestaurants: '인기 맛집',
+    newRestaurants: '신규 맛집',
+    featuredRestaurants: '추천 맛집',
+  },
+
   // 맛집
   restaurant: {
     viewDetails: '상세보기',
@@ -130,6 +142,46 @@ export const ko = {
     location: '위치',
     hours: '영업시간',
     contact: '연락처',
+    searchResults: '검색 결과',
+    noResults: '검색 결과가 없습니다',
+    filterByCategory: '카테고리별 필터',
+    sortBy: '정렬',
+    sortByRating: '평점순',
+    sortByReviews: '리뷰순',
+    sortByNewest: '최신순',
+  },
+
+  // 이벤트
+  event: {
+    title: '이벤트',
+    ongoing: '진행중',
+    ended: '종료',
+    viewDetail: '자세히 보기',
+    period: '기간',
+    noEvents: '진행중인 이벤트가 없습니다',
+  },
+
+  // 공지사항
+  notice: {
+    title: '공지사항',
+    important: '중요',
+    viewDetail: '자세히 보기',
+    noNotices: '공지사항이 없습니다',
+    postedAt: '게시일',
+  },
+
+  // 약관
+  terms: {
+    title: '이용약관',
+    legalNotice: '법적 효력 안내',
+    legalNoticeContent: '본 이용약관은 한국어 버전만 법적 효력을 가집니다. 다른 언어로 번역된 내용은 참고용이며, 한국어 원문과 차이가 있을 경우 한국어 원문이 우선합니다.',
+  },
+
+  // 개인정보처리방침
+  privacy: {
+    title: '개인정보처리방침',
+    legalNotice: '법적 효력 안내',
+    legalNoticeContent: '본 개인정보처리방침은 한국어 버전만 법적 효력을 가집니다. 다른 언어로 번역된 내용은 참고용이며, 한국어 원문과 차이가 있을 경우 한국어 원문이 우선합니다.',
   },
 
   // 리뷰

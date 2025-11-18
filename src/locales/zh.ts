@@ -121,6 +121,18 @@ export const zh: TranslationKeys = {
     reviewEditComingSoon: '评论编辑功能即将推出。',
   },
 
+  // 主页
+  home: {
+    heroTitle: '您的美味时刻',
+    heroSubtitle: '发现全国各地的隐藏美食',
+    categories: '分类',
+    allCategories: '全部',
+    highRatedRestaurants: '高评分餐厅',
+    popularRestaurants: '热门餐厅',
+    newRestaurants: '新开餐厅',
+    featuredRestaurants: '推荐餐厅',
+  },
+
   // 餐厅
   restaurant: {
     viewDetails: '查看详情',
@@ -132,6 +144,46 @@ export const zh: TranslationKeys = {
     location: '位置',
     hours: '营业时间',
     contact: '联系方式',
+    searchResults: '搜索结果',
+    noResults: '未找到结果',
+    filterByCategory: '按分类筛选',
+    sortBy: '排序',
+    sortByRating: '评分排序',
+    sortByReviews: '评论数排序',
+    sortByNewest: '最新排序',
+  },
+
+  // 活动
+  event: {
+    title: '活动',
+    ongoing: '进行中',
+    ended: '已结束',
+    viewDetail: '查看详情',
+    period: '期间',
+    noEvents: '暂无进行中的活动',
+  },
+
+  // 公告
+  notice: {
+    title: '公告',
+    important: '重要',
+    viewDetail: '查看详情',
+    noNotices: '暂无公告',
+    postedAt: '发布日期',
+  },
+
+  // 服务条款
+  terms: {
+    title: '服务条款',
+    legalNotice: '法律效力说明',
+    legalNoticeContent: '本服务条款仅韩语版本具有法律效力。其他语言的翻译仅供参考，如有差异，以韩语原文为准。',
+  },
+
+  // 隐私政策
+  privacy: {
+    title: '隐私政策',
+    legalNotice: '法律效力说明',
+    legalNoticeContent: '本隐私政策仅韩语版本具有法律效力。其他语言的翻译仅供参考，如有差异，以韩语原文为准。',
   },
 
   // 评论

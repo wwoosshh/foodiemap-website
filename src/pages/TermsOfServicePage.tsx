@@ -1,9 +1,11 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent, Divider, Container } from '@mui/material';
-import { Description } from '@mui/icons-material';
+import { Box, Typography, Card, CardContent, Divider, Container, Alert } from '@mui/material';
+import { Description, Warning } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
+import { useLanguage } from '../context/LanguageContext';
 
 const TermsOfServicePage: React.FC = () => {
+  const { t, language } = useLanguage();
   const lastUpdated = '2025년 1월 1일';
 
   return (
@@ -12,12 +14,24 @@ const TermsOfServicePage: React.FC = () => {
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Description sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
         <Typography variant="h3" fontWeight={700} gutterBottom>
-          이용약관
+          {t.terms.title}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           최종 수정일: {lastUpdated}
         </Typography>
       </Box>
+
+      {/* 법적 효력 경고 (한국어가 아닌 경우에만 표시) */}
+      {language !== 'ko' && (
+        <Alert severity="warning" icon={<Warning />} sx={{ mb: 3 }}>
+          <Typography variant="body2" fontWeight={600} gutterBottom>
+            {t.terms.legalNotice}
+          </Typography>
+          <Typography variant="body2">
+            {t.terms.legalNoticeContent}
+          </Typography>
+        </Alert>
+      )}
 
       <Card>
         <CardContent sx={{ p: 4 }}>

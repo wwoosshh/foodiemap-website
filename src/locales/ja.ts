@@ -121,6 +121,18 @@ export const ja: TranslationKeys = {
     reviewEditComingSoon: 'レビュー編集機能は準備中です。',
   },
 
+  // ホーム
+  home: {
+    heroTitle: 'あなたの美味しい瞬間',
+    heroSubtitle: '全国の隠れた名店を見つけよう',
+    categories: 'カテゴリー',
+    allCategories: 'すべて',
+    highRatedRestaurants: '高評価レストラン',
+    popularRestaurants: '人気レストラン',
+    newRestaurants: '新規レストラン',
+    featuredRestaurants: 'おすすめレストラン',
+  },
+
   // レストラン
   restaurant: {
     viewDetails: '詳細を見る',
@@ -132,6 +144,46 @@ export const ja: TranslationKeys = {
     location: '場所',
     hours: '営業時間',
     contact: '連絡先',
+    searchResults: '検索結果',
+    noResults: '結果が見つかりません',
+    filterByCategory: 'カテゴリーで絞り込む',
+    sortBy: '並び替え',
+    sortByRating: '評価順',
+    sortByReviews: 'レビュー数順',
+    sortByNewest: '新着順',
+  },
+
+  // イベント
+  event: {
+    title: 'イベント',
+    ongoing: '開催中',
+    ended: '終了',
+    viewDetail: '詳細を見る',
+    period: '期間',
+    noEvents: '開催中のイベントはありません',
+  },
+
+  // お知らせ
+  notice: {
+    title: 'お知らせ',
+    important: '重要',
+    viewDetail: '詳細を見る',
+    noNotices: 'お知らせはありません',
+    postedAt: '投稿日',
+  },
+
+  // 利用規約
+  terms: {
+    title: '利用規約',
+    legalNotice: '法的効力について',
+    legalNoticeContent: '本利用規約は韓国語版のみが法的効力を持ちます。他の言語への翻訳は参考用であり、韓国語原文と相違がある場合は韓国語原文が優先されます。',
+  },
+
+  // プライバシーポリシー
+  privacy: {
+    title: 'プライバシーポリシー',
+    legalNotice: '法的効力について',
+    legalNoticeContent: '本プライバシーポリシーは韓国語版のみが法的効力を持ちます。他の言語への翻訳は参考用であり、韓国語原文と相違がある場合は韓国語原文が優先されます。',
   },
 
   // レビュー

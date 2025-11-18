@@ -17,9 +17,11 @@ import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 import { DEFAULT_EVENT_IMAGE, handleImageError } from '../constants/images';
 import { stripMarkdown } from '../utils/markdown';
+import { useLanguage } from '../context/LanguageContext';
 
 const EventListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,11 +39,11 @@ const EventListPage: React.FC = () => {
           setEvents(response.data.events || []);
           setTotalPages(response.data.pagination?.totalPages || 1);
         } else {
-          setError('이벤트를 불러올 수 없습니다.');
+          setError(t.event.noEvents);
         }
       } catch (err) {
         console.error('이벤트 로드 실패:', err);
-        setError('이벤트를 불러오는 중 오류가 발생했습니다.');
+        setError(t.common.error);
       } finally {
         setLoading(false);
       }
@@ -69,10 +71,10 @@ const EventListPage: React.FC = () => {
       <Box sx={{ mb: 6, textAlign: 'center' }}>
         <EventIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
         <Typography variant="h3" fontWeight={700} gutterBottom>
-          이벤트
+          {t.event.title}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          진행 중인 다양한 이벤트를 확인하세요
+          {t.event.ongoing}
         </Typography>
       </Box>
 
@@ -107,7 +109,7 @@ const EventListPage: React.FC = () => {
       ) : events.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="body1" color="text.secondary">
-            진행 중인 이벤트가 없습니다.
+            {t.event.noEvents}
           </Typography>
         </Box>
       ) : (
@@ -160,10 +162,10 @@ const EventListPage: React.FC = () => {
                     <Chip
                       label={
                         event.status === 'active'
-                          ? '진행중'
+                          ? t.event.ongoing
                           : event.status === 'inactive'
-                          ? '대기'
-                          : '종료'
+                          ? t.event.ongoing
+                          : t.event.ended
                       }
                       size="small"
                       color={event.status === 'active' ? 'success' : 'default'}

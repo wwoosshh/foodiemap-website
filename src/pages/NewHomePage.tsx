@@ -30,6 +30,7 @@ import {
   NewIcon,
 } from '../components/icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PushedRestaurant {
   id: number;
@@ -44,6 +45,7 @@ interface PushedRestaurant {
 const NewHomePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -376,10 +378,10 @@ const NewHomePage: React.FC = () => {
               fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' },
             }}
           >
-            당신의 맛있는 순간
+            {t.home.heroTitle}
           </Typography>
           <Typography variant="h5" color="text.secondary" sx={{ mb: { xs: 3, md: 4 }, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>
-            전국의 숨은 맛집을 찾아보세요
+            {t.home.heroSubtitle}
           </Typography>
           <Button
             variant="contained"
@@ -546,7 +548,7 @@ const NewHomePage: React.FC = () => {
 
             {/* 다양한 알고리즘별 맛집 섹션 */}
             <RestaurantSection
-              title="별점이 높은 맛집"
+              title={t.home.highRatedRestaurants}
               icon={<StarFilledIcon />}
               restaurants={ratingRestaurants}
               sortParam="rating_desc"
@@ -598,7 +600,7 @@ const NewHomePage: React.FC = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3, color: 'primary.main' }}>
-                카테고리
+                {t.home.categories}
               </Typography>
 
               {/* 전체 보기 버튼 */}

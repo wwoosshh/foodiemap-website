@@ -16,9 +16,11 @@ import { Campaign, Visibility } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 import { stripMarkdown } from '../utils/markdown';
+import { useLanguage } from '../context/LanguageContext';
 
 const NoticeListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [notices, setNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,11 +38,11 @@ const NoticeListPage: React.FC = () => {
           setNotices(response.data.notices || []);
           setTotalPages(response.data.pagination?.totalPages || 1);
         } else {
-          setError('공지사항을 불러올 수 없습니다.');
+          setError(t.notice.noNotices);
         }
       } catch (err) {
         console.error('공지사항 로드 실패:', err);
-        setError('공지사항을 불러오는 중 오류가 발생했습니다.');
+        setError(t.common.error);
       } finally {
         setLoading(false);
       }
@@ -69,10 +71,10 @@ const NoticeListPage: React.FC = () => {
       <Box sx={{ mb: 6, textAlign: 'center' }}>
         <Campaign sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
         <Typography variant="h3" fontWeight={700} gutterBottom>
-          공지사항
+          {t.notice.title}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          중요한 소식과 업데이트를 확인하세요
+          {t.notice.important}
         </Typography>
       </Box>
 
@@ -96,7 +98,7 @@ const NoticeListPage: React.FC = () => {
       ) : notices.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="body1" color="text.secondary">
-            등록된 공지사항이 없습니다.
+            {t.notice.noNotices}
           </Typography>
         </Box>
       ) : (
@@ -130,7 +132,7 @@ const NoticeListPage: React.FC = () => {
                     >
                       {notice.is_important && (
                         <Chip
-                          label="중요"
+                          label={t.notice.important}
                           size="small"
                           color="error"
                           sx={{ fontWeight: 600 }}
