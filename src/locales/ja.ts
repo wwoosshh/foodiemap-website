@@ -131,6 +131,17 @@ export const ja: TranslationKeys = {
     popularRestaurants: '人気レストラン',
     newRestaurants: '新規レストラン',
     featuredRestaurants: 'おすすめレストラン',
+    mostReviewedRestaurants: 'レビューが多いレストラン',
+    mostViewedRestaurants: '閲覧数が多いレストラン',
+    mostLikedRestaurants: 'お気に入りが多いレストラン',
+    featuredTitle: '今すぐ行きたいレストラン',
+    exploreRestaurants: 'レストランを探す',
+    selectedCategory: '選択されたカテゴリー',
+    viewAll: 'すべて見る',
+    viewMore: 'もっと見る',
+    registeredRestaurants: '登録レストラン',
+    writtenReviews: '投稿レビュー',
+    activeUsers: 'アクティブユーザー',
   },
 
   // レストラン

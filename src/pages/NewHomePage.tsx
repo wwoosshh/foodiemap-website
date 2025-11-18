@@ -45,7 +45,7 @@ interface PushedRestaurant {
 const NewHomePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,14 +89,19 @@ const NewHomePage: React.FC = () => {
   const loadInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      // 배너, 카테고리, 푸시 맛집 로드
+      // 배너, 푸시 맛집 로드
       const homeDataRes = await ApiService.getHomeData();
 
       if (homeDataRes.success && homeDataRes.data) {
         setBanners(homeDataRes.data.banners || []);
-        setCategories(homeDataRes.data.categories || []);
         setPushedRestaurants(homeDataRes.data.pushedRestaurants || []);
         setStats(homeDataRes.data.stats || { totalRestaurants: 0, totalReviews: 0, totalUsers: 0 });
+      }
+
+      // 언어별 카테고리 로드
+      const categoriesRes = await ApiService.getCategoriesWithLang(language);
+      if (categoriesRes.success && categoriesRes.data) {
+        setCategories(categoriesRes.data.categories || []);
       }
 
       // 전체 맛집 로드
@@ -107,7 +112,7 @@ const NewHomePage: React.FC = () => {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  }, [loadRestaurantsByCategory]);
+  }, [loadRestaurantsByCategory, language]);
 
   useEffect(() => {
     loadInitialData();
@@ -236,10 +241,10 @@ const NewHomePage: React.FC = () => {
 
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' }, color: 'rgba(255,255,255,0.9)' }}>
-            리뷰 {restaurant.review_count || 0}
+            {t('restaurant.reviewCount')} {restaurant.review_count || 0}
           </Typography>
           <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' }, color: 'rgba(255,255,255,0.9)' }}>
-            조회 {restaurant.view_count || 0}
+            {t('restaurant.viewCount')} {restaurant.view_count || 0}
           </Typography>
         </Box>
       </CardContent>
@@ -287,7 +292,7 @@ const NewHomePage: React.FC = () => {
               px: { xs: 1, md: 2 },
             }}
           >
-            더보기
+            {t('home.viewMore')}
           </Button>
         </Box>
 
@@ -394,7 +399,7 @@ const NewHomePage: React.FC = () => {
               fontSize: { xs: '0.9rem', md: '1.1rem' },
             }}
           >
-            맛집 탐색하기
+            {t('home.exploreRestaurants')}
           </Button>
         </Box>
       </Container>
@@ -425,7 +430,7 @@ const NewHomePage: React.FC = () => {
                 fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' },
               }}
             >
-              지금 꼭 가봐야 할 맛집
+              {t('home.featuredTitle')}
             </Typography>
             <Box
               sx={{
@@ -498,10 +503,10 @@ const NewHomePage: React.FC = () => {
                       {renderRating(pushed.restaurant.rating)}
                       <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 } }}>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-                          리뷰 {pushed.restaurant.review_count || 0}
+                          {t('restaurant.reviewCount')} {pushed.restaurant.review_count || 0}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-                          조회 {pushed.restaurant.view_count || 0}
+                          {t('restaurant.viewCount')} {pushed.restaurant.view_count || 0}
                         </Typography>
                       </Box>
                     </Box>
@@ -539,7 +544,7 @@ const NewHomePage: React.FC = () => {
                     }}
                   />
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
-                    선택된 카테고리
+                    {t('home.selectedCategory')}
                   </Typography>
                 </Box>
                 <Divider />
@@ -554,25 +559,25 @@ const NewHomePage: React.FC = () => {
               sortParam="rating_desc"
             />
             <RestaurantSection
-              title="리뷰가 많은 맛집"
+              title={t('home.mostReviewedRestaurants')}
               icon={<ReviewIcon />}
               restaurants={reviewCountRestaurants}
               sortParam="review_count_desc"
             />
             <RestaurantSection
-              title="조회수가 많은 맛집"
+              title={t('home.mostViewedRestaurants')}
               icon={<EyeIcon />}
               restaurants={viewCountRestaurants}
               sortParam="view_count_desc"
             />
             <RestaurantSection
-              title="좋아요가 많은 맛집"
+              title={t('home.mostLikedRestaurants')}
               icon={<HeartFilledIcon />}
               restaurants={favoriteRestaurants}
               sortParam="favorite_count_desc"
             />
             <RestaurantSection
-              title="최신 맛집"
+              title={t('home.newRestaurants')}
               icon={<NewIcon />}
               restaurants={latestRestaurants}
               sortParam="created_at_desc"
@@ -616,7 +621,7 @@ const NewHomePage: React.FC = () => {
                   fontWeight: selectedCategoryId === null ? 700 : 500,
                 }}
               >
-                전체 보기
+                {t('home.viewAll')}
               </Button>
 
               <Divider sx={{ my: 2 }} />
@@ -667,19 +672,19 @@ const NewHomePage: React.FC = () => {
               <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
                 {stats.totalRestaurants.toLocaleString()}+
               </Typography>
-              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>등록된 맛집</Typography>
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>{t('home.registeredRestaurants')}</Typography>
             </Box>
             <Box>
               <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
                 {stats.totalReviews.toLocaleString()}+
               </Typography>
-              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>작성된 리뷰</Typography>
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>{t('home.writtenReviews')}</Typography>
             </Box>
             <Box>
               <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
                 {stats.totalUsers.toLocaleString()}+
               </Typography>
-              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>활성 사용자</Typography>
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>{t('home.activeUsers')}</Typography>
             </Box>
           </Box>
         </Box>

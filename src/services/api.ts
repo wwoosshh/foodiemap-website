@@ -230,7 +230,7 @@ export class ApiService {
   // === 맛집 상세정보 통합 데이터 API ===
 
   // 맛집 상세정보 모든 데이터 한 번에 조회 (정보, 메뉴, 리뷰, 지도 등)
-  static async getRestaurantCompleteData(restaurantId: string): Promise<ApiResponse<{
+  static async getRestaurantCompleteData(restaurantId: string, lang: string = 'ko'): Promise<ApiResponse<{
     restaurant: any;
     contacts?: any;
     facilities?: any;
@@ -266,7 +266,7 @@ export class ApiService {
       address: string;
     } | null;
   }>> {
-    const response = await api.get(`/api/restaurant-details/${restaurantId}/complete`);
+    const response = await api.get(`/api/restaurant-details/${restaurantId}/complete?lang=${lang}`);
     return response.data;
   }
 
@@ -661,6 +661,26 @@ export class ApiService {
     language: string;
   }>> {
     const response = await api.get(`/api/categories/${id}?lang=${lang}`);
+    return response.data;
+  }
+
+  // === 다국어 지원 태그 API ===
+
+  // 태그 목록 조회 (다국어 지원)
+  static async getTagsWithLang(lang: string = 'ko'): Promise<ApiResponse<{
+    tags: any[];
+    language: string;
+  }>> {
+    const response = await api.get(`/api/tags?lang=${lang}`);
+    return response.data;
+  }
+
+  // 태그 상세 조회 (다국어 지원)
+  static async getTagWithLang(id: string, lang: string = 'ko'): Promise<ApiResponse<{
+    tag: any;
+    language: string;
+  }>> {
+    const response = await api.get(`/api/tags/${id}?lang=${lang}`);
     return response.data;
   }
 }

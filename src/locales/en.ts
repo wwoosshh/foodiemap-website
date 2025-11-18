@@ -131,6 +131,17 @@ export const en: TranslationKeys = {
     popularRestaurants: 'Popular Restaurants',
     newRestaurants: 'New Restaurants',
     featuredRestaurants: 'Featured Restaurants',
+    mostReviewedRestaurants: 'Most Reviewed Restaurants',
+    mostViewedRestaurants: 'Most Viewed Restaurants',
+    mostLikedRestaurants: 'Most Liked Restaurants',
+    featuredTitle: 'Must-Visit Restaurants Right Now',
+    exploreRestaurants: 'Explore Restaurants',
+    selectedCategory: 'Selected Category',
+    viewAll: 'View All',
+    viewMore: 'View More',
+    registeredRestaurants: 'Registered Restaurants',
+    writtenReviews: 'Written Reviews',
+    activeUsers: 'Active Users',
   },
 
   // Restaurant

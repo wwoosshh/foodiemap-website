@@ -129,6 +129,17 @@ export const ko = {
     popularRestaurants: '인기 맛집',
     newRestaurants: '신규 맛집',
     featuredRestaurants: '추천 맛집',
+    mostReviewedRestaurants: '리뷰가 많은 맛집',
+    mostViewedRestaurants: '조회수가 많은 맛집',
+    mostLikedRestaurants: '좋아요가 많은 맛집',
+    featuredTitle: '지금 꼭 가봐야 할 맛집',
+    exploreRestaurants: '맛집 탐색하기',
+    selectedCategory: '선택된 카테고리',
+    viewAll: '전체 보기',
+    viewMore: '더보기',
+    registeredRestaurants: '등록된 맛집',
+    writtenReviews: '작성된 리뷰',
+    activeUsers: '활성 사용자',
   },
 
   // 이벤트

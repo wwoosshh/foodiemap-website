@@ -52,7 +52,7 @@ import { openCloudinaryWidget } from '../lib/cloudinary';
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,12 +91,12 @@ const RestaurantDetailPage: React.FC = () => {
       loadRestaurantData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, language]);
 
   const loadRestaurantData = async () => {
     try {
       setLoading(true);
-      const response = await ApiService.getRestaurantCompleteData(id!);
+      const response = await ApiService.getRestaurantCompleteData(id!, language);
 
       if (response.success && response.data) {
         setRestaurant(response.data.restaurant);

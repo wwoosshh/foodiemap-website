@@ -131,6 +131,17 @@ export const zh: TranslationKeys = {
     popularRestaurants: '热门餐厅',
     newRestaurants: '新开餐厅',
     featuredRestaurants: '推荐餐厅',
+    mostReviewedRestaurants: '评论最多餐厅',
+    mostViewedRestaurants: '浏览最多餐厅',
+    mostLikedRestaurants: '收藏最多餐厅',
+    featuredTitle: '现在必去餐厅',
+    exploreRestaurants: '探索餐厅',
+    selectedCategory: '已选分类',
+    viewAll: '查看全部',
+    viewMore: '查看更多',
+    registeredRestaurants: '注册餐厅',
+    writtenReviews: '撰写评论',
+    activeUsers: '活跃用户',
   },
 
   // 餐厅
