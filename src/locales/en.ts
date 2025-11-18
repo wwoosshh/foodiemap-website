@@ -149,12 +149,12 @@ export const en: TranslationKeys = {
 
   // Footer
   footer: {
-    companyName: 'FoodieCube',
+    companyName: 'MZCube',
     description: 'Discover hidden gem restaurants across the country.\nShare your delicious moments with us.',
     quickLinks: 'Quick Links',
     policies: 'Policies',
     terms: 'Terms of Service',
     privacy: 'Privacy Policy',
-    copyright: '© 2025 FoodieCube. All rights reserved.',
+    copyright: '© 2025 MZCube. All rights reserved.',
   },
 };

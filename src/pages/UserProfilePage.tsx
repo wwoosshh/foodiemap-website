@@ -215,11 +215,22 @@ const UserProfilePage: React.FC = () => {
     setSettingsMessage(null);
 
     try {
-      const response = await ApiService.updateProfile({
+      // 업데이트할 데이터 준비 (빈 문자열이나 undefined 제거)
+      const updateData: any = {
         name: profileForm.name,
-        phone: profileForm.phone,
-        avatar_url: profileForm.avatar_url,
-      });
+      };
+
+      // phone이 유효한 경우에만 추가
+      if (profileForm.phone && profileForm.phone.trim()) {
+        updateData.phone = profileForm.phone.trim();
+      }
+
+      // avatar_url이 유효한 URL인 경우에만 추가
+      if (profileForm.avatar_url && profileForm.avatar_url.trim()) {
+        updateData.avatar_url = profileForm.avatar_url.trim();
+      }
+
+      const response = await ApiService.updateProfile(updateData);
 
       if (response.success) {
         await refreshUser();

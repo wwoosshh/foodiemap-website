@@ -149,12 +149,12 @@ export const ja: TranslationKeys = {
 
   // フッター
   footer: {
-    companyName: 'フーディーキューブ',
+    companyName: 'MZCube',
     description: '全国の隠れた名店をご紹介します。\nあなたの美味しい瞬間を共有しましょう。',
     quickLinks: 'クイックリンク',
     policies: 'ポリシー',
     terms: '利用規約',
     privacy: 'プライバシーポリシー',
-    copyright: '© 2025 フーディーキューブ. All rights reserved.',
+    copyright: '© 2025 MZCube. All rights reserved.',
   },
 };

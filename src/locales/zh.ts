@@ -149,12 +149,12 @@ export const zh: TranslationKeys = {
 
   // 页脚
   footer: {
-    companyName: '美食立方',
+    companyName: 'MZCube',
     description: '发现全国各地的隐藏美食。\n与我们分享您的美味时刻。',
     quickLinks: '快速链接',
     policies: '政策',
     terms: '服务条款',
     privacy: '隐私政策',
-    copyright: '© 2025 美食立方. 保留所有权利。',
+    copyright: '© 2025 MZCube. 保留所有权利。',
   },
 };
