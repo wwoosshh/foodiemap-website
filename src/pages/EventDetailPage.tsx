@@ -153,7 +153,9 @@ const EventDetailPage: React.FC = () => {
                 width: '100%',
                 maxHeight: 500,
                 objectFit: 'contain',
-                backgroundColor: '#f5f5f5',
+                backgroundColor: (theme) => theme.palette.mode === 'dark'
+                  ? '#2a2a2a'
+                  : '#f5f5f5',
               }}
             />
           </Card>
@@ -170,13 +172,17 @@ const EventDetailPage: React.FC = () => {
                   '& ul, & ol': { pl: 3, mb: 2 },
                   '& li': { mb: 1 },
                   '& code': {
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: (theme) => theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : '#f5f5f5',
                     padding: '2px 6px',
                     borderRadius: '4px',
                     fontSize: '0.9em'
                   },
                   '& pre': {
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: (theme) => theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : '#f5f5f5',
                     padding: 2,
                     borderRadius: 1,
                     overflow: 'auto',

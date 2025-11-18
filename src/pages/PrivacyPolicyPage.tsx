@@ -209,7 +209,14 @@ const PrivacyPolicyPage: React.FC = () => {
                 ② 회사는 다음과 같이 개인정보를 제3자에게 제공하고 있습니다:
               </Typography>
               <Typography variant="body1" component="div" sx={{ pl: 2, mb: 2 }}>
-                <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1, mb: 2 }}>
+                <Box sx={{
+                  bgcolor: (theme) => theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.05)'
+                    : 'grey.50',
+                  p: 2,
+                  borderRadius: 1,
+                  mb: 2
+                }}>
                   <Typography variant="body2">
                     <strong>현재 제3자 제공 사례 없음</strong>
                   </Typography>
@@ -249,7 +256,14 @@ const PrivacyPolicyPage: React.FC = () => {
                 ① 회사는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리업무를 위탁하고 있습니다:
               </Typography>
               <Typography variant="body1" component="div" sx={{ pl: 2 }}>
-                <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1, mb: 2 }}>
+                <Box sx={{
+                  bgcolor: (theme) => theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.05)'
+                    : 'grey.50',
+                  p: 2,
+                  borderRadius: 1,
+                  mb: 2
+                }}>
                   <Typography variant="body2" paragraph>
                     <strong>1. 클라우드 서비스 제공</strong>
                   </Typography>
@@ -261,7 +275,14 @@ const PrivacyPolicyPage: React.FC = () => {
                     </ul>
                   </Typography>
                 </Box>
-                <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1, mb: 2 }}>
+                <Box sx={{
+                  bgcolor: (theme) => theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.05)'
+                    : 'grey.50',
+                  p: 2,
+                  borderRadius: 1,
+                  mb: 2
+                }}>
                   <Typography variant="body2" paragraph>
                     <strong>2. 이메일 발송 서비스</strong>
                   </Typography>
@@ -481,7 +502,14 @@ const PrivacyPolicyPage: React.FC = () => {
                 ① 회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의
                 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
               </Typography>
-              <Box sx={{ bgcolor: 'grey.50', p: 3, borderRadius: 2, mb: 2 }}>
+              <Box sx={{
+                bgcolor: (theme) => theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : 'grey.50',
+                p: 3,
+                borderRadius: 2,
+                mb: 2
+              }}>
                 <Typography variant="body1" gutterBottom>
                   <strong>▶ 개인정보 보호책임자</strong>
                 </Typography>

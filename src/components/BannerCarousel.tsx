@@ -229,10 +229,14 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
               left: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark'
+                ? 'rgba(30,30,30,0.9)'
+                : 'rgba(255,255,255,0.9)',
               color: 'text.primary',
               '&:hover': {
-                backgroundColor: 'rgba(255,255,255,1)',
+                backgroundColor: (theme) => theme.palette.mode === 'dark'
+                  ? 'rgba(30,30,30,1)'
+                  : 'rgba(255,255,255,1)',
                 transform: 'translateY(-50%) scale(1.1)',
               },
               transition: 'all 0.2s ease',
@@ -248,10 +252,14 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark'
+                ? 'rgba(30,30,30,0.9)'
+                : 'rgba(255,255,255,0.9)',
               color: 'text.primary',
               '&:hover': {
-                backgroundColor: 'rgba(255,255,255,1)',
+                backgroundColor: (theme) => theme.palette.mode === 'dark'
+                  ? 'rgba(30,30,30,1)'
+                  : 'rgba(255,255,255,1)',
                 transform: 'translateY(-50%) scale(1.1)',
               },
               transition: 'all 0.2s ease',
@@ -284,13 +292,19 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
-                backgroundColor: currentIndex === index
-                  ? 'rgba(255,255,255,0.9)'
-                  : 'rgba(255,255,255,0.4)',
+                backgroundColor: (theme) => currentIndex === index
+                  ? theme.palette.mode === 'dark'
+                    ? 'rgba(30,30,30,0.9)'
+                    : 'rgba(255,255,255,0.9)'
+                  : theme.palette.mode === 'dark'
+                    ? 'rgba(30,30,30,0.4)'
+                    : 'rgba(255,255,255,0.4)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.7)',
+                  backgroundColor: (theme) => theme.palette.mode === 'dark'
+                    ? 'rgba(30,30,30,0.7)'
+                    : 'rgba(255,255,255,0.7)',
                   transform: 'scale(1.2)',
                 },
               }}

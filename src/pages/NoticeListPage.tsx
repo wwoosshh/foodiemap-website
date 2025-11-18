@@ -113,7 +113,9 @@ const NoticeListPage: React.FC = () => {
                       cursor: 'pointer',
                       transition: 'background-color 0.2s',
                       '&:hover': {
-                        backgroundColor: '#f5f5f5',
+                        backgroundColor: (theme) => theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : '#f5f5f5',
                       },
                     }}
                   >

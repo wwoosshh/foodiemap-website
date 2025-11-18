@@ -591,7 +591,9 @@ const NewHomePage: React.FC = () => {
                 top: 100,
                 p: 3,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #FFF8F5 100%)',
+                background: theme.palette.mode === 'dark'
+                  ? 'linear-gradient(135deg, #1E1E1E 0%, #252525 100%)'
+                  : 'linear-gradient(135deg, #FFFFFF 0%, #FFF8F5 100%)',
                 border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
               }}
             >

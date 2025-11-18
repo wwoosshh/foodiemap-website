@@ -182,7 +182,11 @@ const ReviewsListView: React.FC<ReviewsListViewProps> = ({
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.100' }}>
+            <TableRow sx={{
+              bgcolor: (theme) => theme.palette.mode === 'dark'
+                ? 'rgba(255, 255, 255, 0.05)'
+                : 'grey.100'
+            }}>
               <TableCell width="35%"><strong>맛집 정보</strong></TableCell>
               <TableCell width="10%" align="center"><strong>평점</strong></TableCell>
               <TableCell width="30%"><strong>리뷰 내용</strong></TableCell>
@@ -295,7 +299,14 @@ const ReviewsListView: React.FC<ReviewsListViewProps> = ({
       </TableContainer>
 
       {filteredReviews.length > 0 && (
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+        <Box sx={{
+          mt: 2,
+          p: 2,
+          bgcolor: (theme) => theme.palette.mode === 'dark'
+            ? 'rgba(255, 255, 255, 0.05)'
+            : 'grey.50',
+          borderRadius: 1
+        }}>
           <Typography variant="body2" color="text.secondary">
             총 {filteredReviews.length}개의 리뷰
           </Typography>

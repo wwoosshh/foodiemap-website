@@ -268,7 +268,14 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
   return (
     <Box>
       {/* 통계 대시보드 */}
-      <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+      <Paper sx={{
+        p: 3,
+        mb: 3,
+        background: (theme) => theme.palette.mode === 'dark'
+          ? 'linear-gradient(135deg, #4a5568 0%, #2d3748 100%)'
+          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white'
+      }}>
         <Typography variant="h6" gutterBottom fontWeight={600}>
           즐겨찾기 통계
         </Typography>
@@ -400,7 +407,11 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  <TableRow sx={{
+                    bgcolor: (theme) => theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : 'grey.50'
+                  }}>
                     <TableCell width="40%"><strong>맛집 정보</strong></TableCell>
                     <TableCell width="15%" align="center"><strong>평점</strong></TableCell>
                     <TableCell width="15%"><strong>카테고리</strong></TableCell>
