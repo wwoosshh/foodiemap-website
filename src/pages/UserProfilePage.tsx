@@ -229,7 +229,7 @@ const UserProfilePage: React.FC = () => {
     setSettingsMessage(null);
 
     try {
-      const response = await ApiService.updateLanguagePreference(language);
+      const response = await ApiService.changeLanguage(language);
       if (response.success) {
         setPreferences({ ...preferences, preferred_language: language });
         setSettingsMessage({ type: 'success', text: '언어 설정이 변경되었습니다.' });
@@ -247,7 +247,7 @@ const UserProfilePage: React.FC = () => {
     setSettingsMessage(null);
 
     try {
-      const response = await ApiService.updateThemePreference(theme);
+      const response = await ApiService.changeTheme(theme);
       if (response.success) {
         setPreferences({ ...preferences, theme });
         setSettingsMessage({ type: 'success', text: '테마 설정이 변경되었습니다.' });
@@ -265,7 +265,7 @@ const UserProfilePage: React.FC = () => {
     setSettingsMessage(null);
 
     try {
-      const response = await ApiService.updateNotificationPreferences({
+      const response = await ApiService.changeNotificationSettings({
         notification_enabled: field === 'notification_enabled' ? value : preferences.notification_enabled,
         email_notification: field === 'email_notification' ? value : preferences.email_notification,
       });
