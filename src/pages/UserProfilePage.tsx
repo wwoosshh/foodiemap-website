@@ -177,12 +177,12 @@ const UserProfilePage: React.FC = () => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setSettingsMessage({ type: 'error', text: '이미지 크기는 5MB 이하여야 합니다.' });
+      setSettingsMessage({ type: 'error', text: t.profile.imageSizeError });
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      setSettingsMessage({ type: 'error', text: '이미지 파일만 업로드 가능합니다.' });
+      setSettingsMessage({ type: 'error', text: t.profile.imageTypeError });
       return;
     }
 
@@ -198,12 +198,12 @@ const UserProfilePage: React.FC = () => {
         if (response.success && response.data) {
           setProfileForm({ ...profileForm, avatar_url: response.data.url });
           setImagePreview(response.data.url);
-          setSettingsMessage({ type: 'success', text: '이미지가 업로드되었습니다.' });
+          setSettingsMessage({ type: 'success', text: t.profile.imageUploaded });
         }
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
-      setSettingsMessage({ type: 'error', text: err.userMessage || '이미지 업로드에 실패했습니다.' });
+      setSettingsMessage({ type: 'error', text: err.userMessage || t.profile.imageUploadFailed });
     } finally {
       setUploading(false);
     }
@@ -226,7 +226,7 @@ const UserProfilePage: React.FC = () => {
         setSettingsMessage({ type: 'success', text: t.profile.profileUpdated });
       }
     } catch (err: any) {
-      setSettingsMessage({ type: 'error', text: err.userMessage || '프로필 수정에 실패했습니다.' });
+      setSettingsMessage({ type: 'error', text: err.userMessage || t.profile.profileUpdateFailed });
     } finally {
       setProfileSaving(false);
     }
@@ -246,7 +246,7 @@ const UserProfilePage: React.FC = () => {
         setSettingsMessage({ type: 'success', text: t.profile.languageChanged });
       }
     } catch (err: any) {
-      setSettingsMessage({ type: 'error', text: err.userMessage || '언어 설정 변경에 실패했습니다.' });
+      setSettingsMessage({ type: 'error', text: err.userMessage || t.profile.languageChangeFailed });
     } finally {
       setPreferencesSaving(false);
     }
@@ -266,7 +266,7 @@ const UserProfilePage: React.FC = () => {
         setSettingsMessage({ type: 'success', text: t.profile.themeChanged });
       }
     } catch (err: any) {
-      setSettingsMessage({ type: 'error', text: err.userMessage || '테마 설정 변경에 실패했습니다.' });
+      setSettingsMessage({ type: 'error', text: err.userMessage || t.profile.themeChangeFailed });
     } finally {
       setPreferencesSaving(false);
     }
@@ -288,7 +288,7 @@ const UserProfilePage: React.FC = () => {
         setSettingsMessage({ type: 'success', text: t.profile.notificationsChanged });
       }
     } catch (err: any) {
-      setSettingsMessage({ type: 'error', text: err.userMessage || '알림 설정 변경에 실패했습니다.' });
+      setSettingsMessage({ type: 'error', text: err.userMessage || t.profile.notificationChangeFailed });
     } finally {
       setPreferencesSaving(false);
     }
@@ -301,7 +301,7 @@ const UserProfilePage: React.FC = () => {
       const response = await ApiService.requestAccountDeletion(deletionReason || undefined);
 
       if (response.success) {
-        alert('회원 탈퇴 요청이 완료되었습니다. 30일 이내에 복구하실 수 있습니다.');
+        alert(t.profile.deletionRequestComplete);
         setDeletionDialogOpen(false);
         setDeletionReason('');
         await loadDeletionStatus();
@@ -313,7 +313,7 @@ const UserProfilePage: React.FC = () => {
         }, 2000);
       }
     } catch (err: any) {
-      alert(err.userMessage || '회원 탈퇴 요청 중 오류가 발생했습니다.');
+      alert(err.userMessage || t.profile.deletionRequestFailed);
     } finally {
       setDeletionLoading(false);
     }
@@ -326,12 +326,12 @@ const UserProfilePage: React.FC = () => {
       const response = await ApiService.recoverAccount();
 
       if (response.success) {
-        alert('계정이 성공적으로 복구되었습니다.');
+        alert(t.profile.accountRecovered);
         await loadDeletionStatus();
         await refreshUser();
       }
     } catch (err: any) {
-      alert(err.userMessage || '계정 복구 중 오류가 발생했습니다.');
+      alert(err.userMessage || t.profile.accountRecoveryFailed);
     } finally {
       setDeletionLoading(false);
     }
@@ -373,7 +373,7 @@ const UserProfilePage: React.FC = () => {
                       {user.email}
                     </Typography>
                     {user.email_verified && (
-                      <Chip label="인증됨" size="small" color="success" />
+                      <Chip label={t.profile.verified} size="small" color="success" />
                     )}
                   </Box>
 
@@ -392,7 +392,7 @@ const UserProfilePage: React.FC = () => {
                   startIcon={<SettingsIcon />}
                   onClick={() => setSelectedTab(2)}
                 >
-                  설정
+                  {t.profile.settings}
                 </Button>
               </Box>
             </Box>
@@ -413,14 +413,14 @@ const UserProfilePage: React.FC = () => {
                   disabled={deletionLoading}
                   startIcon={<RestoreIcon />}
                 >
-                  계정 복구
+                  {t.profile.recoverAccount}
                 </Button>
               )
             }
             sx={{ mb: 3 }}
           >
             <Typography variant="body2" fontWeight={600}>
-              탈퇴 대기 중인 계정입니다
+              {t.profile.deletionPending}
             </Typography>
             <Typography variant="caption">
               {deletionStatus.deletion_deadline &&
@@ -433,9 +433,9 @@ const UserProfilePage: React.FC = () => {
         {/* 탭 */}
         <Box sx={{ mb: 3 }}>
           <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
-            <Tab label={`즐겨찾기 (${favorites.length})`} />
-            <Tab label={`내 리뷰 (${myReviews.length})`} />
-            <Tab label="설정" icon={<SettingsIcon />} iconPosition="start" />
+            <Tab label={`${t.profile.myFavorites} (${favorites.length})`} />
+            <Tab label={`${t.profile.myReviews} (${myReviews.length})`} />
+            <Tab label={t.profile.settings} icon={<SettingsIcon />} iconPosition="start" />
           </Tabs>
         </Box>
 
@@ -466,7 +466,7 @@ const UserProfilePage: React.FC = () => {
                       ));
                     }
                   } catch (error: any) {
-                    alert(error.userMessage || '메모 수정에 실패했습니다.');
+                    alert(error.userMessage || t.profile.memoUpdateFailed);
                   }
                 }}
                 onRefresh={loadUserData}
@@ -482,12 +482,12 @@ const UserProfilePage: React.FC = () => {
                     await ApiService.deleteReview(id);
                     setMyReviews(myReviews.filter(r => r.id !== id));
                   } catch (error: any) {
-                    alert(error.userMessage || '리뷰 삭제에 실패했습니다.');
+                    alert(error.userMessage || t.profile.reviewDeleteFailed);
                   }
                 }}
                 onEditReview={(id) => {
                   // TODO: 리뷰 수정 모달 열기
-                  alert('리뷰 수정 기능은 준비 중입니다.');
+                  alert(t.profile.reviewEditComingSoon);
                 }}
               />
             )}
@@ -511,7 +511,7 @@ const UserProfilePage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                       <PersonIcon color="primary" />
                       <Typography variant="h6" fontWeight={700}>
-                        프로필 정보
+                        {t.profile.profileInfo}
                       </Typography>
                     </Box>
 
@@ -551,17 +551,17 @@ const UserProfilePage: React.FC = () => {
                         </Box>
                         <Box>
                           <Typography variant="body2" color="text.secondary">
-                            프로필 사진
+                            {t.profile.profilePhoto}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            JPG, PNG 파일 (최대 5MB)
+                            {t.profile.fileTypeInfo}
                           </Typography>
                         </Box>
                       </Box>
 
                       {/* 이름 */}
                       <TextField
-                        label="이름"
+                        label={t.profile.name}
                         value={profileForm.name}
                         onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                         fullWidth
@@ -570,20 +570,20 @@ const UserProfilePage: React.FC = () => {
 
                       {/* 전화번호 */}
                       <TextField
-                        label="전화번호"
+                        label={t.profile.phone}
                         value={profileForm.phone}
                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                         fullWidth
-                        placeholder="010-1234-5678"
+                        placeholder={t.profile.phonePlaceholder}
                       />
 
                       {/* 이메일 (읽기 전용) */}
                       <TextField
-                        label="이메일"
+                        label={t.profile.email}
                         value={user?.email}
                         fullWidth
                         disabled
-                        helperText="이메일은 변경할 수 없습니다"
+                        helperText={t.profile.emailReadOnly}
                       />
 
                       {/* 저장 버튼 */}
@@ -594,7 +594,7 @@ const UserProfilePage: React.FC = () => {
                           onClick={handleSaveProfile}
                           disabled={profileSaving || !profileForm.name}
                         >
-                          {profileSaving ? '저장 중...' : '저장'}
+                          {profileSaving ? t.profile.saving : t.common.save}
                         </Button>
                       </Box>
                     </Box>
@@ -607,22 +607,22 @@ const UserProfilePage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                       <LanguageIcon color="primary" />
                       <Typography variant="h6" fontWeight={700}>
-                        언어 설정
+                        {t.profile.languageSettings}
                       </Typography>
                     </Box>
 
                     <FormControl fullWidth>
-                      <InputLabel>언어</InputLabel>
+                      <InputLabel>{t.profile.language}</InputLabel>
                       <Select
                         value={preferences.preferred_language}
                         onChange={(e) => handleLanguageChange(e.target.value)}
-                        label="언어"
+                        label={t.profile.language}
                         disabled={preferencesSaving}
                       >
-                        <MenuItem value="ko">한국어</MenuItem>
-                        <MenuItem value="en">English</MenuItem>
-                        <MenuItem value="ja">日本語</MenuItem>
-                        <MenuItem value="zh">中文</MenuItem>
+                        <MenuItem value="ko">{t.profile.korean}</MenuItem>
+                        <MenuItem value="en">{t.profile.english}</MenuItem>
+                        <MenuItem value="ja">{t.profile.japanese}</MenuItem>
+                        <MenuItem value="zh">{t.profile.chinese}</MenuItem>
                       </Select>
                     </FormControl>
                   </CardContent>
@@ -634,21 +634,21 @@ const UserProfilePage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                       <PaletteIcon color="primary" />
                       <Typography variant="h6" fontWeight={700}>
-                        테마 설정
+                        {t.profile.themeSettings}
                       </Typography>
                     </Box>
 
                     <FormControl fullWidth>
-                      <InputLabel>테마</InputLabel>
+                      <InputLabel>{t.profile.theme}</InputLabel>
                       <Select
                         value={preferences.theme}
                         onChange={(e) => handleThemeChange(e.target.value)}
-                        label="테마"
+                        label={t.profile.theme}
                         disabled={preferencesSaving}
                       >
-                        <MenuItem value="light">라이트 모드</MenuItem>
-                        <MenuItem value="dark">다크 모드</MenuItem>
-                        <MenuItem value="auto">시스템 설정 따르기</MenuItem>
+                        <MenuItem value="light">{t.profile.lightMode}</MenuItem>
+                        <MenuItem value="dark">{t.profile.darkMode}</MenuItem>
+                        <MenuItem value="auto">{t.profile.autoMode}</MenuItem>
                       </Select>
                     </FormControl>
                   </CardContent>
@@ -660,7 +660,7 @@ const UserProfilePage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                       <NotificationsIcon color="primary" />
                       <Typography variant="h6" fontWeight={700}>
-                        알림 설정
+                        {t.profile.notificationSettings}
                       </Typography>
                     </Box>
 
@@ -675,9 +675,9 @@ const UserProfilePage: React.FC = () => {
                         }
                         label={
                           <Box>
-                            <Typography variant="body1">푸시 알림</Typography>
+                            <Typography variant="body1">{t.profile.pushNotifications}</Typography>
                             <Typography variant="caption" color="text.secondary">
-                              새로운 이벤트, 댓글 등에 대한 알림을 받습니다
+                              {t.profile.pushNotificationDesc}
                             </Typography>
                           </Box>
                         }
@@ -695,9 +695,9 @@ const UserProfilePage: React.FC = () => {
                         }
                         label={
                           <Box>
-                            <Typography variant="body1">이메일 알림</Typography>
+                            <Typography variant="body1">{t.profile.emailNotifications}</Typography>
                             <Typography variant="caption" color="text.secondary">
-                              중요한 공지사항을 이메일로 받습니다
+                              {t.profile.emailNotificationDesc}
                             </Typography>
                           </Box>
                         }
@@ -710,7 +710,7 @@ const UserProfilePage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="h6" fontWeight={700} gutterBottom>
-                      계정 관리
+                      {t.profile.accountManagement}
                     </Typography>
 
                     {deletionStatus?.is_deletion_scheduled ? (
@@ -720,7 +720,7 @@ const UserProfilePage: React.FC = () => {
                         sx={{ mb: 3 }}
                       >
                         <Typography variant="body2" fontWeight={600} gutterBottom>
-                          탈퇴 대기 중인 계정입니다
+                          {t.profile.deletionPending}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 2 }}>
                           {deletionStatus.deletion_deadline &&
@@ -728,7 +728,7 @@ const UserProfilePage: React.FC = () => {
                             (${Math.floor(deletionStatus.days_remaining || 0)}일 후) 완전히 삭제됩니다.`}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-                          30일 이내에 계정을 복구할 수 있습니다. 복구 후에는 정상적으로 서비스를 이용하실 수 있습니다.
+                          {t.profile.recoveryPeriodInfo}
                         </Typography>
                         {deletionStatus.can_recover && (
                           <Button
@@ -738,7 +738,7 @@ const UserProfilePage: React.FC = () => {
                             onClick={handleRecoverAccount}
                             disabled={deletionLoading}
                           >
-                            계정 복구하기
+                            {t.profile.recoverAccountButton}
                           </Button>
                         )}
                       </Alert>
@@ -746,19 +746,19 @@ const UserProfilePage: React.FC = () => {
                       <Box>
                         <Alert severity="warning" icon={<WarningIcon />} sx={{ mb: 3 }}>
                           <Typography variant="body2" fontWeight={600} gutterBottom>
-                            회원 탈퇴 시 주의사항
+                            {t.profile.deletionWarningTitle}
                           </Typography>
                           <Typography variant="caption" component="div" sx={{ mb: 1 }}>
-                            • 탈퇴 요청 후 30일간 유예기간이 제공됩니다.
+                            • {t.profile.deletionWarning1}
                           </Typography>
                           <Typography variant="caption" component="div" sx={{ mb: 1 }}>
-                            • 유예기간 동안 로그인이 불가하며, 계정 복구를 요청할 수 있습니다.
+                            • {t.profile.deletionWarning2}
                           </Typography>
                           <Typography variant="caption" component="div" sx={{ mb: 1 }}>
-                            • 30일이 지나면 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.
+                            • {t.profile.deletionWarning3}
                           </Typography>
                           <Typography variant="caption" component="div">
-                            • 작성한 리뷰, 즐겨찾기 등 모든 활동 내역이 삭제됩니다.
+                            • {t.profile.deletionWarning4}
                           </Typography>
                         </Alert>
 
@@ -769,7 +769,7 @@ const UserProfilePage: React.FC = () => {
                           onClick={() => setDeletionDialogOpen(true)}
                           fullWidth
                         >
-                          회원 탈퇴
+                          {t.profile.deleteAccount}
                         </Button>
                       </Box>
                     )}
@@ -792,7 +792,7 @@ const UserProfilePage: React.FC = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <WarningIcon color="error" />
             <Typography variant="h6" fontWeight={700}>
-              정말 탈퇴하시겠습니까?
+              {t.profile.deletionDialogTitle}
             </Typography>
           </Box>
           <IconButton
@@ -806,13 +806,13 @@ const UserProfilePage: React.FC = () => {
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 3 }}>
             <Typography variant="body2" fontWeight={600} gutterBottom>
-              회원 탈퇴 시 주의사항
+              {t.profile.deletionWarningTitle}
             </Typography>
             <Typography variant="caption" component="div">
-              • 탈퇴 요청 후 30일간 유예기간이 제공됩니다<br />
-              • 유예기간 동안 로그인이 불가하며, 계정 복구를 요청할 수 있습니다<br />
-              • 30일이 지나면 모든 데이터가 영구적으로 삭제됩니다<br />
-              • 작성한 리뷰, 즐겨찾기 등 모든 활동 내역이 삭제됩니다
+              • {t.profile.deletionWarning1}<br />
+              • {t.profile.deletionWarning2}<br />
+              • {t.profile.deletionWarning3}<br />
+              • {t.profile.deletionWarning4}
             </Typography>
           </Alert>
 
@@ -820,8 +820,8 @@ const UserProfilePage: React.FC = () => {
             fullWidth
             multiline
             rows={4}
-            label="탈퇴 사유 (선택사항)"
-            placeholder="탈퇴하시는 이유를 알려주시면 서비스 개선에 도움이 됩니다."
+            label={t.profile.deletionReason}
+            placeholder={t.profile.deletionReasonPlaceholder}
             value={deletionReason}
             onChange={(e) => setDeletionReason(e.target.value)}
             disabled={deletionLoading}
@@ -830,7 +830,7 @@ const UserProfilePage: React.FC = () => {
 
         <DialogActions>
           <Button onClick={() => setDeletionDialogOpen(false)} disabled={deletionLoading}>
-            취소
+            {t.common.cancel}
           </Button>
           <Button
             variant="contained"
@@ -839,7 +839,7 @@ const UserProfilePage: React.FC = () => {
             disabled={deletionLoading}
             startIcon={deletionLoading ? <CircularProgress size={20} /> : <DeleteForeverIcon />}
           >
-            {deletionLoading ? '처리 중...' : '탈퇴하기'}
+            {deletionLoading ? t.profile.processing : t.profile.withdraw}
           </Button>
         </DialogActions>
       </Dialog>

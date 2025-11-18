@@ -25,6 +25,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeContext } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import LoginModal from '../LoginModal';
 import {
   CubeLogoIcon,
@@ -110,6 +111,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const theme = useTheme();
   const { currentTheme } = useThemeContext();
+  const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -118,10 +120,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const menuItems = [
-    { label: '홈', path: '/', icon: <RestaurantIcon /> },
-    { label: '맛집 찾기', path: '/restaurants', icon: <RestaurantIcon /> },
-    { label: '이벤트', path: '/events', icon: <GiftIcon /> },
-    { label: '공지사항', path: '/notices', icon: <InfoIcon /> },
+    { label: t.nav.home, path: '/', icon: <RestaurantIcon /> },
+    { label: t.nav.restaurantSearch, path: '/restaurants', icon: <RestaurantIcon /> },
+    { label: t.nav.events, path: '/events', icon: <GiftIcon /> },
+    { label: t.nav.notices, path: '/notices', icon: <InfoIcon /> },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
@@ -193,7 +195,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   display: { xs: 'none', sm: 'block' },
                 }}
               >
-                맛집큐브
+                {t.footer.companyName}
               </Typography>
             </Link>
 
@@ -245,7 +247,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <SearchIcon />
                   </SearchIconWrapper>
                   <StyledInputBase
-                    placeholder="맛집 검색..."
+                    placeholder={t.nav.searchPlaceholder}
                     inputProps={{ 'aria-label': 'search' }}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -302,11 +304,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     }}
                   >
                     <UserIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                    내 프로필
+                    {t.nav.myProfile}
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>
                     <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                    로그아웃
+                    {t.nav.logout}
                   </MenuItem>
                 </Menu>
               </>
@@ -317,7 +319,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 onClick={() => setLoginModalOpen(true)}
                 sx={{ ml: 2 }}
               >
-                로그인
+                {t.nav.login}
               </Button>
             )}
 
@@ -348,7 +350,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       >
         <Box sx={{ p: 3 }}>
           <Typography variant="h6" fontWeight={700} color="primary.main" gutterBottom>
-            메뉴
+            {t.nav.menu}
           </Typography>
         </Box>
         <Divider />
@@ -464,7 +466,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     letterSpacing: '0.5px',
                   }}
                 >
-                  맛집큐브
+                  {t.footer.companyName}
                 </Typography>
               </Box>
               <Typography
@@ -473,11 +475,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   color: 'rgba(255,255,255,0.85)',
                   lineHeight: 1.8,
                   textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  whiteSpace: 'pre-line',
                 }}
               >
-                전국의 숨은 맛집을 찾아드립니다.
-                <br />
-                당신의 맛있는 순간을 함께하세요.
+                {t.footer.description}
               </Typography>
             </Box>
 
@@ -492,7 +493,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                 }}
               >
-                바로가기
+                {t.footer.quickLinks}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Link
@@ -505,7 +506,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
-                  맛집 찾기
+                  {t.nav.restaurantSearch}
                 </Link>
                 <Link
                   to="/events"
@@ -517,7 +518,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
-                  이벤트
+                  {t.nav.events}
                 </Link>
                 <Link
                   to="/notices"
@@ -529,7 +530,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
-                  공지사항
+                  {t.nav.notices}
                 </Link>
               </Box>
             </Box>
@@ -545,7 +546,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                 }}
               >
-                정책
+                {t.footer.policies}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Link
@@ -558,7 +559,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
-                  이용약관
+                  {t.footer.terms}
                 </Link>
                 <Link
                   to="/privacy"
@@ -570,7 +571,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
-                  개인정보처리방침
+                  {t.footer.privacy}
                 </Link>
               </Box>
             </Box>
@@ -583,7 +584,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             align="center"
             sx={{ color: 'rgba(255,255,255,0.5)' }}
           >
-            © 2025 맛집큐브. All rights reserved.
+            {t.footer.copyright}
           </Typography>
         </Container>
       </Box>
