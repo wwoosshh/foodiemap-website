@@ -237,7 +237,7 @@ export const ThemeContextProvider: React.FC<ThemeContextProviderProps> = ({ chil
         dark: '#6C7A89',
       },
       background: {
-        default: '#121212',
+        default: '#0D0D0D',  // 컴포넌트보다 약간 더 어두운 배경
         paper: '#1E1E1E',
       },
       text: {

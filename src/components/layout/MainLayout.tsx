@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeContext } from '../../context/ThemeContext';
 import LoginModal from '../LoginModal';
 import {
   CubeLogoIcon,
@@ -40,14 +41,20 @@ import {
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.95),
+  backgroundColor: theme.palette.mode === 'dark'
+    ? alpha(theme.palette.background.paper, 0.8)
+    : alpha(theme.palette.common.white, 0.95),
   border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
   '&:hover': {
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.mode === 'dark'
+      ? theme.palette.background.paper
+      : theme.palette.common.white,
     borderColor: theme.palette.primary.main,
   },
   '&:focus-within': {
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.mode === 'dark'
+      ? theme.palette.background.paper
+      : theme.palette.common.white,
     borderColor: theme.palette.primary.main,
     boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
   },
@@ -72,14 +79,14 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: '#2C3E50', // 명시적으로 어두운 색상 지정
+  color: theme.palette.text.primary,
   width: '100%',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1.2, 1, 1.2, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create('width'),
     width: '100%',
-    color: '#2C3E50', // 입력 텍스트 색상 명시
+    color: theme.palette.text.primary,
     [theme.breakpoints.up('sm')]: {
       width: '20ch',
       '&:focus': {
@@ -87,7 +94,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
       },
     },
     '&::placeholder': {
-      color: '#6C7A89',
+      color: theme.palette.text.secondary,
       opacity: 0.8,
     },
   },
@@ -102,6 +109,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const { currentTheme } = useThemeContext();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -379,7 +387,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          background: 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
+          background: currentTheme === 'dark'
+            ? 'linear-gradient(180deg, #0D0D0D 0%, #121212 50%, #0F0F0F 100%)'
+            : 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
         }}
       >
         {children}
@@ -392,7 +402,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           mt: 'auto',
           py: 6,
           px: 2,
-          background: 'linear-gradient(135deg, #1a252f 0%, #2C3E50 50%, #34495e 100%)',
+          background: currentTheme === 'dark'
+            ? 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0F0F0F 100%)'
+            : 'linear-gradient(135deg, #1a252f 0%, #2C3E50 50%, #34495e 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
