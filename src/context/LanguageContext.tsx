@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { translations, Language, TranslationKeys } from '../locales';
 import { ApiService } from '../services/api';
 
+type TranslationFunction = ((key: string, variables?: Record<string, any>) => string) & TranslationKeys;
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: TranslationKeys;
+  t: TranslationFunction;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -59,8 +61,41 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     localStorage.setItem('language_preference', lang);
   };
 
-  // 현재 언어의 번역 객체 반환 (메모이제이션으로 성능 최적화)
-  const t = useMemo(() => translations[language], [language]);
+  // 번역 함수: 키 경로를 통해 번역 문자열을 가져오고 변수를 치환
+  // 동시에 객체 접근도 지원 (t.nav.home 형식)
+  const t: TranslationFunction = useMemo(() => {
+    const translateFn = (key: string, variables?: Record<string, any>) => {
+      // 키 경로를 점(.)으로 분리하여 중첩된 객체에 접근
+      const keys = key.split('.');
+      let value: any = translations[language];
+
+      for (const k of keys) {
+        if (value && typeof value === 'object' && k in value) {
+          value = value[k];
+        } else {
+          // 키를 찾을 수 없으면 키 자체 반환
+          return key;
+        }
+      }
+
+      // 최종 값이 문자열이 아니면 키 반환
+      if (typeof value !== 'string') {
+        return key;
+      }
+
+      // 변수가 제공된 경우, {{변수명}} 형식을 치환
+      if (variables) {
+        return value.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+          return variables[varName] !== undefined ? String(variables[varName]) : match;
+        });
+      }
+
+      return value;
+    };
+
+    // 함수 객체에 번역 객체의 속성을 추가하여 객체 접근도 지원
+    return Object.assign(translateFn, translations[language]) as TranslationFunction;
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

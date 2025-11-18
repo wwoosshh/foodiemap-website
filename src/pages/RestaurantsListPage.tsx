@@ -30,10 +30,12 @@ import {
   RestaurantIcon,
 } from '../components/icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
+import { useLanguage } from '../context/LanguageContext';
 
 const RestaurantsListPage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(true);
@@ -250,7 +252,7 @@ const RestaurantsListPage: React.FC = () => {
               lineHeight: 1.6,
             }}
           >
-            {restaurant.description || '맛있는 음식을 만나보세요'}
+            {restaurant.description || ''}
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5, color: 'text.secondary' }}>
@@ -279,7 +281,7 @@ const RestaurantsListPage: React.FC = () => {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                리뷰
+                {t('restaurant.reviewCount')}
               </Typography>
               <Typography variant="caption" fontWeight={700}>
                 {restaurant.review_count || 0}
@@ -287,7 +289,7 @@ const RestaurantsListPage: React.FC = () => {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                조회
+                {t('restaurant.viewCount')}
               </Typography>
               <Typography variant="caption" fontWeight={700}>
                 {restaurant.view_count || 0}
@@ -414,10 +416,10 @@ const RestaurantsListPage: React.FC = () => {
         {/* 페이지 헤더 */}
         <Box sx={{ mb: { xs: 2, md: 4 } }}>
           <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', md: '3rem' } }}>
-            맛집 찾기
+            {t('restaurant.findTitle')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
-            전국의 맛집을 검색하고 탐색해보세요
+            {t('restaurant.findSubtitle')}
           </Typography>
         </Box>
 
@@ -438,7 +440,7 @@ const RestaurantsListPage: React.FC = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  placeholder="맛집 검색..."
+                  placeholder={t('restaurant.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   InputProps={{
@@ -474,7 +476,7 @@ const RestaurantsListPage: React.FC = () => {
                   }}
                 >
                   <MenuItem value="">
-                    <em>전체 카테고리</em>
+                    <em>{t('restaurant.allCategories')}</em>
                   </MenuItem>
                   {categories.map((category) => (
                     <MenuItem key={category.id} value={category.id}>
@@ -500,10 +502,10 @@ const RestaurantsListPage: React.FC = () => {
                     fontSize: { xs: '0.9rem', md: '1rem' },
                   }}
                 >
-                  <MenuItem value="created_at_desc">최신순</MenuItem>
-                  <MenuItem value="rating_desc">평점 높은순</MenuItem>
-                  <MenuItem value="review_count_desc">리뷰 많은순</MenuItem>
-                  <MenuItem value="view_count_desc">조회수 높은순</MenuItem>
+                  <MenuItem value="created_at_desc">{t('restaurant.sortByNewest')}</MenuItem>
+                  <MenuItem value="rating_desc">{t('restaurant.sortByRating')}</MenuItem>
+                  <MenuItem value="review_count_desc">{t('restaurant.sortByReviews')}</MenuItem>
+                  <MenuItem value="view_count_desc">{t('restaurant.sortByViews')}</MenuItem>
                   <MenuItem value="favorite_count_desc">인기순</MenuItem>
                 </Select>
               </FormControl>
@@ -514,7 +516,7 @@ const RestaurantsListPage: React.FC = () => {
         {/* 결과 정보 */}
         <Box sx={{ mb: { xs: 2, md: 3 }, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.85rem', md: '0.875rem' } }}>
-            총 <strong>{pagination.total}</strong>개의 맛집
+            {t('restaurant.totalCount', { count: pagination.total })}
           </Typography>
         </Box>
 
@@ -525,7 +527,7 @@ const RestaurantsListPage: React.FC = () => {
           </Box>
         ) : restaurants.length === 0 ? (
           <Alert severity="info" sx={{ my: 4 }}>
-            검색 결과가 없습니다. 다른 검색어를 시도해보세요.
+            {t('restaurant.noResults')}
           </Alert>
         ) : (
           <>

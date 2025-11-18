@@ -28,6 +28,7 @@ import MainLayout from '../components/layout/MainLayout';
 import NaverMap from '../components/NaverMap';
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   StarFilledIcon,
   HeartFilledIcon,
@@ -51,6 +52,7 @@ import { openCloudinaryWidget } from '../lib/cloudinary';
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -508,13 +510,13 @@ const RestaurantDetailPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Typography variant="body1" color="text.secondary">
-                  리뷰 {restaurant.review_count || 0}
+                  {t('restaurant.reviewCount')} {restaurant.review_count || 0}
                 </Typography>
                 {restaurant.avg_price_per_person && (
                   <>
                     <Typography color="text.secondary">•</Typography>
                     <Typography variant="body1" color="text.secondary">
-                      1인 평균 {restaurant.avg_price_per_person.toLocaleString()}원
+                      {t('restaurant.avgPrice')} {restaurant.avg_price_per_person.toLocaleString()}원
                     </Typography>
                   </>
                 )}
@@ -528,7 +530,7 @@ const RestaurantDetailPage: React.FC = () => {
                 )}
                 <Typography color="text.secondary">•</Typography>
                 <Typography variant="body1" color="text.secondary">
-                  조회 {restaurant.view_count || 0}
+                  {t('restaurant.viewCount')} {restaurant.view_count || 0}
                 </Typography>
               </Box>
 
@@ -543,7 +545,7 @@ const RestaurantDetailPage: React.FC = () => {
                     fontWeight: 600,
                   }}
                 >
-                  {isFavorited ? '즐겨찾기' : '즐겨찾기 추가'}
+                  {isFavorited ? t('restaurant.unfavorite') : t('restaurant.favorite')}
                 </Button>
                 <Button
                   variant="outlined"
@@ -553,7 +555,7 @@ const RestaurantDetailPage: React.FC = () => {
                     fontWeight: 600,
                   }}
                 >
-                  공유
+                  {t('restaurant.share')}
                 </Button>
               </Box>
             </Box>
@@ -581,7 +583,7 @@ const RestaurantDetailPage: React.FC = () => {
             {tags && tags.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
-                  태그
+                  {t('restaurant.tags')}
                 </Typography>
                 {Object.entries(groupedTags).map(([category, categoryTags]) => (
                   <Box key={category} sx={{ mb: 2 }}>
@@ -613,14 +615,14 @@ const RestaurantDetailPage: React.FC = () => {
             {/* 핵심 정보 - 신문 2컬럼 레이아웃 */}
             <Box sx={{ mb: 4 }}>
               <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                정보
+                {t('restaurant.info')}
               </Typography>
 
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 4 }}>
                 {/* 주소 */}
                 <Box>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    주소
+                    {t('restaurant.address')}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
                     {restaurant.address}
@@ -655,11 +657,11 @@ const RestaurantDetailPage: React.FC = () => {
                 {/* 연락처 */}
                 <Box>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    연락처
+                    {t('restaurant.contact')}
                   </Typography>
                   {(contacts?.phone || restaurant?.phone) && (
                     <Typography variant="body2" display="block">
-                      대표: {(contacts?.phone || restaurant?.phone)}
+                      {t('restaurant.phone')}: {(contacts?.phone || restaurant?.phone)}
                     </Typography>
                   )}
                   {contacts?.secondary_phone && (
@@ -682,7 +684,7 @@ const RestaurantDetailPage: React.FC = () => {
                 {/* 영업시간 */}
                 <Box>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    영업시간
+                    {t('restaurant.hours')}
                   </Typography>
                   {renderBusinessHours()}
                 </Box>
@@ -696,7 +698,7 @@ const RestaurantDetailPage: React.FC = () => {
                     <Stack spacing={0.5}>
                       {(contacts?.website_url || restaurant?.website_url) && (
                         <Link href={(contacts?.website_url || restaurant?.website_url)} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">웹사이트: {(contacts?.website_url || restaurant?.website_url)}</Typography>
+                          <Typography variant="body2">{t('restaurant.website')}: {(contacts?.website_url || restaurant?.website_url)}</Typography>
                         </Link>
                       )}
                       {contacts?.blog_url && (
@@ -900,8 +902,8 @@ const RestaurantDetailPage: React.FC = () => {
                   },
                 }}
               >
-                <Tab label={`리뷰 (${reviews.length})`} />
-                <Tab label={`메뉴 (${menus.all.length})`} />
+                <Tab label={`${t('restaurant.reviews')} (${reviews.length})`} />
+                <Tab label={`${t('restaurant.menu')} (${menus.all.length})`} />
                 <Tab label="지도" />
               </Tabs>
             </Box>
@@ -911,7 +913,7 @@ const RestaurantDetailPage: React.FC = () => {
               <Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                   <Typography variant="h5" fontWeight={700}>
-                    리뷰
+                    {t('restaurant.reviews')}
                   </Typography>
                   <Button
                     variant="contained"
@@ -922,7 +924,7 @@ const RestaurantDetailPage: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    리뷰 작성
+                    {t('restaurant.addReview')}
                   </Button>
                 </Box>
 
@@ -1043,7 +1045,7 @@ const RestaurantDetailPage: React.FC = () => {
             {selectedTab === 1 && (
               <Box>
                 <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                  메뉴
+                  {t('restaurant.menu')}
                 </Typography>
                 {menus.all.length === 0 ? (
                   <Typography variant="body2" color="text.secondary">등록된 메뉴가 없습니다.</Typography>
@@ -1316,7 +1318,7 @@ const RestaurantDetailPage: React.FC = () => {
               >
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6" fontWeight={700} gutterBottom>
-                    사진 ({photos.all.length})
+                    {t('restaurant.photos')} ({photos.all.length})
                   </Typography>
                 </Box>
 

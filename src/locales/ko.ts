@@ -131,26 +131,6 @@ export const ko = {
     featuredRestaurants: '추천 맛집',
   },
 
-  // 맛집
-  restaurant: {
-    viewDetails: '상세보기',
-    addReview: '리뷰 작성',
-    favorite: '찜하기',
-    unfavorite: '찜 해제',
-    rating: '평점',
-    reviews: '리뷰',
-    location: '위치',
-    hours: '영업시간',
-    contact: '연락처',
-    searchResults: '검색 결과',
-    noResults: '검색 결과가 없습니다',
-    filterByCategory: '카테고리별 필터',
-    sortBy: '정렬',
-    sortByRating: '평점순',
-    sortByReviews: '리뷰순',
-    sortByNewest: '최신순',
-  },
-
   // 이벤트
   event: {
     title: '이벤트',
@@ -182,6 +162,49 @@ export const ko = {
     title: '개인정보처리방침',
     legalNotice: '법적 효력 안내',
     legalNoticeContent: '본 개인정보처리방침은 한국어 버전만 법적 효력을 가집니다. 다른 언어로 번역된 내용은 참고용이며, 한국어 원문과 차이가 있을 경우 한국어 원문이 우선합니다.',
+  },
+
+  // 맛집
+  restaurant: {
+    // 맛집 찾기 페이지
+    findTitle: '맛집 찾기',
+    findSubtitle: '전국의 맛집을 검색하고 탐색해보세요',
+    searchPlaceholder: '맛집 검색...',
+    allCategories: '전체 카테고리',
+    sort: '정렬',
+    sortByNewest: '최신순',
+    sortByRating: '평점 높은순',
+    sortByReviews: '리뷰 많은순',
+    sortByViews: '조회수 많은순',
+    totalCount: '총 {{count}}개의 맛집',
+    noResults: '검색 결과가 없습니다. 다른 검색어를 시도해보세요.',
+
+    // 맛집 상세 페이지
+    reviews: '리뷰',
+    tags: '태그',
+    info: '정보',
+    address: '주소',
+    phone: '전화번호',
+    website: '웹사이트',
+    hours: '영업시간',
+    facilities: '편의시설',
+    services: '서비스',
+    menu: '메뉴',
+    photos: '사진',
+    rating: '평점',
+    reviewCount: '리뷰',
+    viewCount: '조회',
+    priceRange: '가격대',
+    avgPrice: '1인 평균',
+    parking: '주차',
+    reservation: '예약',
+    delivery: '배달',
+    takeout: '포장',
+    contact: '연락처',
+    operations: '운영정보',
+    copyAddress: '주소 복사',
+    showOnMap: '지도에서 보기',
+    share: '공유하기',
   },
 
   // 리뷰
