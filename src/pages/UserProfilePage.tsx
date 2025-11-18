@@ -26,7 +26,6 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
-  Paper,
 } from '@mui/material';
 import {
   Warning as WarningIcon,
@@ -44,6 +43,8 @@ import MainLayout from '../components/layout/MainLayout';
 import FavoritesListView from '../components/FavoritesListView';
 import ReviewsListView from '../components/ReviewsListView';
 import { useAuth } from '../context/AuthContext';
+import { useThemeContext } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { ApiService } from '../services/api';
 import {
   UserIcon,
@@ -55,6 +56,8 @@ import {
 const UserProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser, logout } = useAuth();
+  const { setThemeMode } = useThemeContext();
+  const { setLanguage, t } = useLanguage();
 
   const [selectedTab, setSelectedTab] = useState(0);
   const [favorites, setFavorites] = useState<any[]>([]);
@@ -150,12 +153,18 @@ const UserProfilePage: React.FC = () => {
     try {
       const response = await ApiService.getUserPreferences();
       if (response.success && response.data) {
+        const theme = response.data.theme || 'light';
+        const lang = response.data.preferred_language || 'ko';
         setPreferences({
-          preferred_language: response.data.preferred_language || 'ko',
-          theme: response.data.theme || 'light',
+          preferred_language: lang,
+          theme,
           notification_enabled: response.data.notification_enabled !== false,
           email_notification: response.data.email_notification !== false,
         });
+        // 테마를 실제로 적용 (ThemeContext에 반영)
+        setThemeMode(theme as 'light' | 'dark' | 'auto');
+        // 언어를 실제로 적용 (LanguageContext에 반영)
+        setLanguage(lang as 'ko' | 'en' | 'ja' | 'zh');
       }
     } catch (err) {
       console.error('사용자 설정 로드 실패:', err);
@@ -214,7 +223,7 @@ const UserProfilePage: React.FC = () => {
 
       if (response.success) {
         await refreshUser();
-        setSettingsMessage({ type: 'success', text: '프로필이 수정되었습니다.' });
+        setSettingsMessage({ type: 'success', text: t.profile.profileUpdated });
       }
     } catch (err: any) {
       setSettingsMessage({ type: 'error', text: err.userMessage || '프로필 수정에 실패했습니다.' });
@@ -224,15 +233,17 @@ const UserProfilePage: React.FC = () => {
   };
 
   // 언어 설정 변경
-  const handleLanguageChange = async (language: string) => {
+  const handleLanguageChange = async (lang: string) => {
     setPreferencesSaving(true);
     setSettingsMessage(null);
 
     try {
-      const response = await ApiService.changeLanguage(language);
+      const response = await ApiService.changeLanguage(lang);
       if (response.success) {
-        setPreferences({ ...preferences, preferred_language: language });
-        setSettingsMessage({ type: 'success', text: '언어 설정이 변경되었습니다.' });
+        setPreferences({ ...preferences, preferred_language: lang });
+        // 언어를 실제로 적용 (즉시 UI에 반영)
+        setLanguage(lang as 'ko' | 'en' | 'ja' | 'zh');
+        setSettingsMessage({ type: 'success', text: t.profile.languageChanged });
       }
     } catch (err: any) {
       setSettingsMessage({ type: 'error', text: err.userMessage || '언어 설정 변경에 실패했습니다.' });
@@ -250,7 +261,9 @@ const UserProfilePage: React.FC = () => {
       const response = await ApiService.changeTheme(theme);
       if (response.success) {
         setPreferences({ ...preferences, theme });
-        setSettingsMessage({ type: 'success', text: '테마 설정이 변경되었습니다.' });
+        // 테마를 실제로 적용 (즉시 UI에 반영)
+        setThemeMode(theme as 'light' | 'dark' | 'auto');
+        setSettingsMessage({ type: 'success', text: t.profile.themeChanged });
       }
     } catch (err: any) {
       setSettingsMessage({ type: 'error', text: err.userMessage || '테마 설정 변경에 실패했습니다.' });
@@ -272,7 +285,7 @@ const UserProfilePage: React.FC = () => {
 
       if (response.success) {
         setPreferences({ ...preferences, [field]: value });
-        setSettingsMessage({ type: 'success', text: '알림 설정이 변경되었습니다.' });
+        setSettingsMessage({ type: 'success', text: t.profile.notificationsChanged });
       }
     } catch (err: any) {
       setSettingsMessage({ type: 'error', text: err.userMessage || '알림 설정 변경에 실패했습니다.' });
