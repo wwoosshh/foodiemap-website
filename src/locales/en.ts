@@ -174,6 +174,56 @@ export const en: TranslationKeys = {
     copyAddress: 'Copy Address',
     showOnMap: 'Show on Map',
     share: 'Share',
+    favorite: 'Add to Favorites',
+    unfavorite: 'Remove from Favorites',
+    addReview: 'Write Review',
+    map: 'Map',
+
+    // SNS / Links
+    blog: 'Blog',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    youtube: 'YouTube',
+    kakao: 'KakaoTalk',
+    naverPlace: 'Naver Place',
+    booking: 'Booking',
+    naverBooking: 'Naver Booking',
+
+    // Business Hours
+    noHoursInfo: 'No business hours information available.',
+    mon: 'Mon',
+    tue: 'Tue',
+    wed: 'Wed',
+    thu: 'Thu',
+    fri: 'Fri',
+    sat: 'Sat',
+    sun: 'Sun',
+    noInfo: 'No information',
+    closed: 'Closed',
+    breakTime: 'Break Time',
+    lastOrder: 'Last Order',
+    regularHolidays: 'Regular Holidays',
+    holidayNotice: 'Holiday Notice',
+
+    // Facilities / Services
+    parkingFacilities: 'Parking Facilities',
+    amenities: 'Amenities',
+    seatingInfo: 'Seating Information',
+    reservationService: 'Reservation Service',
+    kidsMenu: 'Kids Menu',
+    reservationPhone: 'Reservation Phone',
+
+    // Menu Types
+    signatureMenu: 'Signature Menu',
+    popularMenu: 'Popular Menu',
+    allMenu: 'All Menu',
+    newMenu: 'New',
+    seasonalMenu: 'Seasonal',
+    signature: 'Signature',
+    noMenuInfo: 'No menu information available.',
+
+    // Reviews
+    firstReview: 'Be the first to write a review!',
   },
 
   // Event

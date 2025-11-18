@@ -174,6 +174,56 @@ export const zh: TranslationKeys = {
     copyAddress: '复制地址',
     showOnMap: '在地图上查看',
     share: '分享',
+    favorite: '添加收藏',
+    unfavorite: '取消收藏',
+    addReview: '写评论',
+    map: '地图',
+
+    // SNS / 链接
+    blog: '博客',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    youtube: 'YouTube',
+    kakao: 'KakaoTalk',
+    naverPlace: 'Naver Place',
+    booking: '预订',
+    naverBooking: 'Naver预订',
+
+    // 营业时间
+    noHoursInfo: '无营业时间信息。',
+    mon: '周一',
+    tue: '周二',
+    wed: '周三',
+    thu: '周四',
+    fri: '周五',
+    sat: '周六',
+    sun: '周日',
+    noInfo: '无信息',
+    closed: '休息',
+    breakTime: '休息时间',
+    lastOrder: '最后点单',
+    regularHolidays: '定期休息',
+    holidayNotice: '休息通知',
+
+    // 设施 / 服务
+    parkingFacilities: '停车设施',
+    amenities: '便利设施',
+    seatingInfo: '座位信息',
+    reservationService: '预订服务',
+    kidsMenu: '儿童菜单',
+    reservationPhone: '预订电话',
+
+    // 菜单类型
+    signatureMenu: '招牌菜',
+    popularMenu: '人气菜',
+    allMenu: '全部菜单',
+    newMenu: '新菜',
+    seasonalMenu: '季节限定',
+    signature: '招牌',
+    noMenuInfo: '无菜单信息。',
+
+    // 评论
+    firstReview: '成为第一个写评论的人！',
   },
 
   // 活动

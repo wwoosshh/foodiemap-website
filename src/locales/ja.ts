@@ -174,6 +174,56 @@ export const ja: TranslationKeys = {
     copyAddress: '住所をコピー',
     showOnMap: '地図で見る',
     share: '共有',
+    favorite: 'お気に入りに追加',
+    unfavorite: 'お気に入りから削除',
+    addReview: 'レビューを書く',
+    map: '地図',
+
+    // SNS / リンク
+    blog: 'ブログ',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    youtube: 'YouTube',
+    kakao: 'カカオトーク',
+    naverPlace: 'Naver Place',
+    booking: '予約',
+    naverBooking: 'Naver予約',
+
+    // 営業時間
+    noHoursInfo: '営業時間情報がありません。',
+    mon: '月',
+    tue: '火',
+    wed: '水',
+    thu: '木',
+    fri: '金',
+    sat: '土',
+    sun: '日',
+    noInfo: '情報なし',
+    closed: '休業',
+    breakTime: 'ブレイクタイム',
+    lastOrder: 'ラストオーダー',
+    regularHolidays: '定休日',
+    holidayNotice: '休業案内',
+
+    // 施設 / サービス
+    parkingFacilities: '駐車施設',
+    amenities: '便利施設',
+    seatingInfo: '座席情報',
+    reservationService: '予約サービス',
+    kidsMenu: 'キッズメニュー',
+    reservationPhone: '予約電話',
+
+    // メニュータイプ
+    signatureMenu: 'シグニチャーメニュー',
+    popularMenu: '人気メニュー',
+    allMenu: '全メニュー',
+    newMenu: '新メニュー',
+    seasonalMenu: 'シーズン限定',
+    signature: 'シグニチャー',
+    noMenuInfo: '登録されたメニューがありません。',
+
+    // レビュー
+    firstReview: '最初のレビューを書いてみましょう！',
   },
 
   // イベント

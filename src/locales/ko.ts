@@ -205,6 +205,56 @@ export const ko = {
     copyAddress: '주소 복사',
     showOnMap: '지도에서 보기',
     share: '공유하기',
+    favorite: '찜하기',
+    unfavorite: '찜 해제',
+    addReview: '리뷰 작성',
+    map: '지도',
+
+    // SNS / 링크
+    blog: '블로그',
+    instagram: '인스타그램',
+    facebook: '페이스북',
+    youtube: '유튜브',
+    kakao: '카카오톡',
+    naverPlace: '네이버 플레이스',
+    booking: '예약',
+    naverBooking: '네이버 예약',
+
+    // 영업시간
+    noHoursInfo: '영업시간 정보가 없습니다.',
+    mon: '월',
+    tue: '화',
+    wed: '수',
+    thu: '목',
+    fri: '금',
+    sat: '토',
+    sun: '일',
+    noInfo: '정보 없음',
+    closed: '휴무',
+    breakTime: '브레이크 타임',
+    lastOrder: '라스트 오더',
+    regularHolidays: '정기 휴무',
+    holidayNotice: '휴무 안내',
+
+    // 시설 / 서비스
+    parkingFacilities: '주차 시설',
+    amenities: '편의 시설',
+    seatingInfo: '좌석 정보',
+    reservationService: '예약 서비스',
+    kidsMenu: '키즈 메뉴',
+    reservationPhone: '예약 전화',
+
+    // 메뉴 타입
+    signatureMenu: '시그니처 메뉴',
+    popularMenu: '인기 메뉴',
+    allMenu: '전체 메뉴',
+    newMenu: '신메뉴',
+    seasonalMenu: '시즌 한정',
+    signature: '시그니처',
+    noMenuInfo: '등록된 메뉴가 없습니다.',
+
+    // 리뷰
+    firstReview: '첫 번째 리뷰를 작성해보세요!',
   },
 
   // 리뷰

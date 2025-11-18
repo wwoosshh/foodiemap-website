@@ -330,28 +330,28 @@ const RestaurantDetailPage: React.FC = () => {
   const renderBusinessHours = () => {
     const hours = operations?.business_hours;
     if (!hours || typeof hours !== 'object') {
-      return <Typography variant="body2" color="text.secondary">영업시간 정보가 없습니다.</Typography>;
+      return <Typography variant="body2" color="text.secondary">{t('restaurant.noHoursInfo')}</Typography>;
     }
 
     const weekdays = [
-      { key: 'mon', label: '월' },
-      { key: 'tue', label: '화' },
-      { key: 'wed', label: '수' },
-      { key: 'thu', label: '목' },
-      { key: 'fri', label: '금' },
-      { key: 'sat', label: '토' },
-      { key: 'sun', label: '일' },
+      { key: 'mon', label: t('restaurant.mon') },
+      { key: 'tue', label: t('restaurant.tue') },
+      { key: 'wed', label: t('restaurant.wed') },
+      { key: 'thu', label: t('restaurant.thu') },
+      { key: 'fri', label: t('restaurant.fri') },
+      { key: 'sat', label: t('restaurant.sat') },
+      { key: 'sun', label: t('restaurant.sun') },
     ];
 
     return (
       <Stack spacing={0.5}>
         {weekdays.map((day) => {
           const dayData = hours[day.key];
-          let displayText = '정보 없음';
+          let displayText = t('restaurant.noInfo');
 
           if (dayData) {
             if (dayData.closed) {
-              displayText = '휴무';
+              displayText = t('restaurant.closed');
             } else if (dayData.open && dayData.close) {
               displayText = `${dayData.open} - ${dayData.close}`;
             }
@@ -371,28 +371,28 @@ const RestaurantDetailPage: React.FC = () => {
         {(operations?.break_time || restaurant?.break_time) && (
           <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
             <Typography variant="caption" color="text.secondary">
-              브레이크 타임: {(operations?.break_time || restaurant?.break_time)}
+              {t('restaurant.breakTime')}: {(operations?.break_time || restaurant?.break_time)}
             </Typography>
           </Box>
         )}
         {(operations?.last_order || restaurant?.last_order) && (
           <Box>
             <Typography variant="caption" color="text.secondary">
-              라스트 오더: {(operations?.last_order || restaurant?.last_order)}
+              {t('restaurant.lastOrder')}: {(operations?.last_order || restaurant?.last_order)}
             </Typography>
           </Box>
         )}
         {operations?.regular_holidays && operations.regular_holidays.length > 0 && (
           <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
             <Typography variant="caption" color="error.main">
-              정기 휴무: {operations.regular_holidays.join(', ')}
+              {t('restaurant.regularHolidays')}: {operations.regular_holidays.join(', ')}
             </Typography>
           </Box>
         )}
         {operations?.holiday_notice && (
           <Box>
             <Typography variant="caption" color="text.secondary">
-              휴무 안내: {operations.holiday_notice}
+              {t('restaurant.holidayNotice')}: {operations.holiday_notice}
             </Typography>
           </Box>
         )}
@@ -703,42 +703,42 @@ const RestaurantDetailPage: React.FC = () => {
                       )}
                       {contacts?.blog_url && (
                         <Link href={contacts.blog_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">블로그: {contacts.blog_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.blog')}: {contacts.blog_url}</Typography>
                         </Link>
                       )}
                       {contacts?.instagram_url && (
                         <Link href={contacts.instagram_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">인스타그램: {contacts.instagram_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.instagram')}: {contacts.instagram_url}</Typography>
                         </Link>
                       )}
                       {contacts?.facebook_url && (
                         <Link href={contacts.facebook_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">페이스북: {contacts.facebook_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.facebook')}: {contacts.facebook_url}</Typography>
                         </Link>
                       )}
                       {contacts?.youtube_url && (
                         <Link href={contacts.youtube_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">유튜브: {contacts.youtube_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.youtube')}: {contacts.youtube_url}</Typography>
                         </Link>
                       )}
                       {contacts?.kakao_channel_url && (
                         <Link href={contacts.kakao_channel_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">카카오톡: {contacts.kakao_channel_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.kakao')}: {contacts.kakao_channel_url}</Typography>
                         </Link>
                       )}
                       {contacts?.naver_place_url && (
                         <Link href={contacts.naver_place_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">네이버 플레이스: {contacts.naver_place_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.naverPlace')}: {contacts.naver_place_url}</Typography>
                         </Link>
                       )}
                       {contacts?.booking_url && (
                         <Link href={contacts.booking_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">예약: {contacts.booking_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.booking')}: {contacts.booking_url}</Typography>
                         </Link>
                       )}
                       {contacts?.naver_booking_url && (
                         <Link href={contacts.naver_booking_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">네이버 예약: {contacts.naver_booking_url}</Typography>
+                          <Typography variant="body2">{t('restaurant.naverBooking')}: {contacts.naver_booking_url}</Typography>
                         </Link>
                       )}
                     </Stack>
@@ -760,7 +760,7 @@ const RestaurantDetailPage: React.FC = () => {
                 {((facilities?.parking_available ?? restaurant?.parking_available) || (facilities?.valet_parking ?? restaurant?.valet_parking) || (facilities?.parking_spaces || restaurant?.parking_spaces) || (facilities?.parking_info || restaurant?.parking_info)) && (
                   <Box>
                     <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      주차 시설
+                      {t('restaurant.parkingFacilities')}
                     </Typography>
                     <Stack spacing={0.5}>
                       {(facilities?.parking_available ?? restaurant?.parking_available) && (
@@ -783,7 +783,7 @@ const RestaurantDetailPage: React.FC = () => {
                 {((facilities?.wifi_available ?? restaurant?.wifi_available) || (facilities?.wheelchair_accessible ?? restaurant?.wheelchair_accessible) || (facilities?.elevator_available ?? restaurant?.elevator_available) || (facilities?.nursing_room ?? restaurant?.nursing_room) || (facilities?.kids_zone ?? restaurant?.kids_zone) || (facilities?.pet_friendly ?? restaurant?.pet_friendly) || (facilities?.kids_menu ?? restaurant?.kids_menu)) && (
                   <Box>
                     <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      편의 시설
+                      {t('restaurant.amenities')}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       {(facilities?.wifi_available ?? restaurant?.wifi_available) && <Chip label="무료 와이파이" size="small" variant="outlined" />}
@@ -792,7 +792,7 @@ const RestaurantDetailPage: React.FC = () => {
                       {(facilities?.nursing_room ?? restaurant?.nursing_room) && <Chip label="수유실" size="small" variant="outlined" />}
                       {(facilities?.kids_zone ?? restaurant?.kids_zone) && <Chip label="키즈존" size="small" variant="outlined" />}
                       {(facilities?.pet_friendly ?? restaurant?.pet_friendly) && <Chip label="반려동물 동반" size="small" variant="outlined" />}
-                      {(facilities?.kids_menu ?? restaurant?.kids_menu) && <Chip label="키즈 메뉴" size="small" variant="outlined" />}
+                      {(facilities?.kids_menu ?? restaurant?.kids_menu) && <Chip label={t('restaurant.kidsMenu')} size="small" variant="outlined" />}
                     </Box>
                   </Box>
                 )}
@@ -801,7 +801,7 @@ const RestaurantDetailPage: React.FC = () => {
                 {((facilities?.group_seating ?? restaurant?.group_seating) || (facilities?.private_room ?? restaurant?.private_room) || (facilities?.outdoor_seating ?? restaurant?.outdoor_seating) || (facilities?.bar_seating ?? restaurant?.bar_seating) || (facilities?.total_seats || restaurant?.total_seats)) && (
                   <Box>
                     <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      좌석 정보
+                      {t('restaurant.seatingInfo')}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       {(facilities?.group_seating ?? restaurant?.group_seating) && <Chip label="단체석" size="small" variant="outlined" />}
@@ -819,17 +819,17 @@ const RestaurantDetailPage: React.FC = () => {
                 {((services?.reservation_available ?? restaurant?.reservation_available) || (services?.online_booking_available ?? restaurant?.online_booking_available) || services?.reservation_phone || services?.reservation_url) && (
                   <Box>
                     <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      예약 서비스
+                      {t('restaurant.reservationService')}
                     </Typography>
                     <Stack spacing={0.5}>
                       {(services?.reservation_available ?? restaurant?.reservation_available) && (
-                        <Typography variant="body2">예약 가능</Typography>
+                        <Typography variant="body2">{t('restaurant.reservation')}</Typography>
                       )}
                       {(services?.online_booking_available ?? restaurant?.online_booking_available) && (
                         <Typography variant="body2">온라인 예약 가능</Typography>
                       )}
                       {services?.reservation_phone && (
-                        <Typography variant="body2">예약 전화: {services.reservation_phone}</Typography>
+                        <Typography variant="body2">{t('restaurant.reservationPhone')}: {services.reservation_phone}</Typography>
                       )}
                       {services?.reservation_url && (
                         <Link href={services.reservation_url} target="_blank" rel="noopener" underline="hover">
@@ -904,7 +904,7 @@ const RestaurantDetailPage: React.FC = () => {
               >
                 <Tab label={`${t('restaurant.reviews')} (${reviews.length})`} />
                 <Tab label={`${t('restaurant.menu')} (${menus.all.length})`} />
-                <Tab label="지도" />
+                <Tab label={t('restaurant.map')} />
               </Tabs>
             </Box>
 
@@ -1048,14 +1048,14 @@ const RestaurantDetailPage: React.FC = () => {
                   {t('restaurant.menu')}
                 </Typography>
                 {menus.all.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">등록된 메뉴가 없습니다.</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('restaurant.noMenuInfo')}</Typography>
                 ) : (
                   <Box>
                     {/* 시그니처 메뉴 */}
                     {menus.signature && menus.signature.length > 0 && (
                       <Box sx={{ mb: 4 }}>
                         <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                          시그니처 메뉴
+                          {t('restaurant.signatureMenu')}
                         </Typography>
                         <Stack spacing={3} divider={<Divider />}>
                           {menus.signature.map((menu: any) => (
@@ -1078,10 +1078,10 @@ const RestaurantDetailPage: React.FC = () => {
                                   <Box>
                                     <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
                                       {menu.is_signature && (
-                                        <Chip label="시그니처" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                        <Chip label={t('restaurant.signature')} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
                                       )}
                                       {menu.is_seasonal && (
-                                        <Chip label="시즌 한정" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }} />
+                                        <Chip label={t('restaurant.seasonalMenu')} size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }} />
                                       )}
                                       {menu.category && (
                                         <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
@@ -1142,7 +1142,7 @@ const RestaurantDetailPage: React.FC = () => {
                     {menus.popular && menus.popular.length > 0 && (
                       <Box sx={{ mb: 4 }}>
                         <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                          인기 메뉴
+                          {t('restaurant.popularMenu')}
                         </Typography>
                         <Stack spacing={3} divider={<Divider />}>
                           {menus.popular.map((menu: any) => (
@@ -1196,7 +1196,7 @@ const RestaurantDetailPage: React.FC = () => {
                     {menus.all && menus.all.length > 0 && (
                       <Box>
                         <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                          전체 메뉴
+                          {t('restaurant.allMenu')}
                         </Typography>
                         <Stack spacing={3} divider={<Divider />}>
                           {menus.all.map((menu: any) => (
@@ -1219,13 +1219,13 @@ const RestaurantDetailPage: React.FC = () => {
                                   <Box>
                                     <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
                                       {menu.is_signature && (
-                                        <Chip label="시그니처" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                        <Chip label={t('restaurant.signature')} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
                                       )}
                                       {menu.is_popular && (
                                         <Chip label="인기" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#FFD93D', color: '#2C3E50' }} />
                                       )}
                                       {menu.is_new && (
-                                        <Chip label="신메뉴" size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                        <Chip label={t('restaurant.newMenu')} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
                                       )}
                                       {menu.category && (
                                         <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
