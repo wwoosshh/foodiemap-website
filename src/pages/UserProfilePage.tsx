@@ -19,15 +19,28 @@ import {
   DialogActions,
   TextField,
   IconButton,
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel,
+  Paper,
 } from '@mui/material';
 import {
   Warning as WarningIcon,
   Close as CloseIcon,
   DeleteForever as DeleteForeverIcon,
   Restore as RestoreIcon,
+  PhotoCamera,
+  Language as LanguageIcon,
+  Palette as PaletteIcon,
+  Notifications as NotificationsIcon,
+  Person as PersonIcon,
+  Save as SaveIcon,
 } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
-import ProfileEditModal from '../components/ProfileEditModal';
 import FavoritesListView from '../components/FavoritesListView';
 import ReviewsListView from '../components/ReviewsListView';
 import { useAuth } from '../context/AuthContext';
@@ -44,7 +57,6 @@ const UserProfilePage: React.FC = () => {
   const { user, refreshUser, logout } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState(0);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [myReviews, setMyReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +67,27 @@ const UserProfilePage: React.FC = () => {
   const [deletionStatus, setDeletionStatus] = useState<any>(null);
   const [deletionLoading, setDeletionLoading] = useState(false);
 
+  // 프로필 수정 상태
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    avatar_url: user?.avatar_url || '',
+  });
+  const [imagePreview, setImagePreview] = useState<string>(user?.avatar_url || '');
+  const [uploading, setUploading] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // 사용자 설정 상태
+  const [preferences, setPreferences] = useState({
+    preferred_language: 'ko',
+    theme: 'light',
+    notification_enabled: true,
+    email_notification: true,
+  });
+  const [preferencesSaving, setPreferencesSaving] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   useEffect(() => {
     if (!user) {
       navigate('/');
@@ -62,7 +95,20 @@ const UserProfilePage: React.FC = () => {
     }
     loadUserData();
     loadDeletionStatus();
+    loadUserPreferences();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // 사용자 정보 변경 시 폼 업데이트
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || '',
+        phone: user.phone || '',
+        avatar_url: user.avatar_url || '',
+      });
+      setImagePreview(user.avatar_url || '');
+    }
   }, [user]);
 
   const loadUserData = async () => {
@@ -96,6 +142,142 @@ const UserProfilePage: React.FC = () => {
       }
     } catch (err) {
       console.error('탈퇴 상태 조회 실패:', err);
+    }
+  };
+
+  // 사용자 설정 로드
+  const loadUserPreferences = async () => {
+    try {
+      const response = await ApiService.getUserPreferences();
+      if (response.success && response.data) {
+        setPreferences({
+          preferred_language: response.data.preferred_language || 'ko',
+          theme: response.data.theme || 'light',
+          notification_enabled: response.data.notification_enabled !== false,
+          email_notification: response.data.email_notification !== false,
+        });
+      }
+    } catch (err) {
+      console.error('사용자 설정 로드 실패:', err);
+    }
+  };
+
+  // 프로필 이미지 업로드
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setSettingsMessage({ type: 'error', text: '이미지 크기는 5MB 이하여야 합니다.' });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setSettingsMessage({ type: 'error', text: '이미지 파일만 업로드 가능합니다.' });
+      return;
+    }
+
+    setUploading(true);
+    setSettingsMessage(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
+        const response = await ApiService.uploadProfileImage(base64Image);
+
+        if (response.success && response.data) {
+          setProfileForm({ ...profileForm, avatar_url: response.data.url });
+          setImagePreview(response.data.url);
+          setSettingsMessage({ type: 'success', text: '이미지가 업로드되었습니다.' });
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      setSettingsMessage({ type: 'error', text: err.userMessage || '이미지 업로드에 실패했습니다.' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // 프로필 정보 저장
+  const handleSaveProfile = async () => {
+    setProfileSaving(true);
+    setSettingsMessage(null);
+
+    try {
+      const response = await ApiService.updateProfile({
+        name: profileForm.name,
+        phone: profileForm.phone,
+        avatar_url: profileForm.avatar_url,
+      });
+
+      if (response.success) {
+        await refreshUser();
+        setSettingsMessage({ type: 'success', text: '프로필이 수정되었습니다.' });
+      }
+    } catch (err: any) {
+      setSettingsMessage({ type: 'error', text: err.userMessage || '프로필 수정에 실패했습니다.' });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  // 언어 설정 변경
+  const handleLanguageChange = async (language: string) => {
+    setPreferencesSaving(true);
+    setSettingsMessage(null);
+
+    try {
+      const response = await ApiService.updateLanguagePreference(language);
+      if (response.success) {
+        setPreferences({ ...preferences, preferred_language: language });
+        setSettingsMessage({ type: 'success', text: '언어 설정이 변경되었습니다.' });
+      }
+    } catch (err: any) {
+      setSettingsMessage({ type: 'error', text: err.userMessage || '언어 설정 변경에 실패했습니다.' });
+    } finally {
+      setPreferencesSaving(false);
+    }
+  };
+
+  // 테마 설정 변경
+  const handleThemeChange = async (theme: string) => {
+    setPreferencesSaving(true);
+    setSettingsMessage(null);
+
+    try {
+      const response = await ApiService.updateThemePreference(theme);
+      if (response.success) {
+        setPreferences({ ...preferences, theme });
+        setSettingsMessage({ type: 'success', text: '테마 설정이 변경되었습니다.' });
+      }
+    } catch (err: any) {
+      setSettingsMessage({ type: 'error', text: err.userMessage || '테마 설정 변경에 실패했습니다.' });
+    } finally {
+      setPreferencesSaving(false);
+    }
+  };
+
+  // 알림 설정 변경
+  const handleNotificationChange = async (field: string, value: boolean) => {
+    setPreferencesSaving(true);
+    setSettingsMessage(null);
+
+    try {
+      const response = await ApiService.updateNotificationPreferences({
+        notification_enabled: field === 'notification_enabled' ? value : preferences.notification_enabled,
+        email_notification: field === 'email_notification' ? value : preferences.email_notification,
+      });
+
+      if (response.success) {
+        setPreferences({ ...preferences, [field]: value });
+        setSettingsMessage({ type: 'success', text: '알림 설정이 변경되었습니다.' });
+      }
+    } catch (err: any) {
+      setSettingsMessage({ type: 'error', text: err.userMessage || '알림 설정 변경에 실패했습니다.' });
+    } finally {
+      setPreferencesSaving(false);
     }
   };
 
@@ -195,9 +377,9 @@ const UserProfilePage: React.FC = () => {
                 <Button
                   variant="contained"
                   startIcon={<SettingsIcon />}
-                  onClick={() => setEditModalOpen(true)}
+                  onClick={() => setSelectedTab(2)}
                 >
-                  프로필 수정
+                  설정
                 </Button>
               </Box>
             </Box>
@@ -299,7 +481,219 @@ const UserProfilePage: React.FC = () => {
 
             {/* 설정 탭 */}
             {selectedTab === 2 && (
-              <Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {/* 메시지 표시 */}
+                {settingsMessage && (
+                  <Alert
+                    severity={settingsMessage.type}
+                    onClose={() => setSettingsMessage(null)}
+                  >
+                    {settingsMessage.text}
+                  </Alert>
+                )}
+
+                {/* 프로필 수정 섹션 */}
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <PersonIcon color="primary" />
+                      <Typography variant="h6" fontWeight={700}>
+                        프로필 정보
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      {/* 프로필 이미지 */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                        <Box sx={{ position: 'relative' }}>
+                          <Avatar
+                            src={imagePreview}
+                            sx={{ width: 100, height: 100 }}
+                          >
+                            <PersonIcon sx={{ fontSize: 50 }} />
+                          </Avatar>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleImageSelect}
+                            disabled={uploading}
+                          />
+                          <IconButton
+                            sx={{
+                              position: 'absolute',
+                              bottom: -5,
+                              right: -5,
+                              backgroundColor: 'primary.main',
+                              color: 'white',
+                              '&:hover': { backgroundColor: 'primary.dark' },
+                            }}
+                            size="small"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                          >
+                            {uploading ? <CircularProgress size={20} color="inherit" /> : <PhotoCamera fontSize="small" />}
+                          </IconButton>
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            프로필 사진
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            JPG, PNG 파일 (최대 5MB)
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* 이름 */}
+                      <TextField
+                        label="이름"
+                        value={profileForm.name}
+                        onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                        fullWidth
+                        required
+                      />
+
+                      {/* 전화번호 */}
+                      <TextField
+                        label="전화번호"
+                        value={profileForm.phone}
+                        onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        fullWidth
+                        placeholder="010-1234-5678"
+                      />
+
+                      {/* 이메일 (읽기 전용) */}
+                      <TextField
+                        label="이메일"
+                        value={user?.email}
+                        fullWidth
+                        disabled
+                        helperText="이메일은 변경할 수 없습니다"
+                      />
+
+                      {/* 저장 버튼 */}
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                          variant="contained"
+                          startIcon={profileSaving ? <CircularProgress size={20} /> : <SaveIcon />}
+                          onClick={handleSaveProfile}
+                          disabled={profileSaving || !profileForm.name}
+                        >
+                          {profileSaving ? '저장 중...' : '저장'}
+                        </Button>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* 언어 설정 섹션 */}
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <LanguageIcon color="primary" />
+                      <Typography variant="h6" fontWeight={700}>
+                        언어 설정
+                      </Typography>
+                    </Box>
+
+                    <FormControl fullWidth>
+                      <InputLabel>언어</InputLabel>
+                      <Select
+                        value={preferences.preferred_language}
+                        onChange={(e) => handleLanguageChange(e.target.value)}
+                        label="언어"
+                        disabled={preferencesSaving}
+                      >
+                        <MenuItem value="ko">한국어</MenuItem>
+                        <MenuItem value="en">English</MenuItem>
+                        <MenuItem value="ja">日本語</MenuItem>
+                        <MenuItem value="zh">中文</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </CardContent>
+                </Card>
+
+                {/* 테마 설정 섹션 */}
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <PaletteIcon color="primary" />
+                      <Typography variant="h6" fontWeight={700}>
+                        테마 설정
+                      </Typography>
+                    </Box>
+
+                    <FormControl fullWidth>
+                      <InputLabel>테마</InputLabel>
+                      <Select
+                        value={preferences.theme}
+                        onChange={(e) => handleThemeChange(e.target.value)}
+                        label="테마"
+                        disabled={preferencesSaving}
+                      >
+                        <MenuItem value="light">라이트 모드</MenuItem>
+                        <MenuItem value="dark">다크 모드</MenuItem>
+                        <MenuItem value="auto">시스템 설정 따르기</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </CardContent>
+                </Card>
+
+                {/* 알림 설정 섹션 */}
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <NotificationsIcon color="primary" />
+                      <Typography variant="h6" fontWeight={700}>
+                        알림 설정
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={preferences.notification_enabled}
+                            onChange={(e) => handleNotificationChange('notification_enabled', e.target.checked)}
+                            disabled={preferencesSaving}
+                          />
+                        }
+                        label={
+                          <Box>
+                            <Typography variant="body1">푸시 알림</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              새로운 이벤트, 댓글 등에 대한 알림을 받습니다
+                            </Typography>
+                          </Box>
+                        }
+                      />
+
+                      <Divider />
+
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={preferences.email_notification}
+                            onChange={(e) => handleNotificationChange('email_notification', e.target.checked)}
+                            disabled={preferencesSaving}
+                          />
+                        }
+                        label={
+                          <Box>
+                            <Typography variant="body1">이메일 알림</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              중요한 공지사항을 이메일로 받습니다
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* 계정 관리 섹션 */}
                 <Card>
                   <CardContent>
                     <Typography variant="h6" fontWeight={700} gutterBottom>
@@ -436,16 +830,6 @@ const UserProfilePage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* 프로필 수정 모달 */}
-      <ProfileEditModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        onSuccess={() => {
-          refreshUser();
-          setEditModalOpen(false);
-        }}
-      />
     </MainLayout>
   );
 };
