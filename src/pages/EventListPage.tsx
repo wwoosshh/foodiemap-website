@@ -50,7 +50,7 @@ const EventListPage: React.FC = () => {
     };
 
     loadEvents();
-  }, [page]);
+  }, [page, t]);
 
   const formatPeriod = (startDate: string, endDate: string | null) => {
     const start = new Date(startDate).toLocaleDateString('ko-KR');

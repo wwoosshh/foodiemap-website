@@ -49,7 +49,7 @@ const NoticeListPage: React.FC = () => {
     };
 
     loadNotices();
-  }, [page]);
+  }, [page, t]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
