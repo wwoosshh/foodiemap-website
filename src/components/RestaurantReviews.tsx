@@ -17,7 +17,9 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Divider
+  Divider,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
 import {
   ThumbUp,
@@ -46,6 +48,7 @@ interface Review {
   helpful_count: number;
   is_helpful?: boolean;
   tags?: string[];
+  is_anonymous?: boolean;
 }
 
 interface ReviewStats {
@@ -97,7 +100,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     title: '',
     content: '',
     images: [] as string[],
-    tags: [] as string[]
+    tags: [] as string[],
+    is_anonymous: false
   });
 
   // 초기 데이터 동기화
@@ -115,16 +119,27 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
     const content = newReview.content.trim();
     const rating = newReview.rating;
 
-    if (title.length < 1 || title.length > 100) {
-      setError('리뷰 제목은 1자 이상 100자 이하로 작성해주세요.');
+    // 제목 검증
+    if (title.length < 1) {
+      setError('리뷰 제목을 입력해주세요.');
+      return;
+    }
+    if (title.length > 100) {
+      setError('리뷰 제목은 100자 이하로 작성해주세요.');
       return;
     }
 
-    if (content.length < 10 || content.length > 2000) {
-      setError('리뷰 내용은 10자 이상 2000자 이하로 작성해주세요.');
+    // 내용 검증
+    if (content.length < 10) {
+      setError(`리뷰 내용은 최소 10자 이상 작성해주세요. (현재 ${content.length}자)`);
+      return;
+    }
+    if (content.length > 2000) {
+      setError('리뷰 내용은 2000자 이하로 작성해주세요.');
       return;
     }
 
+    // 평점 검증
     if (rating < 1 || rating > 5) {
       setError('평점은 1점부터 5점까지 선택해주세요.');
       return;
@@ -151,7 +166,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
           title: title,
           content: content,
           images: newReview.images,
-          tags: newReview.tags
+          tags: newReview.tags,
+          is_anonymous: newReview.is_anonymous
         });
       } else {
         // 리뷰 작성
@@ -161,7 +177,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
           title: title,
           content: content,
           images: newReview.images,
-          tags: newReview.tags
+          tags: newReview.tags,
+          is_anonymous: newReview.is_anonymous
         });
       }
 
@@ -228,7 +245,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
         title: review.title,
         content: review.content,
         images: review.images,
-        tags: review.tags || []
+        tags: review.tags || [],
+        is_anonymous: review.is_anonymous || false
       });
     } else {
       setEditingReview(null);
@@ -237,7 +255,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
         title: '',
         content: '',
         images: [],
-        tags: []
+        tags: [],
+        is_anonymous: false
       });
     }
     setWriteDialogOpen(true);
@@ -251,7 +270,8 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
       title: '',
       content: '',
       images: [],
-      tags: []
+      tags: [],
+      is_anonymous: false
     });
   };
 
@@ -608,10 +628,17 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
           <TextField
             fullWidth
             label="제목"
+            placeholder="리뷰 제목을 입력해주세요 (1자 이상)"
             value={newReview.title}
             onChange={(e) => setNewReview(prev => ({ ...prev, title: e.target.value }))}
-            error={newReview.title.length > 100}
-            helperText={`${newReview.title.length}/100자${newReview.title.length > 100 ? ' (글자 수가 초과되었습니다)' : ''}`}
+            error={(newReview.title.length > 100) || (newReview.title.trim().length === 0 && newReview.title.length > 0)}
+            helperText={
+              newReview.title.length > 100
+                ? `${newReview.title.length}/100자 - 제목은 100자 이하로 입력해주세요`
+                : newReview.title.trim().length === 0 && newReview.title.length > 0
+                ? '제목을 입력해주세요 (공백만으로는 작성할 수 없습니다)'
+                : `${newReview.title.length}/100자`
+            }
             sx={{ mb: 3 }}
             aria-label="리뷰 제목 입력"
           />
@@ -621,14 +648,40 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
             multiline
             rows={4}
             label="리뷰 내용"
-            placeholder="음식의 맛, 서비스, 분위기 등에 대해 자세히 써주세요..."
+            placeholder="음식의 맛, 서비스, 분위기 등에 대해 자세히 써주세요 (최소 10자 이상)..."
             value={newReview.content}
             onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
-            error={(newReview.content.length < 10 && newReview.content.length > 0) || newReview.content.length > 2000}
-            helperText={`${newReview.content.length}/2000자 (최소 10자 이상)${newReview.content.length > 2000 ? ' (글자 수가 초과되었습니다)' : newReview.content.length < 10 && newReview.content.length > 0 ? ' (10자 이상 입력해주세요)' : ''}`}
+            error={(newReview.content.trim().length < 10 && newReview.content.length > 0) || newReview.content.length > 2000}
+            helperText={
+              newReview.content.length > 2000
+                ? `${newReview.content.length}/2000자 - 리뷰 내용은 2000자 이하로 작성해주세요`
+                : newReview.content.trim().length < 10 && newReview.content.length > 0
+                ? `${newReview.content.trim().length}/2000자 - 리뷰 내용은 최소 10자 이상 작성해주세요 (현재 ${newReview.content.trim().length}자)`
+                : `${newReview.content.length}/2000자 (최소 10자 이상 필수)`
+            }
             sx={{ mb: 3 }}
             aria-label="리뷰 내용 입력"
           />
+
+          <Box sx={{ mb: 3 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={newReview.is_anonymous}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, is_anonymous: e.target.checked }))}
+                  aria-label="익명으로 작성"
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2">익명으로 작성</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    익명으로 작성하면 이름과 프로필 사진이 공개되지 않습니다
+                  </Typography>
+                </Box>
+              }
+            />
+          </Box>
 
           <Box sx={{ mb: 2 }}>
             <Button
@@ -656,9 +709,9 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({
             disabled={
               !newReview.title.trim() ||
               !newReview.content.trim() ||
-              newReview.title.length > 100 ||
-              newReview.content.length < 10 ||
-              newReview.content.length > 2000 ||
+              newReview.title.trim().length > 100 ||
+              newReview.content.trim().length < 10 ||
+              newReview.content.trim().length > 2000 ||
               submitting
             }
           >
