@@ -31,6 +31,10 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // 터치 스와이프 상태
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   // 활성화된 배너만 필터링
   const activeBanners = banners.filter(banner => banner.is_active);
 
@@ -73,6 +77,38 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
     setIsAutoPlaying(autoPlay);
   };
 
+  // 터치 스와이프 핸들러
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsAutoPlaying(false);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) {
+      setIsAutoPlaying(autoPlay);
+      return;
+    }
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
+
+    setIsAutoPlaying(autoPlay);
+  };
+
   if (activeBanners.length === 0) {
     return null;
   }
@@ -90,6 +126,9 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
       {/* 배너 컨테이너 */}
       <Box

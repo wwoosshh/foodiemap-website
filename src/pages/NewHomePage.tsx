@@ -15,7 +15,12 @@ import {
   Skeleton,
   Paper,
   Divider,
+  TextField,
+  InputAdornment,
+  IconButton,
+  useMediaQuery,
 } from '@mui/material';
+import { Search } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
 import { ApiService } from '../services/api';
@@ -46,9 +51,11 @@ const NewHomePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { t, language } = useLanguage();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -132,6 +139,18 @@ const NewHomePage: React.FC = () => {
 
   const handleRestaurantClick = (restaurantId: string) => {
     navigate(`/restaurants/${restaurantId}`);
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/restaurants?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const renderRating = (rating: number) => {
@@ -348,61 +367,51 @@ const NewHomePage: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* 배너 캐러셀 - 최상단 배치 */}
+      {/* 모바일 검색바 - 배너 위 */}
+      {isMobile && (
+        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, mt: 2 }}>
+          <TextField
+            fullWidth
+            placeholder={t('search.placeholder') || '맛집을 검색해보세요...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleSearchKeyPress}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+              endAdornment: searchQuery && (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setSearchQuery('')}>
+                    ×
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'background.paper',
+                borderRadius: 3,
+                '&:hover': {
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                },
+                '&.Mui-focused': {
+                  boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+                },
+              },
+            }}
+          />
+        </Container>
+      )}
+
+      {/* 배너 캐러셀 - 상단 여백 추가 */}
       {banners.length > 0 && (
-        <Box sx={{ mb: { xs: 4, md: 8 } }}>
+        <Box sx={{ mt: { xs: 2, md: 3 }, mb: { xs: 4, md: 8 } }}>
           <BannerCarousel banners={banners} />
         </Box>
       )}
-
-      {/* 히어로 텍스트 */}
-      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
-        <Box
-          sx={{
-            textAlign: 'center',
-            py: { xs: 4, sm: 6, md: 8 },
-            px: { xs: 2, md: 4 },
-            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
-              theme.palette.secondary.main,
-              0.05
-            )} 100%)`,
-            borderRadius: { xs: 2, md: 4 },
-            mb: { xs: 4, md: 8 },
-            mt: { xs: 2, md: 3 },
-          }}
-        >
-          <Typography
-            variant="h2"
-            fontWeight={800}
-            gutterBottom
-            sx={{
-              background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 2,
-              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' },
-            }}
-          >
-            {t.home.heroTitle}
-          </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ mb: { xs: 3, md: 4 }, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>
-            {t.home.heroSubtitle}
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            endIcon={<ArrowRightIcon />}
-            onClick={() => navigate('/restaurants')}
-            sx={{
-              px: { xs: 3, md: 4 },
-              py: { xs: 1, md: 1.5 },
-              fontSize: { xs: '0.9rem', md: '1.1rem' },
-            }}
-          >
-            {t('home.exploreRestaurants')}
-          </Button>
-        </Box>
-      </Container>
 
       {/* 푸시 맛집 섹션 - 두 번째 배치 */}
       {pushedRestaurants.length > 0 && (
