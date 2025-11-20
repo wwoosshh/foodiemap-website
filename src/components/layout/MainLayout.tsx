@@ -7,11 +7,6 @@ import {
   Button,
   Box,
   IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Avatar,
   Menu,
   MenuItem,
@@ -27,10 +22,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useThemeContext } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import LoginModal from '../LoginModal';
+import MobileBottomNav from '../MobileBottomNav';
 import {
   CubeLogoIcon,
   SearchIcon,
-  MenuIcon,
   UserIcon,
   LogoutIcon,
   RestaurantIcon,
@@ -114,7 +109,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -313,76 +307,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 </Menu>
               </>
             ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setLoginModalOpen(true)}
-                sx={{ ml: 2 }}
-              >
-                {t.nav.login}
-              </Button>
-            )}
-
-            {/* 모바일 메뉴 버튼 */}
-            {isMobile && (
-              <IconButton
-                onClick={() => setMobileMenuOpen(true)}
-                sx={{ ml: 1 }}
-              >
-                <MenuIcon />
-              </IconButton>
+              !isMobile && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setLoginModalOpen(true)}
+                  sx={{ ml: 2 }}
+                >
+                  {t.nav.login}
+                </Button>
+              )
             )}
           </Toolbar>
         </Container>
       </AppBar>
-
-      {/* 모바일 드로어 */}
-      <Drawer
-        anchor="right"
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        PaperProps={{
-          sx: {
-            width: 280,
-            backgroundColor: 'background.default',
-          },
-        }}
-      >
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h6" fontWeight={700} color="primary.main" gutterBottom>
-            {t.nav.menu}
-          </Typography>
-        </Box>
-        <Divider />
-        <List>
-          {menuItems.map((item) => (
-            <ListItem key={item.path} disablePadding>
-              <ListItemButton
-                component={Link}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                selected={isActivePath(item.path)}
-                sx={{
-                  py: 1.5,
-                  '&.Mui-selected': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                    borderLeft: '4px solid',
-                    borderColor: 'primary.main',
-                  },
-                }}
-              >
-                <Box sx={{ mr: 2, color: 'primary.main' }}>{item.icon}</Box>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontWeight: isActivePath(item.path) ? 600 : 400,
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
 
       {/* 메인 콘텐츠 */}
       <Box
@@ -392,6 +330,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           background: currentTheme === 'dark'
             ? 'linear-gradient(180deg, #0D0D0D 0%, #121212 50%, #0F0F0F 100%)'
             : 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
+          // 모바일에서 하단 네비게이션 바의 높이만큼 하단 패딩 추가
+          paddingBottom: isMobile ? '90px' : 0,
         }}
       >
         {children}
@@ -594,6 +534,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         open={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
       />
+
+      {/* 모바일 하단 네비게이션 바 */}
+      {isMobile && (
+        <MobileBottomNav
+          onLoginClick={() => setLoginModalOpen(true)}
+        />
+      )}
     </Box>
   );
 };
