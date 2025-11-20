@@ -38,8 +38,8 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
   // 활성화된 배너만 필터링
   const activeBanners = banners.filter(banner => banner.is_active);
 
-  // 반응형 배너 높이 (16:9 비율 기준)
-  const bannerHeight = isMobile ? 280 : 360;
+  // 반응형 배너 높이 (모바일: 4:3 비율, PC: 16:9 비율)
+  const bannerHeight = isMobile ? 220 : 360;
 
   // 자동 재생 기능
   useEffect(() => {
