@@ -21,7 +21,7 @@ interface BannerCarouselProps {
 
 const BannerCarousel: React.FC<BannerCarouselProps> = ({
   banners,
-  height = 300,
+  height = 300, // 기본값 (사용되지 않음)
   autoPlay = true,
   autoPlayInterval = 5000,
 }) => {
@@ -37,6 +37,9 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
 
   // 활성화된 배너만 필터링
   const activeBanners = banners.filter(banner => banner.is_active);
+
+  // 반응형 배너 높이 (16:9 비율 기준)
+  const bannerHeight = isMobile ? 280 : 360;
 
   // 자동 재생 기능
   useEffect(() => {
@@ -118,14 +121,13 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
       sx={{
         position: 'relative',
         width: '100%',
-        height: height,
-        mb: 4,
-        borderRadius: 2,
+        height: bannerHeight,
+        borderRadius: { xs: 0, md: 2 },
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
       }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={!isMobile ? handleMouseEnter : undefined}
+      onMouseLeave={!isMobile ? handleMouseLeave : undefined}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -153,21 +155,23 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 position: 'relative',
                 cursor: banner.link_url ? 'pointer' : 'default',
                 borderRadius: 0,
-                '&:hover': {
-                  '& .banner-overlay': {
-                    opacity: banner.link_url ? 0.3 : 0,
+                ...(!isMobile && {
+                  '&:hover': {
+                    '& .banner-overlay': {
+                      opacity: banner.link_url ? 0.3 : 0,
+                    },
+                    '& .banner-content': {
+                      transform: 'translateY(-10px)',
+                    },
                   },
-                  '& .banner-content': {
-                    transform: 'translateY(-10px)',
-                  },
-                },
+                }),
               }}
               onClick={() => handleBannerClick(banner)}
             >
               {shouldLoadImage ? (
                 <CardMedia
                   component="img"
-                  height={height}
+                  height={bannerHeight}
                   image={banner.image_url || DEFAULT_BANNER_IMAGE}
                   alt={banner.title}
                   loading="lazy"

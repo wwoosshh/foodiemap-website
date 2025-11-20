@@ -406,11 +406,18 @@ const NewHomePage: React.FC = () => {
         </Container>
       )}
 
-      {/* 배너 캐러셀 - 상단 여백 추가 */}
+      {/* 배너 캐러셀 - 상단 여백 추가, PC 폭 제한 */}
       {banners.length > 0 && (
-        <Box sx={{ mt: { xs: 2, md: 3 }, mb: { xs: 4, md: 8 } }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            mt: { xs: 2, md: 3 },
+            mb: { xs: 4, md: 8 },
+            px: { xs: 0, md: 3 },
+          }}
+        >
           <BannerCarousel banners={banners} />
-        </Box>
+        </Container>
       )}
 
       {/* 푸시 맛집 섹션 - 두 번째 배치 */}
