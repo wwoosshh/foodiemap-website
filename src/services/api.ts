@@ -217,6 +217,7 @@ export class ApiService {
     featuredRestaurants: Restaurant[];
     restaurants: Restaurant[];
     pushedRestaurants: any[];
+    events: any[];
     stats: {
       totalRestaurants: number;
       totalReviews: number;

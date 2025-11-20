@@ -60,6 +60,7 @@ const NewHomePage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalRestaurants: 0,
     totalReviews: 0,
@@ -102,7 +103,9 @@ const NewHomePage: React.FC = () => {
       if (homeDataRes.success && homeDataRes.data) {
         setBanners(homeDataRes.data.banners || []);
         setPushedRestaurants(homeDataRes.data.pushedRestaurants || []);
+        setEvents(homeDataRes.data.events || []);
         setStats(homeDataRes.data.stats || { totalRestaurants: 0, totalReviews: 0, totalUsers: 0 });
+        console.log('이벤트 데이터 로드:', homeDataRes.data.events);
       }
 
       // 언어별 카테고리 로드
