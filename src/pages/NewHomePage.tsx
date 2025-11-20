@@ -494,7 +494,7 @@ const NewHomePage: React.FC = () => {
                   <CardMedia
                     component="img"
                     sx={{
-                      height: { xs: 180, sm: 220, md: 250 },
+                      height: { xs: 140, sm: 180, md: 250 },
                       objectFit: 'cover',
                       transition: 'transform 0.4s ease',
                       '&:hover': {
@@ -506,25 +506,25 @@ const NewHomePage: React.FC = () => {
                     onError={handleImageError}
                   />
 
-                  <CardContent sx={{ p: { xs: 2, md: 2 } }}>
-                    <Typography variant="overline" color="primary" fontWeight={700} sx={{ display: 'block', mb: 1, fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
+                  <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+                    <Typography variant="overline" color="primary" fontWeight={700} sx={{ display: 'block', mb: { xs: 0.5, md: 1 }, fontSize: { xs: '0.65rem', md: '0.75rem' } }}>
                       {pushed.title}
                     </Typography>
-                    <Typography variant="h5" fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
+                    <Typography variant="h5" fontWeight={700} gutterBottom sx={{ fontSize: { xs: '0.95rem', md: '1.5rem' }, mb: { xs: 0.5, md: 1 } }}>
                       {pushed.restaurant.name}
                     </Typography>
                     {pushed.subtitle && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: { xs: '0.85rem', md: '0.875rem' } }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' }, lineHeight: 1.3 }}>
                         {pushed.subtitle}
                       </Typography>
                     )}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: { xs: 1, md: 2 } }}>
                       {renderRating(pushed.restaurant.rating)}
-                      <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 } }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
+                      <Box sx={{ display: 'flex', gap: { xs: 0.5, md: 2 }, flexWrap: 'wrap' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' } }}>
                           {t('restaurant.reviewCount')} {pushed.restaurant.review_count || 0}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' } }}>
                           {t('restaurant.viewCount')} {pushed.restaurant.view_count || 0}
                         </Typography>
                       </Box>

@@ -452,12 +452,87 @@ const RestaurantDetailPage: React.FC = () => {
                   alt="맛집 사진"
                   sx={{
                     width: '100%',
-                    height: { xs: 300, md: 500 },
+                    height: { xs: 250, md: 500 },
                     objectFit: 'cover',
                     cursor: 'pointer',
+                    borderRadius: { xs: 2, md: 0 },
                   }}
                   onClick={() => window.open(photos.all[selectedImage]?.url, '_blank')}
                 />
+              </Box>
+            )}
+
+            {/* 모바일: 사진 갤러리 - 대표 이미지 바로 아래 */}
+            {photos.all.length > 0 && (
+              <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 4 }}>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="h6" fontWeight={700}>
+                    {t('restaurant.photos')} ({photos.all.length})
+                  </Typography>
+                </Box>
+
+                {/* 이미지 그리드 */}
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: 0.5,
+                  }}
+                >
+                  {photos.all
+                    .slice(0, isImageListExpanded ? undefined : 8)
+                    .map((photo: any, idx: number) => (
+                      <Box
+                        key={idx}
+                        sx={{
+                          width: '100%',
+                          paddingTop: '100%',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          opacity: selectedImage === idx ? 1 : 0.7,
+                          transition: 'opacity 0.2s',
+                          borderRadius: 1,
+                          '&:hover': {
+                            opacity: 1,
+                          },
+                        }}
+                        onClick={() => setSelectedImage(idx)}
+                      >
+                        <Box
+                          component="img"
+                          src={photo.thumbnail || photo.url}
+                          alt={`사진 ${idx + 1}`}
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </Box>
+                    ))}
+                </Box>
+
+                {/* 더보기 버튼 */}
+                {photos.all.length > 8 && (
+                  <Button
+                    fullWidth
+                    variant="text"
+                    size="small"
+                    onClick={() => setIsImageListExpanded(!isImageListExpanded)}
+                    sx={{
+                      mt: 1,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                    }}
+                    endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                  >
+                    {isImageListExpanded ? '접기' : `${photos.all.length - 8}장 더보기`}
+                  </Button>
+                )}
               </Box>
             )}
 
@@ -618,7 +693,7 @@ const RestaurantDetailPage: React.FC = () => {
                 {t('restaurant.info')}
               </Typography>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 4 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 } }}>
                 {/* 주소 */}
                 <Box>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
@@ -755,7 +830,7 @@ const RestaurantDetailPage: React.FC = () => {
                 시설 / 서비스
               </Typography>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 4 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 } }}>
                 {/* 주차 시설 */}
                 {((facilities?.parking_available ?? restaurant?.parking_available) || (facilities?.valet_parking ?? restaurant?.valet_parking) || (facilities?.parking_spaces || restaurant?.parking_spaces) || (facilities?.parking_info || restaurant?.parking_info)) && (
                   <Box>
@@ -1307,8 +1382,8 @@ const RestaurantDetailPage: React.FC = () => {
             )}
           </Box>
 
-          {/* 오른쪽: 사진 갤러리 */}
-          <Box>
+          {/* 오른쪽: 사진 갤러리 (PC만 표시) */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
             {photos.all.length > 0 && (
               <Box
                 sx={{

@@ -30,6 +30,10 @@ import {
   DialogContent,
   DialogActions,
   Menu,
+  Card,
+  CardContent,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -59,6 +63,8 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
   onRefresh,
 }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<string>('created_at');
   const [expandedFolders, setExpandedFolders] = useState<string[]>(['all']);
@@ -404,111 +410,198 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
             </Stack>
           </AccordionSummary>
           <AccordionDetails>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{
-                    bgcolor: (theme) => theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.05)'
-                      : 'grey.50'
-                  }}>
-                    <TableCell width="40%"><strong>맛집 정보</strong></TableCell>
-                    <TableCell width="15%" align="center"><strong>평점</strong></TableCell>
-                    <TableCell width="15%"><strong>카테고리</strong></TableCell>
-                    <TableCell width="20%"><strong>메모</strong></TableCell>
-                    <TableCell width="10%" align="center"><strong>관리</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {items.map((fav) => (
-                    <TableRow
-                      key={fav.id}
-                      hover
-                      sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-                    >
-                      <TableCell onClick={() => navigate(`/restaurants/${fav.restaurant_id}`)}>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                          <Avatar
-                            src={fav.restaurant?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-                            variant="rounded"
-                            sx={{ width: 60, height: 60 }}
-                          >
-                            <RestaurantIcon />
-                          </Avatar>
-                          <Box>
-                            <Typography variant="body1" fontWeight={600}>
-                              {fav.restaurant?.name || '알 수 없음'}
+            {/* 모바일: 카드 뷰 */}
+            {isMobile ? (
+              <Stack spacing={2}>
+                {items.map((fav) => (
+                  <Card key={fav.id} variant="outlined" onClick={() => navigate(`/restaurants/${fav.restaurant_id}`)} sx={{ cursor: 'pointer' }}>
+                    <CardContent>
+                      <Stack direction="row" spacing={2} alignItems="start">
+                        <Avatar
+                          src={fav.restaurant?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                          variant="rounded"
+                          sx={{ width: 60, height: 60, flexShrink: 0 }}
+                        >
+                          <RestaurantIcon />
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body1" fontWeight={600} gutterBottom noWrap>
+                            {fav.restaurant?.name || '알 수 없음'}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                            <Rating value={fav.restaurant?.rating || 0} readOnly precision={0.1} size="small" />
+                            <Typography variant="caption" fontWeight={600}>
+                              {(fav.restaurant?.rating || 0).toFixed(1)}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                              <LocationIcon sx={{ fontSize: 14 }} />
+                            <Chip
+                              label={fav.restaurant?.categories?.name || '기타'}
+                              size="small"
+                              sx={{
+                                bgcolor: fav.restaurant?.categories?.color || '#ccc',
+                                color: 'white',
+                                fontWeight: 600,
+                                height: 20,
+                                fontSize: '0.7rem',
+                              }}
+                            />
+                          </Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                            <LocationIcon sx={{ fontSize: 12 }} />
+                            <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {fav.restaurant?.address || '-'}
+                            </Box>
+                          </Typography>
+                          {fav.memo && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontStyle: 'italic' }}>
+                              메모: {fav.memo}
+                            </Typography>
+                          )}
+                          <Stack direction="row" spacing={0.5}>
+                            <Tooltip title="폴더 이동">
+                              <IconButton size="small" onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFavorite(fav);
+                                setMoveMenuAnchor(e.currentTarget);
+                              }}>
+                                <MoveIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="메모 수정">
+                              <IconButton size="small" onClick={(e) => {
+                                e.stopPropagation();
+                                const newMemo = prompt('메모를 입력하세요', fav.memo || '');
+                                if (newMemo !== null && onEditMemo) {
+                                  onEditMemo(fav.id, newMemo);
+                                }
+                              }}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="삭제">
+                              <IconButton size="small" color="error" onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('즐겨찾기에서 제거하시겠습니까?') && onRemoveFavorite) {
+                                  onRemoveFavorite(fav.id);
+                                }
+                              }}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            ) : (
+              /* PC: 테이블 뷰 */
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{
+                      bgcolor: (theme) => theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.05)'
+                        : 'grey.50'
+                    }}>
+                      <TableCell width="40%"><strong>맛집 정보</strong></TableCell>
+                      <TableCell width="15%" align="center"><strong>평점</strong></TableCell>
+                      <TableCell width="15%"><strong>카테고리</strong></TableCell>
+                      <TableCell width="20%"><strong>메모</strong></TableCell>
+                      <TableCell width="10%" align="center"><strong>관리</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {items.map((fav) => (
+                      <TableRow
+                        key={fav.id}
+                        hover
+                        sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+                      >
+                        <TableCell onClick={() => navigate(`/restaurants/${fav.restaurant_id}`)}>
+                          <Stack direction="row" spacing={2} alignItems="center">
+                            <Avatar
+                              src={fav.restaurant?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                              variant="rounded"
+                              sx={{ width: 60, height: 60 }}
+                            >
+                              <RestaurantIcon />
+                            </Avatar>
+                            <Box>
+                              <Typography variant="body1" fontWeight={600}>
+                                {fav.restaurant?.name || '알 수 없음'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                <LocationIcon sx={{ fontSize: 14 }} />
+                                {fav.restaurant?.address || '-'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Rating value={fav.restaurant?.rating || 0} readOnly precision={0.1} size="small" />
+                            <Typography variant="body2" fontWeight={600}>
+                              {(fav.restaurant?.rating || 0).toFixed(1)}
                             </Typography>
                           </Box>
-                        </Stack>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <Rating value={fav.restaurant?.rating || 0} readOnly precision={0.1} size="small" />
-                          <Typography variant="body2" fontWeight={600}>
-                            {(fav.restaurant?.rating || 0).toFixed(1)}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={fav.restaurant?.categories?.name || '기타'}
+                            size="small"
+                            sx={{
+                              bgcolor: fav.restaurant?.categories?.color || '#ccc',
+                              color: 'white',
+                              fontWeight: 600,
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                            {fav.memo || '-'}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={fav.restaurant?.categories?.name || '기타'}
-                          size="small"
-                          sx={{
-                            bgcolor: fav.restaurant?.categories?.color || '#ccc',
-                            color: 'white',
-                            fontWeight: 600,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                          {fav.memo || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Stack direction="row" spacing={0.5} justifyContent="center">
-                          <Tooltip title="폴더 이동">
-                            <IconButton size="small" onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedFavorite(fav);
-                              setMoveMenuAnchor(e.currentTarget);
-                            }}>
-                              <MoveIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="메모 수정">
-                            <IconButton size="small" onClick={(e) => {
-                              e.stopPropagation();
-                              const newMemo = prompt('메모를 입력하세요', fav.memo || '');
-                              if (newMemo !== null && onEditMemo) {
-                                onEditMemo(fav.id, newMemo);
-                              }
-                            }}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="삭제">
-                            <IconButton size="small" color="error" onClick={(e) => {
-                              e.stopPropagation();
-                              if (window.confirm('즐겨찾기에서 제거하시겠습니까?') && onRemoveFavorite) {
-                                onRemoveFavorite(fav.id);
-                              }
-                            }}>
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Stack direction="row" spacing={0.5} justifyContent="center">
+                            <Tooltip title="폴더 이동">
+                              <IconButton size="small" onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFavorite(fav);
+                                setMoveMenuAnchor(e.currentTarget);
+                              }}>
+                                <MoveIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="메모 수정">
+                              <IconButton size="small" onClick={(e) => {
+                                e.stopPropagation();
+                                const newMemo = prompt('메모를 입력하세요', fav.memo || '');
+                                if (newMemo !== null && onEditMemo) {
+                                  onEditMemo(fav.id, newMemo);
+                                }
+                              }}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="삭제">
+                              <IconButton size="small" color="error" onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('즐겨찾기에서 제거하시겠습니까?') && onRemoveFavorite) {
+                                  onRemoveFavorite(fav.id);
+                                }
+                              }}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </AccordionDetails>
         </Accordion>
       ))}

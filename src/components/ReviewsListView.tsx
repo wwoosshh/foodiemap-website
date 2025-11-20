@@ -21,6 +21,10 @@ import {
   Tooltip,
   Rating,
   Avatar,
+  Card,
+  CardContent,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -42,6 +46,8 @@ const ReviewsListView: React.FC<ReviewsListViewProps> = ({
   onEditReview,
 }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('created_at');
@@ -178,125 +184,217 @@ const ReviewsListView: React.FC<ReviewsListViewProps> = ({
         </Stack>
       </Paper>
 
-      {/* 리스트 테이블 */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{
-              bgcolor: (theme) => theme.palette.mode === 'dark'
-                ? 'rgba(255, 255, 255, 0.05)'
-                : 'grey.100'
-            }}>
-              <TableCell width="35%"><strong>맛집 정보</strong></TableCell>
-              <TableCell width="10%" align="center"><strong>평점</strong></TableCell>
-              <TableCell width="30%"><strong>리뷰 내용</strong></TableCell>
-              <TableCell width="15%"><strong>작성일</strong></TableCell>
-              <TableCell width="10%" align="center"><strong>관리</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredReviews.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                  <Typography color="text.secondary">
-                    작성한 리뷰가 없습니다
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredReviews.map((review) => (
-                <TableRow
-                  key={review.id}
-                  hover
-                  sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-                >
-                  <TableCell onClick={() => navigate(`/restaurants/${review.restaurant_id}`)}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar
-                        src={review.restaurants?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-                        variant="rounded"
-                        sx={{ width: 60, height: 60 }}
-                      >
-                        <RestaurantIcon />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body1" fontWeight={600}>
-                          {review.restaurants?.name || '알 수 없음'}
+      {/* 리스트 */}
+      {isMobile ? (
+        /* 모바일: 카드 뷰 */
+        <Stack spacing={2}>
+          {filteredReviews.length === 0 ? (
+            <Paper sx={{ py: 8, textAlign: 'center' }}>
+              <Typography color="text.secondary">
+                작성한 리뷰가 없습니다
+              </Typography>
+            </Paper>
+          ) : (
+            filteredReviews.map((review) => (
+              <Card key={review.id} variant="outlined" onClick={() => navigate(`/restaurants/${review.restaurant_id}`)} sx={{ cursor: 'pointer' }}>
+                <CardContent>
+                  <Stack direction="row" spacing={2} alignItems="start">
+                    <Avatar
+                      src={review.restaurants?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                      variant="rounded"
+                      sx={{ width: 60, height: 60, flexShrink: 0 }}
+                    >
+                      <RestaurantIcon />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body1" fontWeight={600} gutterBottom noWrap>
+                        {review.restaurants?.name || '알 수 없음'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                        <Rating value={review.rating} readOnly size="small" />
+                        <Typography variant="caption" fontWeight={600}>
+                          {review.rating}.0
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {review.restaurants?.address || '-'}
+                          {new Date(review.created_at).toLocaleDateString()}
                         </Typography>
                       </Box>
-                    </Stack>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <Rating value={review.rating} readOnly size="small" />
-                      <Typography variant="body2" fontWeight={600}>
-                        {review.rating}.0
+                      {review.title && (
+                        <Typography variant="body2" fontWeight={600} gutterBottom>
+                          {review.title}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          mb: 1,
+                        }}
+                      >
+                        {review.content || '-'}
                       </Typography>
+                      <Stack direction="row" spacing={0.5}>
+                        <Tooltip title="상세보기">
+                          <IconButton size="small" onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/restaurants/${review.restaurant_id}`);
+                          }}>
+                            <ViewIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="수정">
+                          <IconButton size="small" onClick={(e) => {
+                            e.stopPropagation();
+                            if (onEditReview) {
+                              onEditReview(review.id);
+                            }
+                          }}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="삭제">
+                          <IconButton size="small" color="error" onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('리뷰를 삭제하시겠습니까?') && onDeleteReview) {
+                              onDeleteReview(review.id);
+                            }
+                          }}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={600} gutterBottom>
-                      {review.title || '-'}
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </Stack>
+      ) : (
+        /* PC: 테이블 뷰 */
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{
+                bgcolor: (theme) => theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : 'grey.100'
+              }}>
+                <TableCell width="35%"><strong>맛집 정보</strong></TableCell>
+                <TableCell width="10%" align="center"><strong>평점</strong></TableCell>
+                <TableCell width="30%"><strong>리뷰 내용</strong></TableCell>
+                <TableCell width="15%"><strong>작성일</strong></TableCell>
+                <TableCell width="10%" align="center"><strong>관리</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredReviews.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                    <Typography color="text.secondary">
+                      작성한 리뷰가 없습니다
                     </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {review.content || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(review.created_at).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Stack direction="row" spacing={0.5} justifyContent="center">
-                      <Tooltip title="상세보기">
-                        <IconButton size="small" onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/restaurants/${review.restaurant_id}`);
-                        }}>
-                          <ViewIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="수정">
-                        <IconButton size="small" onClick={(e) => {
-                          e.stopPropagation();
-                          if (onEditReview) {
-                            onEditReview(review.id);
-                          }
-                        }}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="삭제">
-                        <IconButton size="small" color="error" onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm('리뷰를 삭제하시겠습니까?') && onDeleteReview) {
-                            onDeleteReview(review.id);
-                          }
-                        }}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                filteredReviews.map((review) => (
+                  <TableRow
+                    key={review.id}
+                    hover
+                    sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+                  >
+                    <TableCell onClick={() => navigate(`/restaurants/${review.restaurant_id}`)}>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar
+                          src={review.restaurants?.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+                          variant="rounded"
+                          sx={{ width: 60, height: 60 }}
+                        >
+                          <RestaurantIcon />
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body1" fontWeight={600}>
+                            {review.restaurants?.name || '알 수 없음'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {review.restaurants?.address || '-'}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Rating value={review.rating} readOnly size="small" />
+                        <Typography variant="body2" fontWeight={600}>
+                          {review.rating}.0
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={600} gutterBottom>
+                        {review.title || '-'}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {review.content || '-'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(review.created_at).toLocaleDateString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={0.5} justifyContent="center">
+                        <Tooltip title="상세보기">
+                          <IconButton size="small" onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/restaurants/${review.restaurant_id}`);
+                          }}>
+                            <ViewIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="수정">
+                          <IconButton size="small" onClick={(e) => {
+                            e.stopPropagation();
+                            if (onEditReview) {
+                              onEditReview(review.id);
+                            }
+                          }}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="삭제">
+                          <IconButton size="small" color="error" onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('리뷰를 삭제하시겠습니까?') && onDeleteReview) {
+                              onDeleteReview(review.id);
+                            }
+                          }}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {filteredReviews.length > 0 && (
         <Box sx={{

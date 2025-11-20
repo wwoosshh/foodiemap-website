@@ -365,13 +365,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-              gap: 4,
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: '1fr', md: 'repeat(3, 1fr)' },
+              gap: { xs: 2, sm: 3, md: 4 },
             }}
           >
             {/* 회사 정보 */}
             <Box
               sx={{
+                gridColumn: { xs: '1 / -1', sm: 'auto', md: 'auto' },
                 animation: 'fadeInUp 0.6s ease-out',
                 '@keyframes fadeInUp': {
                   from: {
@@ -388,7 +389,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <CubeLogoIcon
                   sx={{
-                    fontSize: 36,
+                    fontSize: { xs: 28, md: 36 },
                     color: '#FF6B6B',
                     filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
                     transition: 'all 0.3s ease',
@@ -401,6 +402,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   variant="h6"
                   fontWeight={700}
                   sx={{
+                    fontSize: { xs: '1rem', md: '1.25rem' },
                     color: '#FFFFFF',
                     textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                     letterSpacing: '0.5px',
@@ -414,6 +416,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 sx={{
                   color: 'rgba(255,255,255,0.85)',
                   lineHeight: 1.8,
+                  fontSize: { xs: '0.8rem', md: '0.875rem' },
                   textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
                   whiteSpace: 'pre-line',
                 }}
