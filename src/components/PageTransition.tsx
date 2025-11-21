@@ -36,7 +36,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="sync">
       <motion.div
         key={location.pathname}
         initial="initial"
