@@ -358,11 +358,20 @@ const RestaurantDetailPage: React.FC = () => {
           }
 
           return (
-            <Box key={day.key} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 40 }}>
+            <Box key={day.key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 30, flexShrink: 0 }}>
                 {day.label}
               </Typography>
-              <Typography variant="body2" color={dayData?.closed ? 'error.main' : 'text.primary'}>
+              <Box
+                sx={{
+                  flex: 1,
+                  borderBottom: '1px dotted',
+                  borderColor: 'divider',
+                  minWidth: 20,
+                  mb: 0.5
+                }}
+              />
+              <Typography variant="body2" color={dayData?.closed ? 'error.main' : 'text.primary'} sx={{ flexShrink: 0 }}>
                 {displayText}
               </Typography>
             </Box>
