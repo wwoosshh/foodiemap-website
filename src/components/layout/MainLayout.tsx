@@ -186,7 +186,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   letterSpacing: '-0.03em',
-                  display: { xs: 'none', sm: 'block' },
+                  fontSize: { xs: '1.1rem', sm: '1.5rem' },
                 }}
               >
                 {t.footer.companyName}

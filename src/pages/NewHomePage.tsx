@@ -282,16 +282,27 @@ const NewHomePage: React.FC = () => {
     if (restaurants.length === 0) return null;
 
     return (
-      <Box sx={{ mb: { xs: 4, md: 8 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
+      <Box sx={{
+        mb: { xs: 6, md: 8 },
+        pb: { xs: 4, md: 0 },
+        borderBottom: { xs: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`, md: 'none' },
+      }}>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: { xs: 3, md: 3 },
+          pb: { xs: 2, md: 0 },
+          borderBottom: { xs: `3px solid ${theme.palette.primary.main}`, md: 'none' },
+        }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.5 } }}>
             <Box
               sx={{
-                display: { xs: 'none', sm: 'flex' },
+                display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: { xs: 32, md: 40 },
-                height: { xs: 32, md: 40 },
+                width: { xs: 36, md: 40 },
+                height: { xs: 36, md: 40 },
                 borderRadius: '50%',
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 color: 'primary.main',
@@ -299,7 +310,7 @@ const NewHomePage: React.FC = () => {
             >
               {icon}
             </Box>
-            <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}>
+            <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem', md: '2rem' } }}>
               {title}
             </Typography>
           </Box>
@@ -310,7 +321,7 @@ const NewHomePage: React.FC = () => {
               navigate(`/restaurants?sort=${sortParam}${categoryParam}`);
             }}
             sx={{
-              fontSize: { xs: '0.8rem', md: '0.875rem' },
+              fontSize: { xs: '0.75rem', md: '0.875rem' },
               px: { xs: 1, md: 2 },
             }}
           >
