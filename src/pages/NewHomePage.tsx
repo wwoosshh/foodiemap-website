@@ -169,31 +169,35 @@ const NewHomePage: React.FC = () => {
   };
 
   const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
-    <Card
+    <Box
       component={motion.div}
       layoutId={`restaurant-card-${restaurant.id}`}
-      sx={{
-        position: 'relative',
-        height: { xs: 180, sm: 200, md: 220 },
-        overflow: 'hidden',
-        cursor: 'pointer',
-        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-8px) scale(1.02)',
-          boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.3)',
-          '& .restaurant-image': {
-            transform: 'scale(1.15)',
-          },
-          '& .restaurant-overlay': {
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
-          },
-        },
-        '&:active': {
-          transform: 'translateY(-4px) scale(1.01)',
-        },
-      }}
-      onClick={() => handleRestaurantClick(restaurant.id)}
+      sx={{ height: '100%', display: 'flex' }}
     >
+      <Card
+        sx={{
+          position: 'relative',
+          height: { xs: 180, sm: 200, md: 220 },
+          overflow: 'hidden',
+          cursor: 'pointer',
+          width: '100%',
+          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            transform: 'translateY(-8px) scale(1.02)',
+            boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.3)',
+            '& .restaurant-image': {
+              transform: 'scale(1.15)',
+            },
+            '& .restaurant-overlay': {
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
+            },
+          },
+          '&:active': {
+            transform: 'translateY(-4px) scale(1.01)',
+          },
+        }}
+        onClick={() => handleRestaurantClick(restaurant.id)}
+      >
       {/* 배경 이미지 */}
       <CardMedia
         component="img"
@@ -283,6 +287,7 @@ const NewHomePage: React.FC = () => {
         </Box>
       </CardContent>
     </Card>
+    </Box>
   );
 
   const RestaurantSection: React.FC<{
@@ -482,16 +487,20 @@ const NewHomePage: React.FC = () => {
               }}
             >
               {pushedRestaurants.map((pushed, index) => (
-                  <Card
+                  <Box
                     key={pushed.id}
                     component={motion.div}
                     layoutId={`restaurant-card-${pushed.restaurant.id}`}
-                    sx={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    opacity: 0,
-                    animation: `fadeInUp 0.8s ease-out ${index * 0.2}s forwards`,
+                    sx={{ height: '100%', display: 'flex' }}
+                  >
+                    <Card
+                      sx={{
+                      position: 'relative',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      width: '100%',
+                      opacity: 0,
+                      animation: `fadeInUp 0.8s ease-out ${index * 0.2}s forwards`,
                     '@keyframes fadeInUp': {
                       from: {
                         opacity: 0,
@@ -572,6 +581,7 @@ const NewHomePage: React.FC = () => {
                     </Box>
                   </CardContent>
                 </Card>
+                </Box>
               ))}
             </Box>
           </Container>
