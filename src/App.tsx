@@ -17,11 +17,13 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 
 // Components
 import EmailVerificationModal from './components/EmailVerificationModal';
+import PageTransition from './components/PageTransition';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeContextProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { TransitionProvider } from './context/TransitionContext';
 
 // 이메일 인증 모달을 포함한 앱 컨텐츠
 const AppContent = () => {
@@ -45,35 +47,37 @@ const AppContent = () => {
   return (
     <>
       <Router>
-        <Routes>
-          {/* 메인 페이지 */}
-          <Route path="/" element={<NewHomePage />} />
+        <PageTransition>
+          <Routes>
+            {/* 메인 페이지 */}
+            <Route path="/" element={<NewHomePage />} />
 
-          {/* 맛집 페이지 */}
-          <Route path="/restaurants" element={<RestaurantsListPage />} />
-          <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
+            {/* 맛집 페이지 */}
+            <Route path="/restaurants" element={<RestaurantsListPage />} />
+            <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
 
-          {/* 프로필 페이지 */}
-          <Route path="/profile" element={<UserProfilePage />} />
+            {/* 프로필 페이지 */}
+            <Route path="/profile" element={<UserProfilePage />} />
 
-          {/* OAuth 콜백 */}
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            {/* OAuth 콜백 */}
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-          {/* 이벤트 목록 및 상세 */}
-          <Route path="/events" element={<EventListPage />} />
-          <Route path="/events/:id" element={<EventDetailPage />} />
+            {/* 이벤트 목록 및 상세 */}
+            <Route path="/events" element={<EventListPage />} />
+            <Route path="/events/:id" element={<EventDetailPage />} />
 
-          {/* 공지사항 목록 및 상세 */}
-          <Route path="/notices" element={<NoticeListPage />} />
-          <Route path="/notices/:id" element={<NoticeDetailPage />} />
+            {/* 공지사항 목록 및 상세 */}
+            <Route path="/notices" element={<NoticeListPage />} />
+            <Route path="/notices/:id" element={<NoticeDetailPage />} />
 
-          {/* 정책 페이지 */}
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsOfServicePage />} />
+            {/* 정책 페이지 */}
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
 
-          {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </PageTransition>
       </Router>
 
       {/* 이메일 인증 모달 */}
@@ -94,9 +98,11 @@ function App() {
     <ThemeContextProvider>
       <CssBaseline />
       <LanguageProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <TransitionProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </TransitionProvider>
       </LanguageProvider>
     </ThemeContextProvider>
   );
