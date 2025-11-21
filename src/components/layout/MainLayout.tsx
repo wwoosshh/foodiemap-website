@@ -176,6 +176,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   fontSize: 40,
                   color: 'primary.main',
                   filter: 'drop-shadow(0 2px 4px rgba(255,107,107,0.3))',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'rotate(15deg) scale(1.15)',
+                    filter: 'drop-shadow(0 4px 8px rgba(255,107,107,0.5))',
+                  },
                 }}
               />
               <Typography
@@ -207,6 +212,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       fontWeight: isActivePath(item.path) ? 700 : 500,
                       px: 2.5,
                       py: 1,
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      },
+                      '&:active': {
+                        transform: 'translateY(0)',
+                      },
                       position: 'relative',
                       '&::after': {
                         content: '""',

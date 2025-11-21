@@ -414,7 +414,23 @@ const FavoritesListView: React.FC<FavoritesListViewProps> = ({
             {isMobile ? (
               <Stack spacing={2}>
                 {items.map((fav) => (
-                  <Card key={fav.id} variant="outlined" onClick={() => navigate(`/restaurants/${fav.restaurant_id}`)} sx={{ cursor: 'pointer' }}>
+                  <Card
+                    key={fav.id}
+                    variant="outlined"
+                    onClick={() => navigate(`/restaurants/${fav.restaurant_id}`)}
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        borderColor: 'primary.main',
+                      },
+                      '&:active': {
+                        transform: 'translateY(-2px)',
+                      },
+                    }}
+                  >
                     <CardContent>
                       <Stack direction="row" spacing={2} alignItems="start">
                         <Avatar

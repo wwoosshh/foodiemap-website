@@ -174,10 +174,19 @@ const NewHomePage: React.FC = () => {
         height: { xs: 180, sm: 200, md: 220 },
         overflow: 'hidden',
         cursor: 'pointer',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0px 12px 32px rgba(255, 107, 107, 0.2)',
+          transform: 'translateY(-8px) scale(1.02)',
+          boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.3)',
+          '& .restaurant-image': {
+            transform: 'scale(1.15)',
+          },
+          '& .restaurant-overlay': {
+            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
+          },
+        },
+        '&:active': {
+          transform: 'translateY(-4px) scale(1.01)',
         },
       }}
       onClick={() => handleRestaurantClick(restaurant.id)}
@@ -185,6 +194,7 @@ const NewHomePage: React.FC = () => {
       {/* 배경 이미지 */}
       <CardMedia
         component="img"
+        className="restaurant-image"
         sx={{
           position: 'absolute',
           top: 0,
@@ -192,10 +202,7 @@ const NewHomePage: React.FC = () => {
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          transition: 'transform 0.3s ease',
-          '&:hover': {
-            transform: 'scale(1.05)',
-          },
+          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
         image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
         alt={restaurant.name}
@@ -204,6 +211,7 @@ const NewHomePage: React.FC = () => {
 
       {/* 그라데이션 오버레이 */}
       <Box
+        className="restaurant-overlay"
         sx={{
           position: 'absolute',
           top: 0,
@@ -211,6 +219,7 @@ const NewHomePage: React.FC = () => {
           width: '100%',
           height: '100%',
           background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
+          transition: 'background 0.5s ease',
         }}
       />
 
@@ -476,10 +485,28 @@ const NewHomePage: React.FC = () => {
                     position: 'relative',
                     overflow: 'hidden',
                     cursor: 'pointer',
-                    transition: 'all 0.4s ease',
+                    opacity: 0,
+                    animation: `fadeInUp 0.8s ease-out ${index * 0.2}s forwards`,
+                    '@keyframes fadeInUp': {
+                      from: {
+                        opacity: 0,
+                        transform: 'translateY(40px)',
+                      },
+                      to: {
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                      },
+                    },
+                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                     '&:hover': {
-                      transform: { xs: 'translateY(-4px)', md: 'translateY(-12px)' },
-                      boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.25)',
+                      transform: { xs: 'translateY(-8px) scale(1.02)', md: 'translateY(-16px) scale(1.03)' },
+                      boxShadow: '0px 24px 48px rgba(255, 107, 107, 0.35)',
+                      '& .pushed-image': {
+                        transform: 'scale(1.1)',
+                      },
+                    },
+                    '&:active': {
+                      transform: { xs: 'translateY(-4px) scale(1.01)', md: 'translateY(-12px) scale(1.02)' },
                     },
                   }}
                   onClick={() => handleRestaurantClick(pushed.restaurant.id)}
@@ -504,13 +531,11 @@ const NewHomePage: React.FC = () => {
 
                   <CardMedia
                     component="img"
+                    className="pushed-image"
                     sx={{
                       height: { xs: 140, sm: 180, md: 250 },
                       objectFit: 'cover',
-                      transition: 'transform 0.4s ease',
-                      '&:hover': {
-                        transform: 'scale(1.1)',
-                      },
+                      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                     image={pushed.restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
                     alt={pushed.restaurant.name}

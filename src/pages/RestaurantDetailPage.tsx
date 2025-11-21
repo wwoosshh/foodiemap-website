@@ -445,9 +445,18 @@ const RestaurantDetailPage: React.FC = () => {
           <Box>
             {/* 대표 이미지 */}
             {photos.all.length > 0 && (
-              <Box sx={{ mb: 4, position: 'relative' }}>
+              <Box sx={{
+                mb: 4,
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: { xs: 2, md: 0 },
+                '&:hover .main-restaurant-image': {
+                  transform: 'scale(1.05)',
+                },
+              }}>
                 <Box
                   component="img"
+                  className="main-restaurant-image"
                   src={photos.all[selectedImage]?.url}
                   alt="맛집 사진"
                   sx={{
@@ -455,7 +464,7 @@ const RestaurantDetailPage: React.FC = () => {
                     height: { xs: 250, md: 500 },
                     objectFit: 'cover',
                     cursor: 'pointer',
-                    borderRadius: { xs: 2, md: 0 },
+                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                   onClick={() => window.open(photos.all[selectedImage]?.url, '_blank')}
                 />
@@ -491,16 +500,24 @@ const RestaurantDetailPage: React.FC = () => {
                           overflow: 'hidden',
                           cursor: 'pointer',
                           opacity: selectedImage === idx ? 1 : 0.7,
-                          transition: 'opacity 0.2s',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                           borderRadius: 1,
+                          border: selectedImage === idx ? '2px solid' : '2px solid transparent',
+                          borderColor: selectedImage === idx ? 'primary.main' : 'transparent',
+                          transform: selectedImage === idx ? 'scale(1.05)' : 'scale(1)',
                           '&:hover': {
                             opacity: 1,
+                            transform: 'scale(1.08)',
+                          },
+                          '&:hover .thumbnail-image': {
+                            transform: 'scale(1.1)',
                           },
                         }}
                         onClick={() => setSelectedImage(idx)}
                       >
                         <Box
                           component="img"
+                          className="thumbnail-image"
                           src={photo.thumbnail || photo.url}
                           alt={`사진 ${idx + 1}`}
                           sx={{
@@ -510,6 +527,7 @@ const RestaurantDetailPage: React.FC = () => {
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
+                            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                           }}
                         />
                       </Box>
@@ -1426,6 +1444,7 @@ const RestaurantDetailPage: React.FC = () => {
                       >
                         <Box
                           component="img"
+                          className="thumbnail-image"
                           src={photo.thumbnail || photo.url}
                           alt={`사진 ${idx + 1}`}
                           sx={{
@@ -1435,6 +1454,7 @@ const RestaurantDetailPage: React.FC = () => {
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
+                            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                           }}
                         />
                       </Box>
