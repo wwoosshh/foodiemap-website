@@ -12,11 +12,6 @@ const FloatingContactButton: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { isVisible } = useScrollDirection({ threshold: 10, alwaysShowAtTop: false });
 
-  // 디버깅용 로그
-  useEffect(() => {
-    console.log('FloatingContactButton - isMobile:', isMobile, 'isVisible:', isVisible);
-  }, [isMobile, isVisible]);
-
   const handleClick = () => {
     navigate('/contact');
   };
@@ -27,15 +22,12 @@ const FloatingContactButton: React.FC = () => {
     return isVisible ? 'translateY(0)' : 'translateY(110px)';
   };
 
-  const getHoverTransform = () => {
-    if (!isMobile) return 'scale(1.1) translateY(-2px)';
-    return isVisible ? 'scale(1.1) translateY(-2px)' : 'scale(1.1) translateY(108px)';
-  };
-
-  const getActiveTransform = () => {
-    if (!isMobile) return 'scale(1.05) translateY(0)';
-    return isVisible ? 'scale(1.05) translateY(0)' : 'scale(1.05) translateY(110px)';
-  };
+  // 디버깅용 로그
+  useEffect(() => {
+    const transformValue = getTransformValue();
+    console.log('FloatingContactButton - isMobile:', isMobile, 'isVisible:', isVisible, 'transform:', transformValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, isVisible]);
 
   return (
     <Zoom in={true} timeout={500}>
@@ -48,6 +40,9 @@ const FloatingContactButton: React.FC = () => {
           color="primary"
           aria-label="contact"
           onClick={handleClick}
+          style={{
+            transform: getTransformValue(),
+          }}
           sx={{
             position: 'fixed',
             bottom: { xs: 130, md: 24 },
@@ -55,7 +50,6 @@ const FloatingContactButton: React.FC = () => {
             zIndex: 1200,
             width: { xs: 56, md: 64 },
             height: { xs: 56, md: 64 },
-            transform: getTransformValue(),
             backgroundColor: theme.palette.mode === 'dark'
               ? alpha(theme.palette.primary.main, 0.9)
               : theme.palette.primary.main,
@@ -69,13 +63,9 @@ const FloatingContactButton: React.FC = () => {
               backgroundColor: theme.palette.mode === 'dark'
                 ? theme.palette.primary.light
                 : theme.palette.primary.dark,
-              transform: getHoverTransform(),
               boxShadow: theme.palette.mode === 'dark'
                 ? `0 12px 32px ${alpha(theme.palette.primary.main, 0.5)}, 0 0 0 1px ${alpha('#FFFFFF', 0.15)} inset`
                 : `0 12px 32px ${alpha(theme.palette.primary.main, 0.45)}`,
-            },
-            '&:active': {
-              transform: getActiveTransform(),
             },
             // 애니메이션 효과
             '@keyframes pulse': {
