@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { updateMetaTags, DEFAULT_META } from '../utils/seo';
 import {
   Container,
   Box,
@@ -128,6 +129,14 @@ const NewHomePage: React.FC = () => {
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
+
+  // SEO: 메타 태그 설정
+  useEffect(() => {
+    updateMetaTags({
+      ...DEFAULT_META,
+      url: window.location.href
+    });
+  }, []);
 
   useEffect(() => {
     // 초기 로드가 완료되고, 카테고리가 변경되었을 때 실행 (null 포함)

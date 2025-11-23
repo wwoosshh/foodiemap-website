@@ -1,3 +1,38 @@
-# https://www.robotstxt.org/robotstxt.html
+# FoodieMap - Robots.txt
+# 검색 엔진 크롤러 허용 설정
+
+# 모든 검색 엔진 허용
 User-agent: *
-Disallow:
+Allow: /
+
+# 관리자 페이지 차단
+Disallow: /admin/
+Disallow: /api/
+
+# 사용자 정보 페이지 차단 (개인정보 보호)
+Disallow: /profile/
+Disallow: /settings/
+
+# Google Bot
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Naver Bot
+User-agent: Yeti
+Allow: /
+Crawl-delay: 0
+
+# Daum Bot
+User-agent: Daumoa
+Allow: /
+Crawl-delay: 0
+
+# Bing Bot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+# Sitemap 위치
+Sitemap: https://mzcube.com/sitemap.xml
+Sitemap: https://foodiemap-backend.onrender.com/api/sitemap.xml
