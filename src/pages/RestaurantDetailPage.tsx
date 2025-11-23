@@ -510,38 +510,45 @@ const RestaurantDetailPage: React.FC = () => {
                 display: { xs: 'block', md: 'none' },
                 mb: 4,
               }}>
-                <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ mb: 2 }}>
                   <Typography variant="h6" fontWeight={700}>
                     {t('restaurant.photos')} ({photos.all.length})
                   </Typography>
-                  {photos.all.length > 3 && (
-                    <Button
-                      size="small"
-                      onClick={() => setIsImageListExpanded(!isImageListExpanded)}
-                      endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                      sx={{ textTransform: 'none', fontWeight: 600 }}
-                    >
-                      {isImageListExpanded ? '접기' : `더보기 (${photos.all.length - 3})`}
-                    </Button>
-                  )}
                 </Box>
 
-                {/* 이미지 그리드 */}
+                {/* 이미지 스와이프 캐러셀 */}
                 <Box
                   sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 1,
+                    display: 'flex',
+                    gap: 1.5,
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                    pb: 1,
+                    // 스크롤바 숨기기
+                    '&::-webkit-scrollbar': {
+                      display: 'none',
+                    },
+                    scrollbarWidth: 'none', // Firefox
+                    msOverflowStyle: 'none', // IE/Edge
                   }}
                 >
-                  {photos.all
-                    .slice(0, isImageListExpanded ? undefined : 3)
-                    .map((photo: any, idx: number) => (
+                  {photos.all.map((photo: any, idx: number) => (
+                    <Box
+                      key={idx}
+                      sx={{
+                        minWidth: 'calc(33.333% - 10px)', // 3개가 한 화면에 보이도록
+                        width: 'calc(33.333% - 10px)',
+                        flexShrink: 0,
+                        scrollSnapAlign: 'start',
+                        scrollSnapStop: 'always',
+                      }}
+                    >
                       <Box
-                        key={idx}
                         sx={{
                           width: '100%',
-                          paddingTop: '100%',
+                          paddingTop: '100%', // 정사각형 비율
                           position: 'relative',
                           overflow: 'hidden',
                           cursor: 'pointer',
@@ -569,14 +576,21 @@ const RestaurantDetailPage: React.FC = () => {
                             objectFit: 'cover',
                             opacity: selectedImage === idx ? 1 : 0.8,
                             transition: 'opacity 0.3s',
-                            '&:hover': {
-                              opacity: 1,
-                            },
                           }}
                         />
                       </Box>
-                    ))}
+                    </Box>
+                  ))}
                 </Box>
+
+                {/* 스와이프 힌트 (첫 방문자를 위한 안내) */}
+                {photos.all.length > 3 && (
+                  <Box sx={{ mt: 1, textAlign: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">
+                      ← 좌우로 스와이프하여 더 많은 사진 보기 →
+                    </Typography>
+                  </Box>
+                )}
               </Box>
             )}
 
