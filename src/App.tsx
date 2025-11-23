@@ -14,6 +14,7 @@ import NoticeListPage from './pages/NoticeListPage';
 import NoticeDetailPage from './pages/NoticeDetailPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import ContactPage from './pages/ContactPage';
 
 // Components
 import EmailVerificationModal from './components/EmailVerificationModal';
@@ -73,6 +74,9 @@ const AppContent = () => {
             {/* 정책 페이지 */}
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
+
+            {/* 문의하기 페이지 */}
+            <Route path="/contact" element={<ContactPage />} />
 
             {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
             <Route path="*" element={<Navigate to="/" replace />} />

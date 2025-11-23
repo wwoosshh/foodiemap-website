@@ -62,11 +62,6 @@ const NewHomePage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
-  const [stats, setStats] = useState({
-    totalRestaurants: 0,
-    totalReviews: 0,
-    totalUsers: 0,
-  });
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // 다양한 알고리즘별 맛집 상태
@@ -102,10 +97,9 @@ const NewHomePage: React.FC = () => {
       const homeDataRes = await ApiService.getHomeData();
 
       if (homeDataRes.success && homeDataRes.data) {
-        // 배너, 푸시 맛집, 통계 설정
+        // 배너, 푸시 맛집 설정
         setBanners(homeDataRes.data.banners || []);
         setPushedRestaurants(homeDataRes.data.pushedRestaurants || []);
-        setStats(homeDataRes.data.stats || { totalRestaurants: 0, totalReviews: 0, totalUsers: 0 });
 
         // 카테고리 설정 (별도 API 호출 제거)
         setCategories(homeDataRes.data.categories || []);
@@ -725,40 +719,6 @@ const NewHomePage: React.FC = () => {
                 ))}
               </Box>
             </Paper>
-          </Box>
-        </Box>
-
-        {/* 통계 섹션 */}
-        <Box
-          sx={{
-            py: { xs: 3, sm: 4, md: 6 },
-            px: { xs: 2, sm: 3, md: 4 },
-            borderRadius: { xs: 2, md: 4 },
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-            color: 'white',
-            mb: { xs: 4, md: 8 },
-            mt: { xs: 4, md: 8 },
-          }}
-        >
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: { xs: 3, md: 4 }, textAlign: 'center' }}>
-            <Box>
-              <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
-                {stats.totalRestaurants.toLocaleString()}+
-              </Typography>
-              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>{t('home.registeredRestaurants')}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
-                {stats.totalReviews.toLocaleString()}+
-              </Typography>
-              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>{t('home.writtenReviews')}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="h3" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
-                {stats.totalUsers.toLocaleString()}+
-              </Typography>
-              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>{t('home.activeUsers')}</Typography>
-            </Box>
           </Box>
         </Box>
       </Container>

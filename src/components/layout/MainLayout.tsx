@@ -378,14 +378,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: '1fr', md: 'repeat(3, 1fr)' },
-              gap: { xs: 2, sm: 3, md: 4 },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: { xs: 3, sm: 3, md: 4 },
             }}
           >
             {/* 회사 정보 */}
             <Box
               sx={{
-                gridColumn: { xs: '1 / -1', sm: 'auto', md: 'auto' },
+                gridColumn: { xs: '1 / -1', sm: '1 / -1', md: 'auto' },
                 animation: 'fadeInUp 0.6s ease-out',
                 '@keyframes fadeInUp': {
                   from: {
@@ -438,7 +438,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </Typography>
             </Box>
 
-            {/* 링크 */}
+            {/* 바로가기 */}
             <Box>
               <Typography
                 variant="h6"
@@ -447,6 +447,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 sx={{
                   color: '#FFFFFF',
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                  fontSize: { xs: '0.95rem', md: '1.25rem' },
                 }}
               >
                 {t.footer.quickLinks}
@@ -458,6 +459,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     color: 'rgba(255,255,255,0.7)',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
+                    fontSize: '0.875rem',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
@@ -470,6 +472,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     color: 'rgba(255,255,255,0.7)',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
+                    fontSize: '0.875rem',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
@@ -482,11 +485,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     color: 'rgba(255,255,255,0.7)',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
+                    fontSize: '0.875rem',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
                   {t.nav.notices}
+                </Link>
+                <Link
+                  to="/contact"
+                  style={{
+                    color: 'rgba(255,255,255,0.7)',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    fontSize: '0.875rem',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+                >
+                  {t.footer.contact}
                 </Link>
               </Box>
             </Box>
@@ -500,6 +517,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 sx={{
                   color: '#FFFFFF',
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                  fontSize: { xs: '0.95rem', md: '1.25rem' },
                 }}
               >
                 {t.footer.policies}
@@ -511,6 +529,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     color: 'rgba(255,255,255,0.7)',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
+                    fontSize: '0.875rem',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
@@ -523,12 +542,43 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     color: 'rgba(255,255,255,0.7)',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
+                    fontSize: '0.875rem',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
                   {t.footer.privacy}
                 </Link>
+              </Box>
+            </Box>
+
+            {/* 회사 정보 */}
+            <Box>
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                gutterBottom
+                sx={{
+                  color: '#FFFFFF',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                  fontSize: { xs: '0.95rem', md: '1.25rem' },
+                }}
+              >
+                {t.footer.companyInfo}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>
+                  {t.footer.businessName}: {t.footer.companyName}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>
+                  {t.footer.businessNumber}: {t.footer.notYetRegistered}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>
+                  {t.footer.address}: {t.footer.notYetRegistered}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>
+                  {t.footer.adminEmail}: nunconnect1@gmail.com
+                </Typography>
               </Box>
             </Box>
           </Box>
