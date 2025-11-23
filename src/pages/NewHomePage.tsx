@@ -96,30 +96,34 @@ const NewHomePage: React.FC = () => {
   const loadInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      // 배너, 푸시 맛집 로드
+      // 모든 데이터를 한 번에 로드 (최적화)
       const homeDataRes = await ApiService.getHomeData();
 
       if (homeDataRes.success && homeDataRes.data) {
+        // 배너, 푸시 맛집, 통계 설정
         setBanners(homeDataRes.data.banners || []);
         setPushedRestaurants(homeDataRes.data.pushedRestaurants || []);
         setStats(homeDataRes.data.stats || { totalRestaurants: 0, totalReviews: 0, totalUsers: 0 });
-      }
 
-      // 언어별 카테고리 로드
-      const categoriesRes = await ApiService.getCategoriesWithLang(language);
-      if (categoriesRes.success && categoriesRes.data) {
-        setCategories(categoriesRes.data.categories || []);
-      }
+        // 카테고리 설정 (별도 API 호출 제거)
+        setCategories(homeDataRes.data.categories || []);
 
-      // 전체 맛집 로드
-      await loadRestaurantsByCategory(null);
+        // Multi-sort 맛집 데이터 설정 (별도 API 호출 제거)
+        if (homeDataRes.data.multiSort) {
+          setRatingRestaurants(homeDataRes.data.multiSort.byRating || []);
+          setReviewCountRestaurants(homeDataRes.data.multiSort.byReviewCount || []);
+          setViewCountRestaurants(homeDataRes.data.multiSort.byViewCount || []);
+          setFavoriteRestaurants(homeDataRes.data.multiSort.byFavoriteCount || []);
+          setLatestRestaurants(homeDataRes.data.multiSort.byLatest || []);
+        }
+      }
     } catch (err: any) {
       setError(err.userMessage || '데이터를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  }, [loadRestaurantsByCategory, language]);
+  }, [language]);
 
   useEffect(() => {
     loadInitialData();
