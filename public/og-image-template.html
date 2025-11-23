@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맛집큐브 OG 이미지 템플릿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .og-container {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 배경 패턴 */
+        .og-container::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image:
+                radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: movePattern 20s linear infinite;
+        }
+
+        @keyframes movePattern {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+            padding: 60px;
+        }
+
+        .logo {
+            font-size: 120px;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .title {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 20px rgba(0,0,0,0.3);
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            font-size: 36px;
+            font-weight: 500;
+            opacity: 0.95;
+            text-shadow: 1px 1px 10px rgba(0,0,0,0.2);
+        }
+
+        .badge {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="og-container">
+        <div class="badge">🎯 맛집 추천 플랫폼</div>
+
+        <div class="content">
+            <div class="logo">🍽️</div>
+            <h1 class="title">맛집큐브</h1>
+            <p class="subtitle">부천 · 인천 · 서울 맛집 지도</p>
+        </div>
+
+        <div class="footer">
+            리얼 리뷰 · 별점 · 위치 정보
+        </div>
+    </div>
+
+    <!--
+        사용법:
+        1. 브라우저에서 이 파일 열기
+        2. 1200 x 630 사이즈로 스크린샷 캡처
+        3. og-image.jpg로 저장
+        4. website/public/ 폴더에 업로드
+
+        또는 온라인 도구 사용:
+        - Canva: https://www.canva.com
+        - Figma: https://www.figma.com
+        크기: 1200 x 630 픽셀
+    -->
+</body>
+</html>

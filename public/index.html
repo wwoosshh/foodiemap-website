@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) - Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBWND6XNR6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EBWND6XNR6');
+    </script>
+
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/cube-logo.svg" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
@@ -21,6 +30,8 @@
       content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval'
+          https://www.googletagmanager.com
+          https://www.google-analytics.com
           https://oapi.map.naver.com
           https://nrbe.pstatic.net
           https://t1.kakaocdn.net
@@ -34,6 +45,8 @@
           data:;
         img-src 'self' https: data: blob:;
         connect-src 'self'
+          https://www.google-analytics.com
+          https://analytics.google.com
           https://foodiemap-backend.onrender.com
           https://*.supabase.co
           https://api.cloudinary.com
