@@ -538,8 +538,8 @@ const RestaurantDetailPage: React.FC = () => {
                     <Box
                       key={idx}
                       sx={{
-                        minWidth: 'calc(33.333% - 10px)', // 3개가 한 화면에 보이도록
-                        width: 'calc(33.333% - 10px)',
+                        minWidth: 'calc((100% - 24px) / 3)', // 정확한 계산: (전체 - gap합) / 3
+                        width: 'calc((100% - 24px) / 3)',
                         flexShrink: 0,
                         scrollSnapAlign: 'start',
                         scrollSnapStop: 'always',
