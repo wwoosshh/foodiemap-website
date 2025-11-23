@@ -523,8 +523,6 @@ const RestaurantDetailPage: React.FC = () => {
                     overflowX: 'auto',
                     overflowY: 'hidden',
                     pb: 1,
-                    mx: -2,
-                    px: 2,
                     scrollbarWidth: 'thin',
                     scrollbarColor: (theme) => `${theme.palette.primary.main} ${theme.palette.background.paper}`,
                     '&::-webkit-scrollbar': {
