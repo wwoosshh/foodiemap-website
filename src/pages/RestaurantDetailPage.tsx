@@ -1448,6 +1448,8 @@ const RestaurantDetailPage: React.FC = () => {
             {photos.all.length > 0 && (
               <Box
                 sx={{
+                  position: 'sticky',
+                  top: 80,
                   mb: 4,
                 }}
               >
