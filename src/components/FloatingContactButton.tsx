@@ -29,13 +29,14 @@ const FloatingContactButton: React.FC = () => {
           onClick={handleClick}
           sx={{
             position: 'fixed',
-            bottom: isMobile
-              ? (isVisible ? 130 : 20)
-              : 24,
+            bottom: { xs: 130, md: 24 },
             right: { xs: 20, md: 24 },
             zIndex: 1200,
             width: { xs: 56, md: 64 },
             height: { xs: 56, md: 64 },
+            transform: isMobile
+              ? (isVisible ? 'translateY(0)' : 'translateY(110px)')
+              : 'translateY(0)',
             backgroundColor: theme.palette.mode === 'dark'
               ? alpha(theme.palette.primary.main, 0.9)
               : theme.palette.primary.main,
@@ -44,18 +45,22 @@ const FloatingContactButton: React.FC = () => {
             boxShadow: theme.palette.mode === 'dark'
               ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}, 0 0 0 1px ${alpha('#FFFFFF', 0.1)} inset`
               : `0 8px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, box-shadow 0.3s',
             '&:hover': {
               backgroundColor: theme.palette.mode === 'dark'
                 ? theme.palette.primary.light
                 : theme.palette.primary.dark,
-              transform: 'scale(1.1) translateY(-2px)',
+              transform: isMobile
+                ? (isVisible ? 'scale(1.1) translateY(-2px)' : 'scale(1.1) translateY(108px)')
+                : 'scale(1.1) translateY(-2px)',
               boxShadow: theme.palette.mode === 'dark'
                 ? `0 12px 32px ${alpha(theme.palette.primary.main, 0.5)}, 0 0 0 1px ${alpha('#FFFFFF', 0.15)} inset`
                 : `0 12px 32px ${alpha(theme.palette.primary.main, 0.45)}`,
             },
             '&:active': {
-              transform: 'scale(1.05) translateY(0)',
+              transform: isMobile
+                ? (isVisible ? 'scale(1.05) translateY(0)' : 'scale(1.05) translateY(110px)')
+                : 'scale(1.05) translateY(0)',
             },
             // 애니메이션 효과
             '@keyframes pulse': {
