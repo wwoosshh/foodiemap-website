@@ -471,8 +471,8 @@ const RestaurantDetailPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" }, gap: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3 }, overflow: 'hidden' }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" }, gap: { xs: 2, md: 4 } }}>
           {/* 왼쪽: 메인 콘텐츠 */}
           <Box>
             {/* 대표 이미지 */}
