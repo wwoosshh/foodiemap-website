@@ -1,13 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fab, Tooltip, useTheme, alpha, Zoom } from '@mui/material';
+import { Fab, Tooltip, useTheme, alpha, Zoom, useMediaQuery } from '@mui/material';
 import { Email } from '@mui/icons-material';
 import { useLanguage } from '../context/LanguageContext';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 
 const FloatingContactButton: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { t } = useLanguage();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isVisible } = useScrollDirection({ threshold: 10, alwaysShowAtTop: false });
 
   const handleClick = () => {
     navigate('/contact');
@@ -26,7 +29,9 @@ const FloatingContactButton: React.FC = () => {
           onClick={handleClick}
           sx={{
             position: 'fixed',
-            bottom: { xs: 130, md: 24 },
+            bottom: isMobile
+              ? (isVisible ? 130 : 20)
+              : 24,
             right: { xs: 20, md: 24 },
             zIndex: 1200,
             width: { xs: 56, md: 64 },
@@ -39,7 +44,7 @@ const FloatingContactButton: React.FC = () => {
             boxShadow: theme.palette.mode === 'dark'
               ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}, 0 0 0 1px ${alpha('#FFFFFF', 0.1)} inset`
               : `0 8px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
               backgroundColor: theme.palette.mode === 'dark'
                 ? theme.palette.primary.light
