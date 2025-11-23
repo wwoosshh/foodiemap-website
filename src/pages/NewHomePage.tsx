@@ -125,7 +125,7 @@ const NewHomePage: React.FC = () => {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  }, [language]);
+  }, []);
 
   useEffect(() => {
     loadInitialData();
