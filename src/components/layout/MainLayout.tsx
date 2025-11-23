@@ -23,6 +23,7 @@ import { useThemeContext } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import LoginModal from '../LoginModal';
 import MobileBottomNav from '../MobileBottomNav';
+import FloatingContactButton from '../FloatingContactButton';
 import {
   CubeLogoIcon,
   SearchIcon,
@@ -607,6 +608,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           onLoginClick={() => setLoginModalOpen(true)}
         />
       )}
+
+      {/* 플로팅 문의하기 버튼 */}
+      <FloatingContactButton />
     </Box>
   );
 };

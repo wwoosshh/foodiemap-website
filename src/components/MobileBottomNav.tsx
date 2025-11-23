@@ -71,41 +71,34 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
     <Box
       sx={{
         position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        bottom: 20,
+        left: '50%',
+        transform: isVisible
+          ? 'translateX(-50%) translateY(0)'
+          : 'translateX(-50%) translateY(150%)',
+        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: 1100,
-        transform: isVisible ? 'translateY(0)' : 'translateY(100%)',
-        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         // 하단 Safe Area 처리 (iOS 등)
-        pb: 'env(safe-area-inset-bottom)',
+        mb: 'calc(env(safe-area-inset-bottom) / 2)',
       }}
     >
       <Paper
-        elevation={8}
+        elevation={12}
         sx={{
-          borderRadius: '24px 24px 0 0',
+          borderRadius: '50px',
           backgroundColor: theme.palette.mode === 'dark'
-            ? alpha(theme.palette.background.paper, 0.95)
-            : alpha('#FFFFFF', 0.95),
-          backdropFilter: 'blur(20px)',
-          borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            ? alpha(theme.palette.background.paper, 0.85)
+            : alpha('#FFFFFF', 0.92),
+          backdropFilter: 'blur(30px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+          border: theme.palette.mode === 'dark'
+            ? `1px solid ${alpha('#FFFFFF', 0.1)}`
+            : `1px solid ${alpha('#000000', 0.08)}`,
           boxShadow: theme.palette.mode === 'dark'
-            ? '0 -4px 20px rgba(0, 0, 0, 0.5)'
-            : '0 -4px 20px rgba(0, 0, 0, 0.08)',
-          // 알약 형태의 그림자 효과
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '60px',
-            height: '4px',
-            backgroundColor: alpha(theme.palette.primary.main, 0.3),
-            borderRadius: '2px',
-            mt: 1,
-          },
+            ? `0 8px 32px ${alpha('#000000', 0.6)}, 0 0 0 1px ${alpha('#FFFFFF', 0.1)} inset`
+            : `0 8px 32px ${alpha('#000000', 0.12)}, 0 0 0 1px ${alpha('#000000', 0.04)} inset`,
+          maxWidth: '420px',
+          mx: 2,
         }}
       >
         <BottomNavigation
@@ -114,34 +107,43 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
           showLabels
           sx={{
             backgroundColor: 'transparent',
-            height: 70,
-            pt: 1.5,
-            pb: 1,
+            height: 68,
+            px: 1.5,
+            py: 1,
+            borderRadius: '50px',
             '& .MuiBottomNavigationAction-root': {
               minWidth: 'auto',
-              padding: '6px 12px',
-              gap: '4px',
+              padding: '8px 10px',
+              gap: '3px',
+              borderRadius: '16px',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               color: theme.palette.text.secondary,
               '&.Mui-selected': {
                 color: theme.palette.primary.main,
+                backgroundColor: alpha(theme.palette.primary.main, 0.12),
                 '& .MuiBottomNavigationAction-label': {
                   fontWeight: 700,
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                 },
                 '& .MuiSvgIcon-root': {
-                  transform: 'scale(1.1)',
+                  transform: 'scale(1.15)',
+                  filter: theme.palette.mode === 'dark'
+                    ? 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.5))'
+                    : 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
                 },
               },
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
               '& .MuiBottomNavigationAction-label': {
-                fontSize: '0.7rem',
+                fontSize: '0.65rem',
                 fontWeight: 500,
                 opacity: 1,
-                transition: 'all 0.2s ease',
+                transition: 'all 0.25s ease',
               },
               '& .MuiSvgIcon-root': {
-                fontSize: 24,
-                transition: 'transform 0.2s ease',
+                fontSize: 22,
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               },
             },
           }}
@@ -149,24 +151,10 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
           <BottomNavigationAction
             label={t.nav.home}
             icon={<HomeIcon />}
-            sx={{
-              '&.Mui-selected': {
-                '& .MuiSvgIcon-root': {
-                  filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.3))',
-                },
-              },
-            }}
           />
           <BottomNavigationAction
             label={t.nav.restaurantSearch}
             icon={<RestaurantIcon />}
-            sx={{
-              '&.Mui-selected': {
-                '& .MuiSvgIcon-root': {
-                  filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.3))',
-                },
-              },
-            }}
           />
           <BottomNavigationAction
             label={t.nav.events}
@@ -175,13 +163,6 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
                 <GiftIcon />
               </Badge>
             }
-            sx={{
-              '&.Mui-selected': {
-                '& .MuiSvgIcon-root': {
-                  filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.3))',
-                },
-              },
-            }}
           />
           <BottomNavigationAction
             label={t.nav.notices}
@@ -190,24 +171,10 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
                 <InfoIcon />
               </Badge>
             }
-            sx={{
-              '&.Mui-selected': {
-                '& .MuiSvgIcon-root': {
-                  filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.3))',
-                },
-              },
-            }}
           />
           <BottomNavigationAction
             label={user ? t.nav.myProfile : t.nav.login}
             icon={<UserIcon />}
-            sx={{
-              '&.Mui-selected': {
-                '& .MuiSvgIcon-root': {
-                  filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.3))',
-                },
-              },
-            }}
           />
         </BottomNavigation>
       </Paper>
