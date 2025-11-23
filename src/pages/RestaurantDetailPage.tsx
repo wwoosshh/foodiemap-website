@@ -29,6 +29,8 @@ import NaverMap from '../components/NaverMap';
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { updateMetaTags, generateRestaurantMeta } from '../utils/seo';
+import { generateRestaurantSchema, generateBreadcrumbSchema, insertMultipleStructuredData } from '../utils/structuredData';
 import {
   StarFilledIcon,
   HeartFilledIcon,
@@ -99,8 +101,29 @@ const RestaurantDetailPage: React.FC = () => {
       const response = await ApiService.getRestaurantCompleteData(id!, language);
 
       if (response.success && response.data) {
-        setRestaurant(response.data.restaurant);
+        const restaurantData = response.data.restaurant;
+        setRestaurant(restaurantData);
         setReviews(response.data.reviews?.items || []);
+
+        // SEO: 메타 태그 업데이트
+        if (restaurantData) {
+          updateMetaTags(generateRestaurantMeta(restaurantData));
+
+          // SEO: 구조화된 데이터 (Schema.org) 추가
+          const schemas = [
+            generateRestaurantSchema({
+              ...restaurantData,
+              contacts: response.data.contacts,
+              operations: response.data.operations
+            }),
+            generateBreadcrumbSchema([
+              { name: '홈', url: 'https://mzcube.com' },
+              { name: '맛집', url: 'https://mzcube.com/restaurants' },
+              { name: restaurantData.name, url: `https://mzcube.com/restaurant/${restaurantData.id}` }
+            ])
+          ];
+          insertMultipleStructuredData(schemas);
+        }
 
         // 메뉴 데이터
         if (response.data.menus && typeof response.data.menus === 'object' && 'all' in response.data.menus) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateMetaTags, DEFAULT_META } from '../utils/seo';
+import { generateOrganizationSchema, generateWebSiteSchema, insertMultipleStructuredData } from '../utils/structuredData';
 import {
   Container,
   Box,
@@ -130,12 +131,19 @@ const NewHomePage: React.FC = () => {
     loadInitialData();
   }, [loadInitialData]);
 
-  // SEO: 메타 태그 설정
+  // SEO: 메타 태그 및 구조화된 데이터 설정
   useEffect(() => {
     updateMetaTags({
       ...DEFAULT_META,
       url: window.location.href
     });
+
+    // 구조화된 데이터 추가 (Organization, WebSite)
+    const schemas = [
+      generateOrganizationSchema(),
+      generateWebSiteSchema()
+    ];
+    insertMultipleStructuredData(schemas);
   }, []);
 
   useEffect(() => {
