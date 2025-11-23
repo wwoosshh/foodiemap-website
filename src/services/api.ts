@@ -690,6 +690,19 @@ export class ApiService {
     const response = await api.get(`/api/tags/${id}?lang=${lang}`);
     return response.data;
   }
+
+  // === 문의하기 API ===
+
+  // 문의하기 이메일 발송
+  static async sendContactEmail(contactData: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.post('/api/contact', contactData);
+    return response.data;
+  }
 }
 
 export default api;
