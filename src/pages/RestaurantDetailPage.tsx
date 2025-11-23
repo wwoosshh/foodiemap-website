@@ -471,7 +471,7 @@ const RestaurantDetailPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
         <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" }, gap: { xs: 2, md: 4 } }}>
           {/* 왼쪽: 메인 콘텐츠 */}
@@ -1444,10 +1444,11 @@ const RestaurantDetailPage: React.FC = () => {
           </Box>
 
           {/* 오른쪽: 사진 갤러리 (PC만 표시) */}
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Box sx={{ display: { xs: 'none', md: 'block' }, position: 'relative' }}>
             {photos.all.length > 0 && (
               <Box
                 sx={{
+                  position: 'relative',
                   mb: 4,
                 }}
               >
