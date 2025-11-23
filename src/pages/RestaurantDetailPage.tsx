@@ -505,7 +505,10 @@ const RestaurantDetailPage: React.FC = () => {
 
             {/* 모바일: 사진 갤러리 - 대표 이미지 바로 아래 */}
             {photos.all.length > 0 && (
-              <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 4 }}>
+              <Box sx={{
+                display: { xs: 'block', md: 'none' },
+                mb: 4,
+              }}>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6" fontWeight={700}>
                     {t('restaurant.photos')} ({photos.all.length})
@@ -520,6 +523,8 @@ const RestaurantDetailPage: React.FC = () => {
                     overflowX: 'auto',
                     overflowY: 'hidden',
                     pb: 1,
+                    mx: -2,
+                    px: 2,
                     scrollbarWidth: 'thin',
                     scrollbarColor: (theme) => `${theme.palette.primary.main} ${theme.palette.background.paper}`,
                     '&::-webkit-scrollbar': {
