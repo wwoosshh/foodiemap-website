@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Fab, Tooltip, useTheme, alpha, Zoom, useMediaQuery } from '@mui/material';
 import { Email } from '@mui/icons-material';
@@ -21,13 +21,6 @@ const FloatingContactButton: React.FC = () => {
     if (!isMobile) return 'translateY(0)';
     return isVisible ? 'translateY(0)' : 'translateY(110px)';
   };
-
-  // 디버깅용 로그
-  useEffect(() => {
-    const transformValue = getTransformValue();
-    console.log('FloatingContactButton - isMobile:', isMobile, 'isVisible:', isVisible, 'transform:', transformValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile, isVisible]);
 
   return (
     <Zoom in={true} timeout={500}>

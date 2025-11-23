@@ -528,7 +528,14 @@ const TermsOfServicePage: React.FC = () => {
             </Box>
 
             {/* 고객센터 안내 */}
-            <Box sx={{ mt: 4, p: 3, backgroundColor: 'grey.50', borderRadius: 2 }}>
+            <Box sx={{
+              mt: 4,
+              p: 3,
+              bgcolor: (theme) => theme.palette.mode === 'dark'
+                ? 'rgba(255, 255, 255, 0.05)'
+                : 'grey.50',
+              borderRadius: 2
+            }}>
               <Typography variant="h6" fontWeight={600} gutterBottom>
                 고객센터 안내
               </Typography>
