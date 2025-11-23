@@ -540,8 +540,9 @@ const RestaurantDetailPage: React.FC = () => {
                     <Box
                       key={idx}
                       sx={{
-                        minWidth: 'calc((100% - 24px) / 3)', // 정확한 계산: (전체 - gap합) / 3
-                        width: 'calc((100% - 24px) / 3)',
+                        minWidth: 'calc((100vw - 56px) / 3)', // 뷰포트 기준: (100vw - 패딩32px - gap24px) / 3
+                        width: 'calc((100vw - 56px) / 3)',
+                        maxWidth: 'calc((100vw - 56px) / 3)',
                         flexShrink: 0,
                         scrollSnapAlign: 'start',
                         scrollSnapStop: 'always',
