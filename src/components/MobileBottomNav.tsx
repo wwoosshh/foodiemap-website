@@ -97,8 +97,9 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
           boxShadow: theme.palette.mode === 'dark'
             ? `0 8px 32px ${alpha('#000000', 0.6)}, 0 0 0 1px ${alpha('#FFFFFF', 0.1)} inset`
             : `0 8px 32px ${alpha('#000000', 0.12)}, 0 0 0 1px ${alpha('#000000', 0.04)} inset`,
-          maxWidth: '420px',
-          mx: 2,
+          width: 'calc(100vw - 32px)',
+          maxWidth: '600px',
+          mx: 'auto',
         }}
       >
         <BottomNavigation
@@ -108,12 +109,12 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
           sx={{
             backgroundColor: 'transparent',
             height: 68,
-            px: 1.5,
+            px: 1,
             py: 1,
             borderRadius: '50px',
             '& .MuiBottomNavigationAction-root': {
               minWidth: 'auto',
-              padding: '8px 10px',
+              padding: '8px 6px',
               gap: '3px',
               borderRadius: '16px',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -140,6 +141,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
                 fontWeight: 500,
                 opacity: 1,
                 transition: 'all 0.25s ease',
+                whiteSpace: 'nowrap',
               },
               '& .MuiSvgIcon-root': {
                 fontSize: 22,

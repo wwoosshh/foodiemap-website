@@ -26,7 +26,7 @@ const FloatingContactButton: React.FC = () => {
           onClick={handleClick}
           sx={{
             position: 'fixed',
-            bottom: { xs: 110, md: 24 },
+            bottom: { xs: 130, md: 24 },
             right: { xs: 20, md: 24 },
             zIndex: 1200,
             width: { xs: 56, md: 64 },
