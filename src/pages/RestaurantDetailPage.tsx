@@ -1444,12 +1444,10 @@ const RestaurantDetailPage: React.FC = () => {
           </Box>
 
           {/* 오른쪽: 사진 갤러리 (PC만 표시) */}
-          <Box sx={{ display: { xs: 'none', md: 'block' }, alignSelf: 'start' }}>
+          <Box sx={{ display: { xs: 'none', md: 'block' }, position: 'sticky', top: 80, alignSelf: 'start' }}>
             {photos.all.length > 0 && (
               <Box
                 sx={{
-                  position: 'sticky',
-                  top: 80,
                   mb: 4,
                 }}
               >
