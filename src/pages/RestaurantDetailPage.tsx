@@ -520,6 +520,8 @@ const RestaurantDetailPage: React.FC = () => {
                 <Box
                   sx={{
                     display: 'flex',
+                    width: '100%',
+                    maxWidth: '100%',
                     gap: 1.5,
                     overflowX: 'auto',
                     overflowY: 'hidden',
