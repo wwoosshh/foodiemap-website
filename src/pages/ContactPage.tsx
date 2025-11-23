@@ -14,11 +14,17 @@ import {
   Paper,
 } from '@mui/material';
 import { Email, Send } from '@mui/icons-material';
+import emailjs from '@emailjs/browser';
 import MainLayout from '../components/layout/MainLayout';
 import { useLanguage } from '../context/LanguageContext';
 
 const ADMIN_EMAIL = 'nunconnect1@gmail.com';
 const KAKAO_CHANNEL_URL = 'https://pf.kakao.com/_xlxnxfBn'; // 카카오톡 채널 URL (실제 URL로 변경 필요)
+
+// EmailJS 설정 - 환경 변수에서 가져오기
+const EMAILJS_SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || '';
+const EMAILJS_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || '';
+const EMAILJS_PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || '';
 
 const ContactPage: React.FC = () => {
   const theme = useTheme();
@@ -97,20 +103,34 @@ const ContactPage: React.FC = () => {
       return;
     }
 
+    // EmailJS 설정 확인
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+      setSnackbar({
+        open: true,
+        message: 'EmailJS가 설정되지 않았습니다. 관리자에게 문의해주세요.',
+        severity: 'error',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // 이메일 발송 로직 구현
-      // 실제로는 백엔드 API를 호출해야 합니다
-      // 여기서는 mailto 링크를 사용하거나, EmailJS 같은 서비스를 사용할 수 있습니다
+      // EmailJS를 사용하여 이메일 발송
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_email: ADMIN_EMAIL,
+      };
 
-      const subject = encodeURIComponent(`[문의] ${formData.subject}`);
-      const body = encodeURIComponent(
-        `이름: ${formData.name}\n이메일: ${formData.email}\n\n문의 내용:\n${formData.message}`
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
       );
-
-      // mailto 링크로 이메일 클라이언트 열기
-      window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
 
       setSnackbar({
         open: true,
@@ -126,6 +146,7 @@ const ContactPage: React.FC = () => {
         message: '',
       });
     } catch (error) {
+      console.error('EmailJS Error:', error);
       setSnackbar({
         open: true,
         message: t.contactPage.errorMessage,
