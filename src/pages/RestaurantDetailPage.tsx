@@ -509,80 +509,72 @@ const RestaurantDetailPage: React.FC = () => {
                 display: { xs: 'block', md: 'none' },
                 mb: 4,
               }}>
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="h6" fontWeight={700}>
                     {t('restaurant.photos')} ({photos.all.length})
                   </Typography>
+                  {photos.all.length > 3 && (
+                    <Button
+                      size="small"
+                      onClick={() => setIsImageListExpanded(!isImageListExpanded)}
+                      endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                      {isImageListExpanded ? '접기' : `더보기 (${photos.all.length - 3})`}
+                    </Button>
+                  )}
                 </Box>
 
-                {/* 이미지 수평 스크롤 */}
+                {/* 이미지 그리드 */}
                 <Box
                   sx={{
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
                     gap: 1,
-                    maxWidth: '100%',
-                    overflowX: 'auto',
-                    overflowY: 'hidden',
-                    pb: 1,
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: (theme) => `${theme.palette.primary.main} ${theme.palette.background.paper}`,
-                    '&::-webkit-scrollbar': {
-                      height: '6px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                      backgroundColor: (theme) => theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.05)'
-                        : 'rgba(0, 0, 0, 0.05)',
-                      borderRadius: '3px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                      backgroundColor: 'primary.main',
-                      borderRadius: '3px',
-                      '&:hover': {
-                        backgroundColor: 'primary.dark',
-                      },
-                    },
-                    WebkitOverflowScrolling: 'touch',
                   }}
                 >
-                  {photos.all.map((photo: any, idx: number) => (
-                    <Box
-                      key={idx}
-                      sx={{
-                        minWidth: '120px',
-                        width: '120px',
-                        height: '120px',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                        opacity: selectedImage === idx ? 1 : 0.7,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        borderRadius: 2,
-                        border: selectedImage === idx ? '3px solid' : '3px solid transparent',
-                        borderColor: selectedImage === idx ? 'primary.main' : 'transparent',
-                        transform: selectedImage === idx ? 'scale(1.05)' : 'scale(1)',
-                        flexShrink: 0,
-                        '&:active': {
-                          opacity: 1,
-                          transform: 'scale(0.95)',
-                        },
-                      }}
-                      onClick={() => setSelectedImage(idx)}
-                    >
+                  {photos.all
+                    .slice(0, isImageListExpanded ? undefined : 3)
+                    .map((photo: any, idx: number) => (
                       <Box
-                        component="img"
-                        className="thumbnail-image"
-                        src={photo.thumbnail || photo.url}
-                        alt={`사진 ${idx + 1}`}
+                        key={idx}
                         sx={{
                           width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          paddingTop: '100%',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          borderRadius: 2,
+                          border: selectedImage === idx ? '3px solid' : '3px solid transparent',
+                          borderColor: selectedImage === idx ? 'primary.main' : 'transparent',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:active': {
+                            transform: 'scale(0.95)',
+                          },
                         }}
-                      />
-                    </Box>
-                  ))}
+                        onClick={() => setSelectedImage(idx)}
+                      >
+                        <Box
+                          component="img"
+                          className="thumbnail-image"
+                          src={photo.thumbnail || photo.url}
+                          alt={`사진 ${idx + 1}`}
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            opacity: selectedImage === idx ? 1 : 0.8,
+                            transition: 'opacity 0.3s',
+                            '&:hover': {
+                              opacity: 1,
+                            },
+                          }}
+                        />
+                      </Box>
+                    ))}
                 </Box>
               </Box>
             )}
