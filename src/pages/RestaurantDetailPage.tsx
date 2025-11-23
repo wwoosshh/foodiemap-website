@@ -749,14 +749,14 @@ const RestaurantDetailPage: React.FC = () => {
             <Divider sx={{ my: 4 }} />
 
             {/* 핵심 정보 - 신문 2컬럼 레이아웃 */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: 4, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
               <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
                 {t('restaurant.info')}
               </Typography>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 } }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 }, width: '100%', maxWidth: '100%' }}>
                 {/* 주소 */}
-                <Box>
+                <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
                     {t('restaurant.address')}
                   </Typography>
@@ -791,7 +791,7 @@ const RestaurantDetailPage: React.FC = () => {
                 </Box>
 
                 {/* 연락처 */}
-                <Box>
+                <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
                     {t('restaurant.contact')}
                   </Typography>
@@ -818,7 +818,7 @@ const RestaurantDetailPage: React.FC = () => {
                 </Box>
 
                 {/* 영업시간 */}
-                <Box>
+                <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
                     {t('restaurant.hours')}
                   </Typography>
@@ -827,7 +827,7 @@ const RestaurantDetailPage: React.FC = () => {
 
                 {/* SNS / 링크 */}
                 {((contacts?.website_url || restaurant?.website_url) || contacts?.blog_url || contacts?.instagram_url || contacts?.facebook_url || contacts?.youtube_url || contacts?.kakao_channel_url || contacts?.naver_place_url || contacts?.booking_url || contacts?.naver_booking_url) && (
-                  <Box>
+                  <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-all' }}>
                     <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
                       SNS / 링크
                     </Typography>
@@ -886,12 +886,12 @@ const RestaurantDetailPage: React.FC = () => {
             <Divider sx={{ my: 4 }} />
 
             {/* 시설 / 서비스 정보 */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: 4, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
               <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
                 시설 / 서비스
               </Typography>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 } }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 }, width: '100%', maxWidth: '100%' }}>
                 {/* 주차 시설 */}
                 {((facilities?.parking_available ?? restaurant?.parking_available) || (facilities?.valet_parking ?? restaurant?.valet_parking) || (facilities?.parking_spaces || restaurant?.parking_spaces) || (facilities?.parking_info || restaurant?.parking_info)) && (
                   <Box>
