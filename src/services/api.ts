@@ -217,7 +217,13 @@ export class ApiService {
     featuredRestaurants: Restaurant[];
     restaurants: Restaurant[];
     pushedRestaurants: any[];
-    events: any[];
+    multiSort: {
+      byRating: Restaurant[];
+      byReviewCount: Restaurant[];
+      byViewCount: Restaurant[];
+      byFavoriteCount: Restaurant[];
+      byLatest: Restaurant[];
+    };
     stats: {
       totalRestaurants: number;
       totalReviews: number;
