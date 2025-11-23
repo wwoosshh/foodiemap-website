@@ -52,7 +52,7 @@ interface PushedRestaurant {
 const NewHomePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [loading, setLoading] = useState(true);
