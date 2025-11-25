@@ -34,6 +34,17 @@ export const ja: TranslationKeys = {
     searchPlaceholder: 'レストランを検索...',
   },
 
+  // 検索
+  search: {
+    viewAllResults: '全ての検索結果を見る',
+    noResults: '検索結果がありません',
+    tryDifferent: '別のキーワードで検索してください',
+    recentSearches: '最近の検索',
+    clearAll: 'すべて削除',
+    searchSuggestions: '検索候補',
+    popularSearches: '人気の検索',
+  },
+
   // プロフィールページ
   profile: {
     title: 'プロフィール',

@@ -32,6 +32,17 @@ export const ko = {
     searchPlaceholder: '맛집 검색...',
   },
 
+  // 검색
+  search: {
+    viewAllResults: '전체 검색 결과 보기',
+    noResults: '검색 결과가 없습니다',
+    tryDifferent: '다른 검색어를 입력해 보세요',
+    recentSearches: '최근 검색',
+    clearAll: '전체 삭제',
+    searchSuggestions: '검색 제안',
+    popularSearches: '인기 검색어',
+  },
+
   // 프로필 페이지
   profile: {
     title: '프로필',

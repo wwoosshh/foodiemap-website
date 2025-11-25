@@ -14,88 +14,23 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-  InputBase,
   alpha,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeContext } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import LoginModal from '../LoginModal';
 import MobileBottomNav from '../MobileBottomNav';
 import FloatingContactButton from '../FloatingContactButton';
+import SearchAutocomplete from '../SearchAutocomplete';
 import {
   CubeLogoIcon,
-  SearchIcon,
   UserIcon,
   LogoutIcon,
   RestaurantIcon,
   GiftIcon,
   InfoIcon,
 } from '../icons/CustomIcons';
-
-// 검색 바 스타일
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.mode === 'dark'
-    ? alpha(theme.palette.background.paper, 0.8)
-    : alpha(theme.palette.common.white, 0.95),
-  border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-  '&:hover': {
-    backgroundColor: theme.palette.mode === 'dark'
-      ? theme.palette.background.paper
-      : theme.palette.common.white,
-    borderColor: theme.palette.primary.main,
-  },
-  '&:focus-within': {
-    backgroundColor: theme.palette.mode === 'dark'
-      ? theme.palette.background.paper
-      : theme.palette.common.white,
-    borderColor: theme.palette.primary.main,
-    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
-  },
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(2),
-    width: 'auto',
-  },
-  transition: 'all 0.3s ease',
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: theme.palette.text.secondary,
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: theme.palette.text.primary,
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1.2, 1, 1.2, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    color: theme.palette.text.primary,
-    [theme.breakpoints.up('sm')]: {
-      width: '20ch',
-      '&:focus': {
-        width: '30ch',
-      },
-    },
-    '&::placeholder': {
-      color: theme.palette.text.secondary,
-      opacity: 0.8,
-    },
-  },
-}));
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -111,7 +46,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const menuItems = [
@@ -120,14 +54,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { label: t.nav.events, path: '/events', icon: <GiftIcon /> },
     { label: t.nav.notices, path: '/notices', icon: <InfoIcon /> },
   ];
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/restaurants?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
-  };
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchor(event.currentTarget);
@@ -247,21 +173,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* 검색 바 */}
+            {/* 검색 바 - SearchAutocomplete 컴포넌트 사용 */}
             {!isMobile && (
-              <Box component="form" onSubmit={handleSearch}>
-                <Search>
-                  <SearchIconWrapper>
-                    <SearchIcon />
-                  </SearchIconWrapper>
-                  <StyledInputBase
-                    placeholder={t.nav.searchPlaceholder}
-                    inputProps={{ 'aria-label': 'search' }}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </Search>
-              </Box>
+              <SearchAutocomplete variant="navbar" />
             )}
 
             {/* 로그인/사용자 메뉴 */}

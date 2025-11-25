@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
@@ -12,7 +12,6 @@ import {
   FormControl,
   Select,
   MenuItem,
-  TextField,
   InputAdornment,
   Pagination,
   CircularProgress,
@@ -20,12 +19,12 @@ import {
   useTheme,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
+import SearchAutocomplete from '../components/SearchAutocomplete';
 import { ApiService } from '../services/api';
 import { Restaurant, Category } from '../types';
 import {
   StarFilledIcon,
   LocationIcon,
-  SearchIcon,
   FilterIcon,
   RestaurantIcon,
 } from '../components/icons/CustomIcons';
@@ -48,11 +47,13 @@ const RestaurantsListPage: React.FC = () => {
     totalPages: 1,
   });
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState<string | ''>(
     searchParams.get('category') || ''
   );
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'created_at_desc');
+
+  // URL 검색 파라미터에서 초기 검색어 가져오기
+  const initialSearchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     loadCategories();
@@ -106,10 +107,24 @@ const RestaurantsListPage: React.FC = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateFilters({ search: searchQuery, page: '1' });
-  };
+  const updateFilters = useCallback((newParams: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(searchParams);
+
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === undefined || value === '') {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    setSearchParams(params);
+  }, [searchParams, setSearchParams]);
+
+  // 검색 실행 (SearchAutocomplete에서 호출)
+  const handleSearch = useCallback((query: string) => {
+    updateFilters({ search: query, page: '1' });
+  }, [updateFilters]);
 
   const handleCategoryChange = (categoryId: string | '') => {
     setSelectedCategory(categoryId);
@@ -127,20 +142,6 @@ const RestaurantsListPage: React.FC = () => {
   const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
     updateFilters({ page: String(page) });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const updateFilters = (newParams: Record<string, string | undefined>) => {
-    const params = new URLSearchParams(searchParams);
-
-    Object.entries(newParams).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    });
-
-    setSearchParams(params);
   };
 
   const handleRestaurantClick = (restaurantId: string) => {
@@ -434,29 +435,14 @@ const RestaurantsListPage: React.FC = () => {
           }}
         >
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: { xs: 1.5, md: 2 }, alignItems: "center" }}>
-            {/* 검색 */}
+            {/* 검색 - SearchAutocomplete 사용 */}
             <Box sx={{ gridColumn: { xs: '1', sm: '1 / -1', md: 'auto' } }}>
-              <Box component="form" onSubmit={handleSearch}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder={t('restaurant.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      fontSize: { xs: '0.9rem', md: '1rem' },
-                    },
-                  }}
-                />
-              </Box>
+              <SearchAutocomplete
+                variant="page"
+                placeholder={t('restaurant.searchPlaceholder')}
+                onSearch={handleSearch}
+                initialValue={initialSearchQuery}
+              />
             </Box>
 
             {/* 카테고리 필터 */}

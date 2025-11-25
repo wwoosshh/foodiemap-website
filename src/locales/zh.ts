@@ -34,6 +34,17 @@ export const zh: TranslationKeys = {
     searchPlaceholder: '搜索餐厅...',
   },
 
+  // 搜索
+  search: {
+    viewAllResults: '查看所有搜索结果',
+    noResults: '未找到搜索结果',
+    tryDifferent: '请尝试其他搜索词',
+    recentSearches: '最近搜索',
+    clearAll: '全部清除',
+    searchSuggestions: '搜索建议',
+    popularSearches: '热门搜索',
+  },
+
   // 个人资料页面
   profile: {
     title: '个人资料',

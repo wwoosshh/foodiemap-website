@@ -34,6 +34,17 @@ export const en: TranslationKeys = {
     searchPlaceholder: 'Search restaurants...',
   },
 
+  // Search
+  search: {
+    viewAllResults: 'View all results',
+    noResults: 'No results found',
+    tryDifferent: 'Try a different search term',
+    recentSearches: 'Recent searches',
+    clearAll: 'Clear all',
+    searchSuggestions: 'Search suggestions',
+    popularSearches: 'Popular searches',
+  },
+
   // Profile Page
   profile: {
     title: 'Profile',
