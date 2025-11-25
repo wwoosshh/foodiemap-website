@@ -32,28 +32,32 @@ import {
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 
 // 스타일 정의
-const SearchContainer = styled('div')<{ variant?: 'navbar' | 'page' }>(({ theme, variant }) => ({
+const SearchContainer = styled('div')<{ variant?: 'navbar' | 'page' | 'mobile' }>(({ theme, variant }) => ({
   position: 'relative',
-  borderRadius: variant === 'navbar' ? theme.shape.borderRadius : Number(theme.shape.borderRadius) * 2,
+  borderRadius: variant === 'navbar' ? theme.shape.borderRadius : Number(theme.shape.borderRadius) * 3,
   backgroundColor: theme.palette.mode === 'dark'
-    ? alpha(theme.palette.background.paper, 0.8)
-    : alpha(theme.palette.common.white, 0.95),
-  border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+    ? alpha(theme.palette.background.paper, 0.95)
+    : theme.palette.background.paper,
+  border: variant === 'mobile' ? 'none' : `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+  boxShadow: variant === 'mobile' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
   '&:hover': {
     backgroundColor: theme.palette.mode === 'dark'
       ? theme.palette.background.paper
       : theme.palette.common.white,
-    borderColor: theme.palette.primary.main,
+    borderColor: variant === 'mobile' ? 'transparent' : theme.palette.primary.main,
+    boxShadow: variant === 'mobile' ? '0 4px 12px rgba(0,0,0,0.12)' : 'none',
   },
   '&:focus-within': {
     backgroundColor: theme.palette.mode === 'dark'
       ? theme.palette.background.paper
       : theme.palette.common.white,
-    borderColor: theme.palette.primary.main,
-    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
+    borderColor: variant === 'mobile' ? 'transparent' : theme.palette.primary.main,
+    boxShadow: variant === 'mobile'
+      ? `0 4px 16px rgba(0,0,0,0.15), 0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
+      : `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
   },
   transition: 'all 0.3s ease',
-  width: variant === 'page' ? '100%' : 'auto',
+  width: (variant === 'page' || variant === 'mobile') ? '100%' : 'auto',
 }));
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
@@ -68,16 +72,17 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   zIndex: 1,
 }));
 
-const StyledInputBase = styled(InputBase)<{ variant?: 'navbar' | 'page' }>(({ theme, variant }) => ({
+const StyledInputBase = styled(InputBase)<{ variant?: 'navbar' | 'page' | 'mobile' }>(({ theme, variant }) => ({
   color: theme.palette.text.primary,
   width: '100%',
   '& .MuiInputBase-input': {
-    padding: theme.spacing(1.2, 1, 1.2, 0),
+    padding: variant === 'mobile' ? theme.spacing(1.5, 1, 1.5, 0) : theme.spacing(1.2, 1, 1.2, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     paddingRight: theme.spacing(4),
     transition: theme.transitions.create('width'),
     width: '100%',
     color: theme.palette.text.primary,
+    fontSize: variant === 'mobile' ? '1rem' : 'inherit',
     ...(variant === 'navbar' && {
       [theme.breakpoints.up('sm')]: {
         width: '20ch',
@@ -120,7 +125,7 @@ const SearchResultItem = styled(ListItem)<{ isSelected?: boolean }>(({ theme, is
 }));
 
 interface SearchAutocompleteProps {
-  variant?: 'navbar' | 'page';
+  variant?: 'navbar' | 'page' | 'mobile';
   placeholder?: string;
   onSearch?: (query: string) => void;
   onResultClick?: (restaurant: Restaurant) => void;
@@ -336,7 +341,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         component="form"
         onSubmit={handleSearch}
         ref={containerRef}
-        sx={{ position: 'relative', width: variant === 'page' ? '100%' : 'auto' }}
+        sx={{ position: 'relative', width: (variant === 'page' || variant === 'mobile') ? '100%' : 'auto' }}
       >
         <SearchContainer variant={variant}>
           <SearchIconWrapper>

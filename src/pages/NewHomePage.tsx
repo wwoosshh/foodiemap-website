@@ -17,14 +17,11 @@ import {
   Skeleton,
   Paper,
   Divider,
-  TextField,
-  InputAdornment,
-  IconButton,
   useMediaQuery,
 } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
+import SearchAutocomplete from '../components/SearchAutocomplete';
 import { ApiService } from '../services/api';
 import { Restaurant, Category, Banner } from '../types';
 import {
@@ -57,7 +54,6 @@ const NewHomePage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -154,18 +150,6 @@ const NewHomePage: React.FC = () => {
 
   const handleRestaurantClick = (restaurantId: string) => {
     navigate(`/restaurants/${restaurantId}`);
-  };
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigate(`/restaurants?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
-  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
   };
 
   const renderRating = (rating: number) => {
@@ -405,38 +389,9 @@ const NewHomePage: React.FC = () => {
       {/* 모바일 검색바 - 배너 위 */}
       {isMobile && (
         <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, mt: 2 }}>
-          <TextField
-            fullWidth
+          <SearchAutocomplete
+            variant="mobile"
             placeholder={t('search.placeholder') || '맛집을 검색해보세요...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleSearchKeyPress}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-              endAdornment: searchQuery && (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setSearchQuery('')}>
-                    ×
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: 'background.paper',
-                borderRadius: 3,
-                '&:hover': {
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                },
-                '&.Mui-focused': {
-                  boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-              },
-            }}
           />
         </Container>
       )}
