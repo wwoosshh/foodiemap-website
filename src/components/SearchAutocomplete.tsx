@@ -192,14 +192,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       if (response.success && response.data) {
         let restaurants = response.data.restaurants || [];
 
-        // 한글 초성 검색으로 정렬
+        // 한글 초성 검색으로 정렬 (이름, 주소, 카테고리만 사용 - 본문 제외)
         restaurants = restaurants
           .map(restaurant => ({
             restaurant,
             score: Math.max(
-              smartKoreanMatch(restaurant.name, searchQuery),
-              smartKoreanMatch(restaurant.address || '', searchQuery) * 0.5,
-              smartKoreanMatch(restaurant.categories?.name || '', searchQuery) * 0.3
+              smartKoreanMatch(restaurant.name, searchQuery),         // 이름 매칭 (가장 중요)
+              smartKoreanMatch(restaurant.address || '', searchQuery) * 0.7,  // 주소 매칭
+              smartKoreanMatch(restaurant.categories?.name || '', searchQuery) * 0.8  // 카테고리 매칭
             )
           }))
           .sort((a, b) => b.score - a.score)
