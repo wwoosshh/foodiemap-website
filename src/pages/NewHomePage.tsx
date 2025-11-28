@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateMetaTags, DEFAULT_META } from '../utils/seo';
 import { generateOrganizationSchema, generateWebSiteSchema, insertMultipleStructuredData } from '../utils/structuredData';
@@ -18,6 +18,7 @@ import {
   Paper,
   Divider,
   useMediaQuery,
+  CircularProgress,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
@@ -60,12 +61,21 @@ const NewHomePage: React.FC = () => {
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // 다양한 알고리즘별 맛집 상태
+  // 다양한 알고리즘별 맛집 상태 (PC용)
   const [ratingRestaurants, setRatingRestaurants] = useState<Restaurant[]>([]);
   const [reviewCountRestaurants, setReviewCountRestaurants] = useState<Restaurant[]>([]);
   const [viewCountRestaurants, setViewCountRestaurants] = useState<Restaurant[]>([]);
   const [favoriteRestaurants, setFavoriteRestaurants] = useState<Restaurant[]>([]);
   const [latestRestaurants, setLatestRestaurants] = useState<Restaurant[]>([]);
+
+  // 모바일용 단일 목록 상태
+  const [mobileRestaurants, setMobileRestaurants] = useState<Restaurant[]>([]);
+  const [mobilePage, setMobilePage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const MOBILE_PAGE_SIZE = 12;
 
   const loadRestaurantsByCategory = useCallback(async (categoryId: string | null) => {
     try {
@@ -85,6 +95,39 @@ const NewHomePage: React.FC = () => {
       console.error('Failed to load restaurants:', err);
     }
   }, []);
+
+  // 모바일용 맛집 로드 함수
+  const loadMobileRestaurants = useCallback(async (categoryId: string | null, page: number, reset: boolean = false) => {
+    if (loadingMore && !reset) return;
+
+    try {
+      setLoadingMore(true);
+      const params: any = {
+        page,
+        limit: MOBILE_PAGE_SIZE,
+        sort: 'rating_desc' as const,
+      };
+      if (categoryId) {
+        params.category_id = categoryId;
+      }
+
+      const res = await ApiService.getRestaurants(params);
+
+      if (res.success && res.data) {
+        const newRestaurants = res.data.restaurants || [];
+        if (reset) {
+          setMobileRestaurants(newRestaurants);
+        } else {
+          setMobileRestaurants(prev => [...prev, ...newRestaurants]);
+        }
+        setHasMore(newRestaurants.length >= MOBILE_PAGE_SIZE);
+      }
+    } catch (err: any) {
+      console.error('Failed to load mobile restaurants:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore]);
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -107,6 +150,10 @@ const NewHomePage: React.FC = () => {
           setViewCountRestaurants(homeDataRes.data.multiSort.byViewCount || []);
           setFavoriteRestaurants(homeDataRes.data.multiSort.byFavoriteCount || []);
           setLatestRestaurants(homeDataRes.data.multiSort.byLatest || []);
+
+          // 모바일용 초기 데이터 (byRating 사용)
+          setMobileRestaurants(homeDataRes.data.multiSort.byRating || []);
+          setHasMore((homeDataRes.data.multiSort.byRating || []).length >= MOBILE_PAGE_SIZE);
         }
       }
     } catch (err: any) {
@@ -140,12 +187,43 @@ const NewHomePage: React.FC = () => {
     // 초기 로드가 완료되고, 카테고리가 변경되었을 때 실행 (null 포함)
     if (!isInitialLoad) {
       loadRestaurantsByCategory(selectedCategoryId);
+      // 모바일: 카테고리 변경 시 목록 리셋
+      if (isMobile) {
+        setMobilePage(1);
+        setHasMore(true);
+        loadMobileRestaurants(selectedCategoryId, 1, true);
+      }
     }
-  }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory]);
+  }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory, isMobile, loadMobileRestaurants]);
+
+  // 모바일 무한 스크롤: IntersectionObserver
+  useEffect(() => {
+    if (!isMobile || !hasMore || loadingMore) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          const nextPage = mobilePage + 1;
+          setMobilePage(nextPage);
+          loadMobileRestaurants(selectedCategoryId, nextPage, false);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [isMobile, hasMore, loadingMore, mobilePage, selectedCategoryId, loadMobileRestaurants]);
 
   const handleCategoryClick = (categoryId: string | null) => {
     setSelectedCategoryId(categoryId);
-    // 자동 스크롤 제거
   };
 
   const handleRestaurantClick = (restaurantId: string) => {
@@ -654,70 +732,152 @@ const NewHomePage: React.FC = () => {
       )}
 
       {/* 메인 콘텐츠 */}
-      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
+      {isMobile ? (
+        /* ===== 모바일 레이아웃 ===== */
+        <>
+          {/* Sticky 카테고리 필터 바 */}
+          <Box
+            sx={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 100,
+              backgroundColor: theme.palette.background.paper,
+              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                overflowX: 'auto',
+                '&::-webkit-scrollbar': { display: 'none' },
+                scrollbarWidth: 'none',
+              }}
+            >
+              <Chip
+                label="전체"
+                onClick={() => handleCategoryClick(null)}
+                sx={{
+                  flexShrink: 0,
+                  backgroundColor: selectedCategoryId === null ? theme.palette.primary.main : 'transparent',
+                  color: selectedCategoryId === null ? 'white' : 'text.primary',
+                  border: selectedCategoryId === null ? 'none' : `1px solid ${theme.palette.divider}`,
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                }}
+              />
+              {categories.map((category) => (
+                <Chip
+                  key={category.id}
+                  label={category.name}
+                  onClick={() => handleCategoryClick(category.id)}
+                  sx={{
+                    flexShrink: 0,
+                    backgroundColor: selectedCategoryId === category.id ? theme.palette.primary.main : 'transparent',
+                    color: selectedCategoryId === category.id ? 'white' : 'text.primary',
+                    border: selectedCategoryId === category.id ? 'none' : `1px solid ${theme.palette.divider}`,
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
 
-        {/* 메인 레이아웃: 콘텐츠 + 카테고리 사이드바 */}
-        <Box sx={{ display: 'flex', gap: { xs: 2, md: 4 }, position: 'relative' }}>
-          {/* 메인 콘텐츠 영역 */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {/* 선택된 카테고리 표시 */}
-            {selectedCategoryId && selectedCategory && (
-              <Box sx={{ mb: { xs: 3, md: 4 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, mb: 2 }}>
-                  <Chip
-                    label={selectedCategory.name}
-                    onDelete={() => handleCategoryClick(null)}
-                    sx={{
-                      backgroundColor: theme.palette.primary.main,
-                      color: 'white',
-                      fontWeight: 700,
-                      fontSize: { xs: '0.85rem', md: '1rem' },
-                      py: { xs: 2, md: 2.5 },
-                      '& .MuiChip-deleteIcon': {
-                        color: 'white',
-                      },
-                    }}
-                  />
-                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
-                    {t('home.selectedCategory')}
-                  </Typography>
-                </Box>
-                <Divider />
+          {/* 단일 맛집 목록 */}
+          <Container maxWidth="xl" sx={{ px: 2, py: 2 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 2,
+              }}
+            >
+              {mobileRestaurants.map((restaurant) => (
+                <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+              ))}
+            </Box>
+
+            {/* 무한 스크롤 로딩 */}
+            {hasMore && (
+              <Box ref={loadMoreRef} sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                {loadingMore && <CircularProgress size={28} />}
               </Box>
             )}
 
-            {/* 다양한 알고리즘별 맛집 섹션 */}
-            <RestaurantSection
-              title={t.home.highRatedRestaurants}
-              icon={<StarFilledIcon />}
-              restaurants={ratingRestaurants}
-              sortParam="rating_desc"
-            />
-            <RestaurantSection
-              title={t('home.mostReviewedRestaurants')}
-              icon={<ReviewIcon />}
-              restaurants={reviewCountRestaurants}
-              sortParam="review_count_desc"
-            />
-            <RestaurantSection
-              title={t('home.mostViewedRestaurants')}
-              icon={<EyeIcon />}
-              restaurants={viewCountRestaurants}
-              sortParam="view_count_desc"
-            />
-            <RestaurantSection
-              title={t('home.mostLikedRestaurants')}
-              icon={<HeartFilledIcon />}
-              restaurants={favoriteRestaurants}
-              sortParam="favorite_count_desc"
-            />
-            <RestaurantSection
-              title={t('home.newRestaurants')}
-              icon={<NewIcon />}
-              restaurants={latestRestaurants}
-              sortParam="created_at_desc"
-            />
-          </Box>
+            {!hasMore && mobileRestaurants.length > 0 && (
+              <Typography sx={{ textAlign: 'center', py: 3, color: 'text.disabled', fontSize: '0.8rem' }}>
+                모든 맛집을 불러왔습니다
+              </Typography>
+            )}
+          </Container>
+        </>
+      ) : (
+        /* ===== PC 레이아웃 ===== */
+        <Container maxWidth="xl" sx={{ px: 3 }}>
+          <Box sx={{ display: 'flex', gap: 4, position: 'relative' }}>
+            {/* 메인 콘텐츠 영역 */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              {/* 선택된 카테고리 표시 */}
+              {selectedCategoryId && selectedCategory && (
+                <Box sx={{ mb: 4 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <Chip
+                      label={selectedCategory.name}
+                      onDelete={() => handleCategoryClick(null)}
+                      sx={{
+                        backgroundColor: theme.palette.primary.main,
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        py: 2.5,
+                        '& .MuiChip-deleteIcon': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                      {t('home.selectedCategory')}
+                    </Typography>
+                  </Box>
+                  <Divider />
+                </Box>
+              )}
+
+              {/* 다양한 알고리즘별 맛집 섹션 */}
+              <RestaurantSection
+                title={t.home.highRatedRestaurants}
+                icon={<StarFilledIcon />}
+                restaurants={ratingRestaurants}
+                sortParam="rating_desc"
+              />
+              <RestaurantSection
+                title={t('home.mostReviewedRestaurants')}
+                icon={<ReviewIcon />}
+                restaurants={reviewCountRestaurants}
+                sortParam="review_count_desc"
+              />
+              <RestaurantSection
+                title={t('home.mostViewedRestaurants')}
+                icon={<EyeIcon />}
+                restaurants={viewCountRestaurants}
+                sortParam="view_count_desc"
+              />
+              <RestaurantSection
+                title={t('home.mostLikedRestaurants')}
+                icon={<HeartFilledIcon />}
+                restaurants={favoriteRestaurants}
+                sortParam="favorite_count_desc"
+              />
+              <RestaurantSection
+                title={t('home.newRestaurants')}
+                icon={<NewIcon />}
+                restaurants={latestRestaurants}
+                sortParam="created_at_desc"
+              />
+            </Box>
 
           {/* 우측 카테고리 사이드바 (Sticky) */}
           <Box
@@ -790,6 +950,7 @@ const NewHomePage: React.FC = () => {
           </Box>
         </Box>
       </Container>
+      )}
     </MainLayout>
   );
 };
