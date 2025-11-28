@@ -73,9 +73,9 @@ const NewHomePage: React.FC = () => {
   const [mobilePage, setMobilePage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const MOBILE_PAGE_SIZE = 12;
+  const isLoadingRef = useRef(false); // 중복 요청 방지용
+  const MOBILE_PAGE_SIZE = 10;
 
   const loadRestaurantsByCategory = useCallback(async (categoryId: string | null) => {
     try {
@@ -98,10 +98,13 @@ const NewHomePage: React.FC = () => {
 
   // 모바일용 맛집 로드 함수
   const loadMobileRestaurants = useCallback(async (categoryId: string | null, page: number, reset: boolean = false) => {
-    if (loadingMore && !reset) return;
+    // 중복 요청 방지
+    if (isLoadingRef.current && !reset) return;
+
+    isLoadingRef.current = true;
+    setLoadingMore(true);
 
     try {
-      setLoadingMore(true);
       const params: any = {
         page,
         limit: MOBILE_PAGE_SIZE,
@@ -115,19 +118,29 @@ const NewHomePage: React.FC = () => {
 
       if (res.success && res.data) {
         const newRestaurants = res.data.restaurants || [];
+
         if (reset) {
           setMobileRestaurants(newRestaurants);
+          setMobilePage(1);
         } else {
           setMobileRestaurants(prev => [...prev, ...newRestaurants]);
         }
-        setHasMore(newRestaurants.length >= MOBILE_PAGE_SIZE);
+
+        // 더 이상 데이터가 없으면 hasMore를 false로
+        if (newRestaurants.length < MOBILE_PAGE_SIZE) {
+          setHasMore(false);
+        }
+      } else {
+        setHasMore(false);
       }
     } catch (err: any) {
       console.error('Failed to load mobile restaurants:', err);
+      setHasMore(false);
     } finally {
       setLoadingMore(false);
+      isLoadingRef.current = false;
     }
-  }, [loadingMore]);
+  }, []);
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -198,29 +211,33 @@ const NewHomePage: React.FC = () => {
 
   // 모바일 무한 스크롤: IntersectionObserver
   useEffect(() => {
-    if (!isMobile || !hasMore || loadingMore) return;
+    if (!isMobile) return;
 
-    observerRef.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          const nextPage = mobilePage + 1;
-          setMobilePage(nextPage);
-          loadMobileRestaurants(selectedCategoryId, nextPage, false);
+        const target = entries[0];
+        if (target.isIntersecting && hasMore && !isLoadingRef.current) {
+          setMobilePage(prev => {
+            const nextPage = prev + 1;
+            loadMobileRestaurants(selectedCategoryId, nextPage, false);
+            return nextPage;
+          });
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.5, rootMargin: '100px' }
     );
 
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
-  }, [isMobile, hasMore, loadingMore, mobilePage, selectedCategoryId, loadMobileRestaurants]);
+  }, [isMobile, hasMore, selectedCategoryId, loadMobileRestaurants]);
 
   const handleCategoryClick = (categoryId: string | null) => {
     setSelectedCategoryId(categoryId);
@@ -739,12 +756,13 @@ const NewHomePage: React.FC = () => {
           <Box
             sx={{
               position: 'sticky',
-              top: 0,
+              top: 56, // 헤더 높이
               zIndex: 100,
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               py: 1.5,
               px: 2,
+              boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
             }}
           >
             <Box
@@ -786,24 +804,18 @@ const NewHomePage: React.FC = () => {
             </Box>
           </Box>
 
-          {/* 단일 맛집 목록 */}
+          {/* 단일 맛집 목록 - 1열 */}
           <Container maxWidth="xl" sx={{ px: 2, py: 2 }}>
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: 2,
-              }}
-            >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {mobileRestaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
               ))}
             </Box>
 
-            {/* 무한 스크롤 로딩 */}
+            {/* 무한 스크롤 트리거 */}
             {hasMore && (
-              <Box ref={loadMoreRef} sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                {loadingMore && <CircularProgress size={28} />}
+              <Box ref={loadMoreRef} sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                {loadingMore && <CircularProgress size={24} />}
               </Box>
             )}
 
