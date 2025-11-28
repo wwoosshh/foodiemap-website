@@ -784,14 +784,16 @@ const NewHomePage: React.FC = () => {
               position: 'fixed',
               left: 0,
               right: 0,
-              top: isHeaderVisible ? 64 : 0, // 헤더 숨김 시 최상단으로 이동
+              top: 64, // 항상 헤더 높이(64px) 아래에 위치
               zIndex: 99,
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               py: 1,
               px: 2,
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-              transition: 'top 0.3s ease-in-out',
+              // 헤더가 숨겨지면 위로 64px 이동하여 최상단에 위치
+              transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-64px)',
+              transition: 'transform 0.3s ease-in-out',
             }}
           >
             {/* 카테고리 행 */}
