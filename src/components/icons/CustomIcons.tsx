@@ -385,3 +385,13 @@ export const HomeIcon: React.FC<SvgIconProps> = (props) => (
     />
   </SvgIcon>
 );
+
+// 정렬 아이콘
+export const SortIcon: React.FC<SvgIconProps> = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"
+    />
+  </SvgIcon>
+);

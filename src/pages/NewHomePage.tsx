@@ -20,7 +20,7 @@ import {
   useMediaQuery,
   CircularProgress,
 } from '@mui/material';
-import MainLayout from '../components/layout/MainLayout';
+import MainLayout, { useHeaderVisibility } from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchAutocomplete from '../components/SearchAutocomplete';
 import { ApiService } from '../services/api';
@@ -37,6 +37,9 @@ import {
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 import { useLanguage } from '../context/LanguageContext';
 
+// 정렬 옵션 타입
+type SortOption = 'rating_desc' | 'review_count_desc' | 'view_count_desc' | 'created_at_desc' | 'created_at_asc';
+
 interface PushedRestaurant {
   id: number;
   title: string;
@@ -52,6 +55,7 @@ const NewHomePage: React.FC = () => {
   const theme = useTheme();
   const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isHeaderVisible } = useHeaderVisibility();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,12 +74,23 @@ const NewHomePage: React.FC = () => {
 
   // 모바일용 단일 목록 상태
   const [mobileRestaurants, setMobileRestaurants] = useState<Restaurant[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mobilePage, setMobilePage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>('rating_desc');
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const isLoadingRef = useRef(false); // 중복 요청 방지용
   const MOBILE_PAGE_SIZE = 10;
+
+  // 정렬 옵션 목록
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'rating_desc', label: '별점순' },
+    { value: 'review_count_desc', label: '리뷰순' },
+    { value: 'view_count_desc', label: '조회순' },
+    { value: 'created_at_desc', label: '최신순' },
+    { value: 'created_at_asc', label: '오래된순' },
+  ];
 
   const loadRestaurantsByCategory = useCallback(async (categoryId: string | null) => {
     try {
@@ -97,7 +112,7 @@ const NewHomePage: React.FC = () => {
   }, []);
 
   // 모바일용 맛집 로드 함수
-  const loadMobileRestaurants = useCallback(async (categoryId: string | null, page: number, reset: boolean = false) => {
+  const loadMobileRestaurants = useCallback(async (categoryId: string | null, page: number, sort: SortOption, reset: boolean = false) => {
     // 중복 요청 방지
     if (isLoadingRef.current && !reset) return;
 
@@ -108,7 +123,7 @@ const NewHomePage: React.FC = () => {
       const params: any = {
         page,
         limit: MOBILE_PAGE_SIZE,
-        sort: 'rating_desc' as const,
+        sort,
       };
       if (categoryId) {
         params.category_id = categoryId;
@@ -204,10 +219,10 @@ const NewHomePage: React.FC = () => {
       if (isMobile) {
         setMobilePage(1);
         setHasMore(true);
-        loadMobileRestaurants(selectedCategoryId, 1, true);
+        loadMobileRestaurants(selectedCategoryId, 1, sortOption, true);
       }
     }
-  }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory, isMobile, loadMobileRestaurants]);
+  }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory, isMobile, loadMobileRestaurants, sortOption]);
 
   // 모바일 무한 스크롤: IntersectionObserver
   useEffect(() => {
@@ -219,7 +234,7 @@ const NewHomePage: React.FC = () => {
         if (target.isIntersecting && hasMore && !isLoadingRef.current) {
           setMobilePage(prev => {
             const nextPage = prev + 1;
-            loadMobileRestaurants(selectedCategoryId, nextPage, false);
+            loadMobileRestaurants(selectedCategoryId, nextPage, sortOption, false);
             return nextPage;
           });
         }
@@ -237,7 +252,18 @@ const NewHomePage: React.FC = () => {
         observer.unobserve(currentRef);
       }
     };
-  }, [isMobile, hasMore, selectedCategoryId, loadMobileRestaurants]);
+  }, [isMobile, hasMore, selectedCategoryId, sortOption, loadMobileRestaurants]);
+
+  // 정렬 변경 핸들러
+  const handleSortChange = (newSort: SortOption) => {
+    if (newSort !== sortOption) {
+      setSortOption(newSort);
+      setMobilePage(1);
+      setHasMore(true);
+      setMobileRestaurants([]);
+      loadMobileRestaurants(selectedCategoryId, 1, newSort, true);
+    }
+  };
 
   const handleCategoryClick = (categoryId: string | null) => {
     setSelectedCategoryId(categoryId);
@@ -752,30 +778,34 @@ const NewHomePage: React.FC = () => {
       {isMobile ? (
         /* ===== 모바일 레이아웃 ===== */
         <>
-          {/* Sticky 카테고리 필터 바 */}
+          {/* Sticky 카테고리 + 정렬 필터 바 */}
           <Box
             sx={{
               position: 'sticky',
-              top: 56, // 헤더 높이
+              top: isHeaderVisible ? 56 : 0, // 헤더 숨김 시 최상단으로 이동
               zIndex: 100,
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              py: 1.5,
+              py: 1,
               px: 2,
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+              transition: 'top 0.3s ease-in-out',
             }}
           >
+            {/* 카테고리 행 */}
             <Box
               sx={{
                 display: 'flex',
-                gap: 1,
+                gap: 0.8,
                 overflowX: 'auto',
+                pb: 1,
                 '&::-webkit-scrollbar': { display: 'none' },
                 scrollbarWidth: 'none',
               }}
             >
               <Chip
                 label="전체"
+                size="small"
                 onClick={() => handleCategoryClick(null)}
                 sx={{
                   flexShrink: 0,
@@ -783,13 +813,15 @@ const NewHomePage: React.FC = () => {
                   color: selectedCategoryId === null ? 'white' : 'text.primary',
                   border: selectedCategoryId === null ? 'none' : `1px solid ${theme.palette.divider}`,
                   fontWeight: 600,
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
+                  height: 28,
                 }}
               />
-              {categories.map((category) => (
+              {categories.slice(0, 10).map((category) => (
                 <Chip
                   key={category.id}
                   label={category.name}
+                  size="small"
                   onClick={() => handleCategoryClick(category.id)}
                   sx={{
                     flexShrink: 0,
@@ -797,7 +829,36 @@ const NewHomePage: React.FC = () => {
                     color: selectedCategoryId === category.id ? 'white' : 'text.primary',
                     border: selectedCategoryId === category.id ? 'none' : `1px solid ${theme.palette.divider}`,
                     fontWeight: 600,
-                    fontSize: '0.8rem',
+                    fontSize: '0.75rem',
+                    height: 28,
+                  }}
+                />
+              ))}
+            </Box>
+            {/* 정렬 행 */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 0.5,
+                overflowX: 'auto',
+                '&::-webkit-scrollbar': { display: 'none' },
+                scrollbarWidth: 'none',
+              }}
+            >
+              {sortOptions.map((opt) => (
+                <Chip
+                  key={opt.value}
+                  label={opt.label}
+                  size="small"
+                  onClick={() => handleSortChange(opt.value)}
+                  sx={{
+                    flexShrink: 0,
+                    backgroundColor: sortOption === opt.value ? alpha(theme.palette.secondary.main, 0.15) : 'transparent',
+                    color: sortOption === opt.value ? theme.palette.secondary.main : 'text.secondary',
+                    border: 'none',
+                    fontWeight: sortOption === opt.value ? 600 : 400,
+                    fontSize: '0.7rem',
+                    height: 24,
                   }}
                 />
               ))}

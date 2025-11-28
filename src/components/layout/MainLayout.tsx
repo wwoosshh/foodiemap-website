@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -15,10 +15,14 @@ import {
   useMediaQuery,
   useTheme,
   alpha,
+  Dialog,
+  Slide,
 } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeContext } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useScrollDirection } from '../../hooks/useScrollDirection';
 import LoginModal from '../LoginModal';
 import MobileBottomNav from '../MobileBottomNav';
 import FloatingContactButton from '../FloatingContactButton';
@@ -30,7 +34,21 @@ import {
   RestaurantIcon,
   GiftIcon,
   InfoIcon,
+  SearchIcon,
+  CloseIcon,
 } from '../icons/CustomIcons';
+
+// 검색 모달 슬라이드 트랜지션
+const SlideTransition = React.forwardRef(function Transition(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="down" ref={ref} {...props} />;
+});
+
+// 헤더 가시성 Context
+export const HeaderVisibilityContext = createContext<{ isHeaderVisible: boolean }>({ isHeaderVisible: true });
+export const useHeaderVisibility = () => useContext(HeaderVisibilityContext);
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -44,9 +62,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { currentTheme } = useThemeContext();
   const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isVisible: isHeaderVisible } = useScrollDirection({ threshold: 10, alwaysShowAtTop: true });
 
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   const menuItems = [
     { label: t.nav.home, path: '/', icon: <RestaurantIcon /> },
@@ -74,6 +94,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
+    <HeaderVisibilityContext.Provider value={{ isHeaderVisible }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', maxWidth: '100vw' }}>
       {/* 헤더 */}
       <AppBar
@@ -84,6 +105,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           borderBottom: '1px solid',
           borderColor: 'divider',
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          // 모바일에서 스크롤 방향에 따라 숨김/표시
+          ...(isMobile && {
+            transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+            transition: 'transform 0.3s ease-in-out',
+          }),
         }}
       >
         <Container maxWidth="xl">
@@ -173,7 +199,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* 검색 바 - SearchAutocomplete 컴포넌트 사용 */}
+            {/* 모바일 검색 버튼 */}
+            {isMobile && (
+              <IconButton
+                onClick={() => setSearchModalOpen(true)}
+                sx={{
+                  color: 'text.primary',
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                <SearchIcon />
+              </IconButton>
+            )}
+
+            {/* 검색 바 - SearchAutocomplete 컴포넌트 사용 (PC) */}
             {!isMobile && (
               <SearchAutocomplete variant="navbar" />
             )}
@@ -516,6 +557,41 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         onClose={() => setLoginModalOpen(false)}
       />
 
+      {/* 모바일 플로팅 검색 모달 */}
+      <Dialog
+        fullWidth
+        open={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        TransitionComponent={SlideTransition}
+        PaperProps={{
+          sx: {
+            position: 'fixed',
+            top: 0,
+            m: 0,
+            borderRadius: '0 0 16px 16px',
+            maxHeight: '80vh',
+          },
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" fontWeight={600} sx={{ flex: 1 }}>
+              맛집 검색
+            </Typography>
+            <IconButton onClick={() => setSearchModalOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <SearchAutocomplete
+            variant="mobile"
+            placeholder={t.nav?.searchPlaceholder || '맛집을 검색해보세요...'}
+            autoFocus
+            onResultClick={() => setSearchModalOpen(false)}
+            onSearch={() => setSearchModalOpen(false)}
+          />
+        </Box>
+      </Dialog>
+
       {/* 모바일 하단 네비게이션 바 */}
       {isMobile && (
         <MobileBottomNav
@@ -526,6 +602,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* 플로팅 문의하기 버튼 */}
       <FloatingContactButton />
     </Box>
+    </HeaderVisibilityContext.Provider>
   );
 };
 
