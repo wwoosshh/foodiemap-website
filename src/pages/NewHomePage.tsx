@@ -778,12 +778,14 @@ const NewHomePage: React.FC = () => {
       {isMobile ? (
         /* ===== 모바일 레이아웃 ===== */
         <>
-          {/* Sticky 카테고리 + 정렬 필터 바 */}
+          {/* Fixed 카테고리 + 정렬 필터 바 */}
           <Box
             sx={{
-              position: 'sticky',
-              top: isHeaderVisible ? 56 : 0, // 헤더 숨김 시 최상단으로 이동
-              zIndex: 100,
+              position: 'fixed',
+              left: 0,
+              right: 0,
+              top: isHeaderVisible ? 64 : 0, // 헤더 숨김 시 최상단으로 이동
+              zIndex: 99,
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               py: 1,
@@ -866,7 +868,7 @@ const NewHomePage: React.FC = () => {
           </Box>
 
           {/* 단일 맛집 목록 - 1열 */}
-          <Container maxWidth="xl" sx={{ px: 2, py: 2 }}>
+          <Container maxWidth="xl" sx={{ px: 2, py: 2, mt: '80px' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {mobileRestaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
