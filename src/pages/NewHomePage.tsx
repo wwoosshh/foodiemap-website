@@ -163,120 +163,224 @@ const NewHomePage: React.FC = () => {
     );
   };
 
-  const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
-    <Card
-      sx={{
-        position: 'relative',
-        height: { xs: 180, sm: 200, md: 220 },
-        overflow: 'hidden',
-        cursor: 'pointer',
-        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-8px) scale(1.02)',
-          boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.3)',
-          '& .restaurant-image': {
-            transform: 'scale(1.15)',
-          },
-          '& .restaurant-overlay': {
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
-          },
-        },
-        '&:active': {
-          transform: 'translateY(-4px) scale(1.01)',
-        },
-      }}
-      onClick={() => handleRestaurantClick(restaurant.id)}
-    >
-      {/* 배경 이미지 */}
-      <CardMedia
-        component="img"
-        className="restaurant-image"
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-        image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-        alt={restaurant.name}
-        onError={handleImageError}
-      />
+  const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => {
+    // 모바일: 쿠팡이츠 스타일 (이미지 상단, 텍스트 하단 분리)
+    if (isMobile) {
+      return (
+        <Card
+          sx={{
+            overflow: 'hidden',
+            cursor: 'pointer',
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            transition: 'all 0.2s ease',
+            '&:active': {
+              transform: 'scale(0.98)',
+            },
+          }}
+          onClick={() => handleRestaurantClick(restaurant.id)}
+        >
+          {/* 이미지 영역 */}
+          <Box sx={{ position: 'relative' }}>
+            <CardMedia
+              component="img"
+              sx={{
+                height: 130,
+                objectFit: 'cover',
+              }}
+              image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+              alt={restaurant.name}
+              onError={handleImageError}
+            />
+            {/* 카테고리 뱃지 */}
+            {restaurant.categories && (
+              <Chip
+                label={restaurant.categories.name}
+                size="small"
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 8,
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  color: '#fff',
+                  fontWeight: 500,
+                  fontSize: '0.65rem',
+                  height: 20,
+                }}
+              />
+            )}
+          </Box>
 
-      {/* 그라데이션 오버레이 */}
-      <Box
-        className="restaurant-overlay"
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
-          transition: 'background 0.5s ease',
-        }}
-      />
+          {/* 텍스트 영역 */}
+          <CardContent sx={{ p: 1.5, pb: '12px !important' }}>
+            {/* 가게 이름 + 별점 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  lineHeight: 1.3,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                  mr: 1,
+                }}
+              >
+                {restaurant.name}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, flexShrink: 0 }}>
+                <StarFilledIcon sx={{ fontSize: 13, color: '#FFD93D' }} />
+                <Typography sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
+                  {restaurant.rating.toFixed(1)}
+                </Typography>
+              </Box>
+            </Box>
 
-      {/* 정보 오버레이 */}
-      <CardContent
+            {/* 주소 */}
+            <Typography
+              sx={{
+                fontSize: '0.72rem',
+                color: 'text.secondary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mb: 0.5,
+              }}
+            >
+              {restaurant.address}
+            </Typography>
+
+            {/* 리뷰 · 조회수 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography sx={{ fontSize: '0.68rem', color: 'text.disabled' }}>
+                리뷰 {restaurant.review_count || 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: 'text.disabled' }}>
+                ·
+              </Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: 'text.disabled' }}>
+                조회 {restaurant.view_count || 0}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // PC: 기존 오버레이 스타일
+    return (
+      <Card
         sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          color: 'white',
-          p: { xs: 2, md: 2.5 },
-          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
+          position: 'relative',
+          height: { sm: 200, md: 220 },
+          overflow: 'hidden',
+          cursor: 'pointer',
+          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            transform: 'translateY(-8px) scale(1.02)',
+            boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.3)',
+            '& .restaurant-image': {
+              transform: 'scale(1.15)',
+            },
+            '& .restaurant-overlay': {
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
+            },
+          },
+          '&:active': {
+            transform: 'translateY(-4px) scale(1.01)',
+          },
         }}
+        onClick={() => handleRestaurantClick(restaurant.id)}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ flex: 1, color: 'white', fontSize: { xs: '1rem', md: '1.25rem' } }}>
-            {restaurant.name}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
-            <StarFilledIcon sx={{ fontSize: 18, color: '#FFD93D' }} />
-            <Typography variant="body2" fontWeight={600} sx={{ color: 'white' }}>
-              {restaurant.rating.toFixed(1)}
+        <CardMedia
+          component="img"
+          className="restaurant-image"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
+          alt={restaurant.name}
+          onError={handleImageError}
+        />
+
+        <Box
+          className="restaurant-overlay"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
+            transition: 'background 0.5s ease',
+          }}
+        />
+
+        <CardContent
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            color: 'white',
+            p: 2.5,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ flex: 1, color: 'white', fontSize: '1.25rem' }}>
+              {restaurant.name}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+              <StarFilledIcon sx={{ fontSize: 18, color: '#FFD93D' }} />
+              <Typography variant="body2" fontWeight={600} sx={{ color: 'white' }}>
+                {restaurant.rating.toFixed(1)}
+              </Typography>
+            </Box>
+          </Box>
+
+          {restaurant.categories && (
+            <Chip
+              label={restaurant.categories.name}
+              size="small"
+              sx={{
+                mb: 1,
+                backgroundColor: alpha(theme.palette.primary.main, 0.9),
+                color: '#FFFFFF',
+                fontWeight: 600,
+                border: 'none',
+                height: 24,
+                fontSize: '0.8rem',
+              }}
+            />
+          )}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+            <LocationIcon sx={{ fontSize: 16, color: 'white' }} />
+            <Typography variant="caption" noWrap sx={{ fontSize: '0.875rem', color: 'white' }}>
+              {restaurant.address}
             </Typography>
           </Box>
-        </Box>
 
-        {restaurant.categories && (
-          <Chip
-            label={restaurant.categories.name}
-            size="small"
-            sx={{
-              mb: 1,
-              backgroundColor: alpha(theme.palette.primary.main, 0.9),
-              color: '#FFFFFF',
-              fontWeight: 600,
-              border: 'none',
-              height: { xs: 22, md: 24 },
-              fontSize: { xs: '0.7rem', md: '0.8rem' },
-            }}
-          />
-        )}
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <LocationIcon sx={{ fontSize: { xs: 14, md: 16 }, color: 'white' }} />
-          <Typography variant="caption" noWrap sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, color: 'white' }}>
-            {restaurant.address}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' }, color: 'rgba(255,255,255,0.9)' }}>
-            {t('restaurant.reviewCount')} {restaurant.review_count || 0}
-          </Typography>
-          <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' }, color: 'rgba(255,255,255,0.9)' }}>
-            {t('restaurant.viewCount')} {restaurant.view_count || 0}
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
-  );
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.9)' }}>
+              {t('restaurant.reviewCount')} {restaurant.review_count || 0}
+            </Typography>
+            <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.9)' }}>
+              {t('restaurant.viewCount')} {restaurant.view_count || 0}
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const RestaurantSection: React.FC<{
     title: string;
