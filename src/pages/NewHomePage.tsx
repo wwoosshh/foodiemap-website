@@ -176,12 +176,12 @@ const NewHomePage: React.FC = () => {
           }}
           onClick={() => handleRestaurantClick(restaurant.id)}
         >
-          {/* 이미지 영역 - 정사각형 비율 */}
+          {/* 이미지 영역 - 4:3 비율 */}
           <Box
             sx={{
               position: 'relative',
               width: '100%',
-              paddingTop: '100%', // 1:1 정사각형 비율
+              paddingTop: '75%', // 4:3 비율
               borderRadius: 2,
               overflow: 'hidden',
               mb: 1,
@@ -201,36 +201,49 @@ const NewHomePage: React.FC = () => {
                 objectFit: 'cover',
               }}
             />
+            {/* 카테고리 뱃지 - 이미지 왼쪽 상단 */}
+            {restaurant.categories && (
+              <Chip
+                label={restaurant.categories.name}
+                size="small"
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 8,
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  color: '#fff',
+                  fontWeight: 500,
+                  fontSize: '0.65rem',
+                  height: 20,
+                }}
+              />
+            )}
           </Box>
 
           {/* 텍스트 영역 - 이미지 아래 공백 */}
           <Box sx={{ px: 0.5 }}>
-            {/* 가게 이름 */}
-            <Typography
-              sx={{
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                lineHeight: 1.4,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                mb: 0.3,
-              }}
-            >
-              {restaurant.name}
-            </Typography>
-
-            {/* 별점 + 카테고리 */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.3 }}>
-              <StarFilledIcon sx={{ fontSize: 12, color: '#FFD93D' }} />
-              <Typography sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
-                {restaurant.rating.toFixed(1)}
+            {/* 가게 이름 + 별점 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.3 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  lineHeight: 1.4,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                  mr: 1,
+                }}
+              >
+                {restaurant.name}
               </Typography>
-              {restaurant.categories && (
-                <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                  · {restaurant.categories.name}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, flexShrink: 0 }}>
+                <StarFilledIcon sx={{ fontSize: 12, color: '#FFD93D' }} />
+                <Typography sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                  {restaurant.rating.toFixed(1)}
                 </Typography>
-              )}
+              </Box>
             </Box>
 
             {/* 주소 */}
@@ -241,10 +254,24 @@ const NewHomePage: React.FC = () => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
+                mb: 0.3,
               }}
             >
               {restaurant.address}
             </Typography>
+
+            {/* 리뷰 수 · 조회수 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography sx={{ fontSize: '0.68rem', color: 'text.disabled' }}>
+                리뷰 {restaurant.review_count || 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: 'text.disabled' }}>
+                ·
+              </Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: 'text.disabled' }}>
+                조회 {restaurant.view_count || 0}
+              </Typography>
+            </Box>
           </Box>
         </Box>
       );
