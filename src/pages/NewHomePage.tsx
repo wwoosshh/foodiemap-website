@@ -631,7 +631,7 @@ const NewHomePage: React.FC = () => {
         <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, mt: 2 }}>
           <SearchAutocomplete
             variant="mobile"
-            placeholder={t('search.placeholder') || '맛집을 검색해보세요...'}
+            placeholder=""
           />
         </Container>
       )}
