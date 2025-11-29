@@ -797,62 +797,6 @@ const RestaurantDetailPage: React.FC = () => {
                   </Typography>
                   {renderBusinessHours()}
                 </Box>
-
-                {/* SNS / 링크 */}
-                {((contacts?.website_url || restaurant?.website_url) || contacts?.blog_url || contacts?.instagram_url || contacts?.facebook_url || contacts?.youtube_url || contacts?.kakao_channel_url || contacts?.naver_place_url || contacts?.booking_url || contacts?.naver_booking_url) && (
-                  <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-all' }}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      SNS / 링크
-                    </Typography>
-                    <Stack spacing={0.5}>
-                      {(contacts?.website_url || restaurant?.website_url) && (
-                        <Link href={(contacts?.website_url || restaurant?.website_url)} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.website')}: {(contacts?.website_url || restaurant?.website_url)}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.blog_url && (
-                        <Link href={contacts.blog_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.blog')}: {contacts.blog_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.instagram_url && (
-                        <Link href={contacts.instagram_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.instagram')}: {contacts.instagram_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.facebook_url && (
-                        <Link href={contacts.facebook_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.facebook')}: {contacts.facebook_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.youtube_url && (
-                        <Link href={contacts.youtube_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.youtube')}: {contacts.youtube_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.kakao_channel_url && (
-                        <Link href={contacts.kakao_channel_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.kakao')}: {contacts.kakao_channel_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.naver_place_url && (
-                        <Link href={contacts.naver_place_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.naverPlace')}: {contacts.naver_place_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.booking_url && (
-                        <Link href={contacts.booking_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.booking')}: {contacts.booking_url}</Typography>
-                        </Link>
-                      )}
-                      {contacts?.naver_booking_url && (
-                        <Link href={contacts.naver_booking_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">{t('restaurant.naverBooking')}: {contacts.naver_booking_url}</Typography>
-                        </Link>
-                      )}
-                    </Stack>
-                  </Box>
-                )}
               </Box>
             </Box>
 
