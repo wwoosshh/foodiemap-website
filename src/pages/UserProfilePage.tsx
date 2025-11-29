@@ -378,14 +378,16 @@ const UserProfilePage: React.FC = () => {
                 </Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <EmailIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {user.email}
-                    </Typography>
-                    {user.email_verified && (
-                      <Chip label={t.profile.verified} size="small" color="success" />
-                    )}
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <EmailIcon sx={{ fontSize: 18, color: 'text.secondary', mt: 0.3 }} />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-all' }}>
+                        {user.email}
+                      </Typography>
+                      {user.email_verified && (
+                        <Chip label={t.profile.verified} size="small" color="success" sx={{ alignSelf: 'flex-start' }} />
+                      )}
+                    </Box>
                   </Box>
 
                   {user.phone && (

@@ -295,7 +295,7 @@ export const ko = {
   // 푸터
   footer: {
     companyName: '맛집큐브',
-    description: '전국의 숨은 맛집을 찾아드립니다.\n당신의 맛있는 순간을 함께하세요.',
+    description: '숨은 맛집을 찾아드립니다.\n당신의 맛있는 순간을 함께하세요.',
     quickLinks: '바로가기',
     policies: '정책',
     companyInfo: '회사 정보',

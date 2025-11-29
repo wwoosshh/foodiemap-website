@@ -48,6 +48,7 @@ import {
   Close,
   KeyboardArrowUp,
   KeyboardArrowDown,
+  ContentCopy,
 } from '@mui/icons-material';
 import { openCloudinaryWidget } from '../lib/cloudinary';
 
@@ -179,6 +180,15 @@ const RestaurantDetailPage: React.FC = () => {
     } catch (err: any) {
       alert(err.userMessage || '즐겨찾기 처리에 실패했습니다.');
     }
+  };
+
+  const handleCopyAddress = () => {
+    const address = restaurant?.address || '';
+    navigator.clipboard.writeText(address).then(() => {
+      alert('주소가 복사되었습니다.');
+    }).catch(() => {
+      alert('주소 복사에 실패했습니다.');
+    });
   };
 
   const handleSubmitReview = async () => {
@@ -730,9 +740,22 @@ const RestaurantDetailPage: React.FC = () => {
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 }, width: '100%', maxWidth: '100%' }}>
                 {/* 주소 */}
                 <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    {t('restaurant.address')}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ textTransform: 'uppercase' }}>
+                      {t('restaurant.address')}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={handleCopyAddress}
+                      sx={{
+                        ml: 1,
+                        color: 'text.secondary',
+                        '&:hover': { color: 'primary.main' }
+                      }}
+                    >
+                      <ContentCopy fontSize="small" />
+                    </IconButton>
+                  </Box>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
                     {restaurant.address}
                   </Typography>

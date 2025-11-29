@@ -609,7 +609,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </Box>
           <SearchAutocomplete
             variant="mobile"
-            placeholder={t.nav?.searchPlaceholder || '맛집을 검색해보세요...'}
+            placeholder=""
             autoFocus
             onResultClick={() => setSearchModalOpen(false)}
             onSearch={() => setSearchModalOpen(false)}
