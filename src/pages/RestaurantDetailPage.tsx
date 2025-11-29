@@ -338,17 +338,6 @@ const RestaurantDetailPage: React.FC = () => {
     }
   };
 
-  // 가격대 번역
-  const translatePriceRange = (range: string) => {
-    const priceRangeMap: { [key: string]: string } = {
-      'low': '저가',
-      'medium': '중가',
-      'high': '고가',
-      'very_high': '최고가'
-    };
-    return priceRangeMap[range] || range;
-  };
-
   // 영업시간 렌더링
   const renderBusinessHours = () => {
     const hours = operations?.business_hours;
@@ -648,22 +637,6 @@ const RestaurantDetailPage: React.FC = () => {
                 <Typography variant="body1" color="text.secondary">
                   {t('restaurant.reviewCount')} {restaurant.review_count || 0}
                 </Typography>
-                {restaurant.avg_price_per_person && (
-                  <>
-                    <Typography color="text.secondary">•</Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      {t('restaurant.avgPrice')} {restaurant.avg_price_per_person.toLocaleString()}원
-                    </Typography>
-                  </>
-                )}
-                {restaurant.price_range && (
-                  <>
-                    <Typography color="text.secondary">•</Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      {translatePriceRange(restaurant.price_range)}
-                    </Typography>
-                  </>
-                )}
                 <Typography color="text.secondary">•</Typography>
                 <Typography variant="body1" color="text.secondary">
                   {t('restaurant.viewCount')} {restaurant.view_count || 0}
