@@ -19,7 +19,10 @@ import {
   Divider,
   useMediaQuery,
   CircularProgress,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchAutocomplete from '../components/SearchAutocomplete';
@@ -66,6 +69,7 @@ const NewHomePage: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showCategorySidebar, setShowCategorySidebar] = useState(true);
 
   // 다양한 알고리즘별 맛집 상태 (PC용)
   const [ratingRestaurants, setRatingRestaurants] = useState<Restaurant[]>([]);
@@ -894,7 +898,23 @@ const NewHomePage: React.FC = () => {
         <Container maxWidth="xl" sx={{ px: 3 }}>
           <Box sx={{ display: 'flex', gap: 4, position: 'relative' }}>
             {/* 메인 콘텐츠 영역 */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ flex: 1, minWidth: 0, transition: 'all 0.3s ease' }}>
+              {/* 카테고리 사이드바 토글 버튼 */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Tooltip title={showCategorySidebar ? '카테고리 숨기기' : '카테고리 보기'} placement="left">
+                  <IconButton
+                    onClick={() => setShowCategorySidebar(!showCategorySidebar)}
+                    sx={{
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      '&:hover': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                      },
+                    }}
+                  >
+                    {showCategorySidebar ? <ChevronRight /> : <ChevronLeft />}
+                  </IconButton>
+                </Tooltip>
+              </Box>
               {/* 선택된 카테고리 표시 */}
               {selectedCategoryId && selectedCategory && (
                 <Box sx={{ mb: 4 }}>
@@ -955,10 +975,23 @@ const NewHomePage: React.FC = () => {
             </Box>
 
           {/* 우측 카테고리 사이드바 (Sticky) */}
+          {showCategorySidebar && (
           <Box
             sx={{
               width: 250,
               display: { xs: 'none', lg: 'block' },
+              transition: 'all 0.3s ease',
+              animation: 'slideInRight 0.3s ease-out',
+              '@keyframes slideInRight': {
+                from: {
+                  opacity: 0,
+                  transform: 'translateX(50px)',
+                },
+                to: {
+                  opacity: 1,
+                  transform: 'translateX(0)',
+                },
+              },
             }}
           >
             <Paper
@@ -1023,6 +1056,7 @@ const NewHomePage: React.FC = () => {
               </Box>
             </Paper>
           </Box>
+          )}
         </Box>
       </Container>
       )}
