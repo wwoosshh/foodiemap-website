@@ -313,7 +313,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         component="footer"
         sx={{
           mt: 'auto',
-          py: 6,
+          py: { xs: 3, md: 6 },
           px: 2,
           background: currentTheme === 'dark'
             ? 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0F0F0F 100%)'
@@ -337,7 +337,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-              gap: { xs: 3, sm: 3, md: 4 },
+              gap: { xs: 2, sm: 3, md: 4 },
             }}
           >
             {/* 회사 정보 */}
@@ -357,43 +357,54 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 },
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <CubeLogoIcon
-                  sx={{
-                    fontSize: { xs: 28, md: 36 },
-                    color: '#FF6B6B',
-                    filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'rotate(15deg) scale(1.1)',
-                    },
-                  }}
-                />
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: 'auto 1fr', md: '1fr' },
+                gap: { xs: 2, md: 0 },
+                alignItems: { xs: 'start', md: 'center' },
+              }}>
+                {/* 로고 + 회사명 */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 0, md: 2 } }}>
+                  <CubeLogoIcon
+                    sx={{
+                      fontSize: { xs: 28, md: 36 },
+                      color: '#FF6B6B',
+                      filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'rotate(15deg) scale(1.1)',
+                      },
+                    }}
+                  />
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    sx={{
+                      fontSize: { xs: '1rem', md: '1.25rem' },
+                      color: '#FFFFFF',
+                      textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                      letterSpacing: '0.5px',
+                      display: { xs: 'none', md: 'block' },
+                    }}
+                  >
+                    {t.footer.companyName}
+                  </Typography>
+                </Box>
+
+                {/* 설명 텍스트 */}
                 <Typography
-                  variant="h6"
-                  fontWeight={700}
+                  variant="body2"
                   sx={{
-                    fontSize: { xs: '1rem', md: '1.25rem' },
-                    color: '#FFFFFF',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                    letterSpacing: '0.5px',
+                    color: 'rgba(255,255,255,0.85)',
+                    lineHeight: 1.6,
+                    fontSize: { xs: '0.75rem', md: '0.875rem' },
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                    whiteSpace: 'pre-line',
                   }}
                 >
-                  {t.footer.companyName}
+                  {t.footer.description}
                 </Typography>
               </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'rgba(255,255,255,0.85)',
-                  lineHeight: 1.8,
-                  fontSize: { xs: '0.8rem', md: '0.875rem' },
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                  whiteSpace: 'pre-line',
-                }}
-              >
-                {t.footer.description}
-              </Typography>
             </Box>
 
             {/* 바로가기 */}
@@ -406,11 +417,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   color: '#FFFFFF',
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                   fontSize: { xs: '0.95rem', md: '1.25rem' },
+                  mb: { xs: 1, md: 2 },
                 }}
               >
                 {t.footer.quickLinks}
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'row', md: 'column' },
+                flexWrap: { xs: 'wrap', md: 'nowrap' },
+                gap: { xs: '8px 12px', md: 1 },
+              }}>
                 <Link
                   to="/restaurants"
                   style={{
@@ -476,11 +493,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   color: '#FFFFFF',
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                   fontSize: { xs: '0.95rem', md: '1.25rem' },
+                  mb: { xs: 1, md: 2 },
                 }}
               >
                 {t.footer.policies}
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'row', md: 'column' },
+                flexWrap: { xs: 'wrap', md: 'nowrap' },
+                gap: { xs: '8px 12px', md: 1 },
+              }}>
                 <Link
                   to="/terms"
                   style={{
@@ -541,7 +564,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </Box>
           </Box>
 
-          <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.1)' }} />
+          <Divider sx={{ my: { xs: 2, md: 3 }, borderColor: 'rgba(255,255,255,0.1)' }} />
 
           <Typography
             variant="body2"
