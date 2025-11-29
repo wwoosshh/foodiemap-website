@@ -18,7 +18,7 @@ import MainLayout from '../components/layout/MainLayout';
 import { useLanguage } from '../context/LanguageContext';
 import { ApiService } from '../services/api';
 
-const ADMIN_EMAIL = 'nunconnect1@gmail.com';
+const ADMIN_EMAIL = 'ccjsrnl@naver.com';
 const KAKAO_CHANNEL_URL = 'https://pf.kakao.com/_xlxnxfBn'; // 카카오톡 채널 URL (실제 URL로 변경 필요)
 
 const ContactPage: React.FC = () => {
