@@ -784,7 +784,7 @@ const NewHomePage: React.FC = () => {
           <Box
             sx={{
               position: 'sticky',
-              top: isHeaderVisible ? 58 : 0, // 헤더 보일 때: 58px (실제 네비바 높이), 헤더 숨김 시: 최상단
+              top: isHeaderVisible ? 57 : 0, // 헤더 보일 때: 57px (실제 네비바 높이), 헤더 숨김 시: 최상단
               zIndex: 99,
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
