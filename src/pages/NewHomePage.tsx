@@ -20,7 +20,7 @@ import {
   useMediaQuery,
   CircularProgress,
 } from '@mui/material';
-import MainLayout, { useHeaderVisibility } from '../components/layout/MainLayout';
+import MainLayout from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchAutocomplete from '../components/SearchAutocomplete';
 import { ApiService } from '../services/api';
@@ -36,6 +36,7 @@ import {
 } from '../components/icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 import { useLanguage } from '../context/LanguageContext';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 
 // 정렬 옵션 타입
 type SortOption = 'rating_desc' | 'review_count_desc' | 'view_count_desc' | 'created_at_desc' | 'created_at_asc';
@@ -55,7 +56,8 @@ const NewHomePage: React.FC = () => {
   const theme = useTheme();
   const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { isHeaderVisible } = useHeaderVisibility();
+  // 카테고리바를 위한 독립적인 스크롤 감지 (상단 네비게이션바와 동일한 설정)
+  const { isVisible: isHeaderVisible } = useScrollDirection({ threshold: 10, alwaysShowAtTop: true });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
