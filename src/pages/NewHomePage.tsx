@@ -899,22 +899,6 @@ const NewHomePage: React.FC = () => {
           <Box sx={{ display: 'flex', gap: 4, position: 'relative' }}>
             {/* 메인 콘텐츠 영역 */}
             <Box sx={{ flex: 1, minWidth: 0, transition: 'all 0.3s ease' }}>
-              {/* 카테고리 사이드바 토글 버튼 */}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                <Tooltip title={showCategorySidebar ? '카테고리 숨기기' : '카테고리 보기'} placement="left">
-                  <IconButton
-                    onClick={() => setShowCategorySidebar(!showCategorySidebar)}
-                    sx={{
-                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                      '&:hover': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                      },
-                    }}
-                  >
-                    {showCategorySidebar ? <ChevronRight /> : <ChevronLeft />}
-                  </IconButton>
-                </Tooltip>
-              </Box>
               {/* 선택된 카테고리 표시 */}
               {selectedCategoryId && selectedCategory && (
                 <Box sx={{ mb: 4 }}>
@@ -974,31 +958,43 @@ const NewHomePage: React.FC = () => {
               />
             </Box>
 
-          {/* 우측 카테고리 사이드바 (Sticky) */}
-          {showCategorySidebar && (
+          {/* 우측 카테고리 사이드바 영역 (Sticky) */}
           <Box
             sx={{
-              width: 250,
-              display: { xs: 'none', lg: 'block' },
+              width: showCategorySidebar ? 250 : 60,
+              display: { xs: 'none', lg: 'flex' },
+              flexDirection: 'column',
+              alignItems: showCategorySidebar ? 'stretch' : 'center',
               transition: 'all 0.3s ease',
-              animation: 'slideInRight 0.3s ease-out',
-              '@keyframes slideInRight': {
-                from: {
-                  opacity: 0,
-                  transform: 'translateX(50px)',
-                },
-                to: {
-                  opacity: 1,
-                  transform: 'translateX(0)',
-                },
-              },
             }}
           >
+            {/* 토글 버튼 - Sticky */}
+            <Tooltip title={showCategorySidebar ? '카테고리 숨기기' : '카테고리 보기'} placement="left">
+              <IconButton
+                onClick={() => setShowCategorySidebar(!showCategorySidebar)}
+                sx={{
+                  position: 'sticky',
+                  top: 100,
+                  alignSelf: showCategorySidebar ? 'flex-start' : 'center',
+                  mb: 2,
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                  },
+                  zIndex: 10,
+                }}
+              >
+                {showCategorySidebar ? <ChevronRight /> : <ChevronLeft />}
+              </IconButton>
+            </Tooltip>
+
+            {/* 카테고리 사이드바 Paper */}
+            {showCategorySidebar && (
             <Paper
               elevation={2}
               sx={{
                 position: 'sticky',
-                top: 100,
+                top: 156,
                 p: 3,
                 borderRadius: 3,
                 background: theme.palette.mode === 'dark'
