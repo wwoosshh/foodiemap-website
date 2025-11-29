@@ -778,17 +778,19 @@ const NewHomePage: React.FC = () => {
       {isMobile ? (
         /* ===== 모바일 레이아웃 ===== */
         <>
-          {/* Sticky 카테고리 + 정렬 필터 바 - 스크롤 시 상단에 고정 */}
+          {/* Fixed 카테고리 + 정렬 필터 바 - 헤더와 동기화 */}
           <Box
             sx={{
-              position: 'sticky',
-              top: isHeaderVisible ? 73 : 0, // 헤더 높이 73px, 헤더 숨김 시 최상단
+              position: 'fixed',
+              top: isHeaderVisible ? 73 : 0, // 헤더 보일 때: 73px, 헤더 숨김 시: 최상단
+              left: 0,
+              right: 0,
               zIndex: 99,
+              width: '100%',
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               py: 1,
               px: 2,
-              mx: -2, // Container 패딩 상쇄
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
               transition: 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
@@ -867,7 +869,7 @@ const NewHomePage: React.FC = () => {
           </Box>
 
           {/* 단일 맛집 목록 - 1열 */}
-          <Container maxWidth="xl" sx={{ px: 2, py: 2 }}>
+          <Container maxWidth="xl" sx={{ px: 2, py: 2, pt: 12 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {mobileRestaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
