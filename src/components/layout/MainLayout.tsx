@@ -108,7 +108,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           // 모바일에서 스크롤 방향에 따라 숨김/표시
           ...(isMobile && {
             transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
-            transition: 'transform 0.3s ease-in-out',
+            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           }),
         }}
       >
@@ -300,7 +300,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             ? 'linear-gradient(180deg, #0D0D0D 0%, #121212 50%, #0F0F0F 100%)'
             : 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
           // 모바일에서 고정 헤더 높이만큼 상단 패딩 추가
-          paddingTop: isMobile ? '64px' : 0,
+          paddingTop: isMobile ? '73px' : 0,
           // 모바일에서 하단 네비게이션 바의 높이만큼 하단 패딩 추가
           paddingBottom: isMobile ? '90px' : 0,
         }}
