@@ -1051,8 +1051,8 @@ const NewHomePage: React.FC = () => {
                 ))}
               </Box>
             </Paper>
+            )}
           </Box>
-          )}
         </Box>
       </Container>
       )}
