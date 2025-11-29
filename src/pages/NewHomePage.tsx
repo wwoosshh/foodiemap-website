@@ -62,8 +62,6 @@ const NewHomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [showCategoryBar, setShowCategoryBar] = useState(false);
-  const pushedSectionRef = useRef<HTMLDivElement | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
@@ -257,25 +255,6 @@ const NewHomePage: React.FC = () => {
       }
     };
   }, [isMobile, hasMore, selectedCategoryId, sortOption, loadMobileRestaurants]);
-
-  // 푸시 섹션을 지나면 카테고리바 표시
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleScroll = () => {
-      if (pushedSectionRef.current) {
-        const rect = pushedSectionRef.current.getBoundingClientRect();
-        const headerHeight = isHeaderVisible ? 64 : 0;
-        // 푸시 섹션이 헤더 아래로 완전히 지나갔으면 카테고리바 표시
-        setShowCategoryBar(rect.bottom <= headerHeight);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // 초기 상태 확인
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile, isHeaderVisible]);
 
   // 정렬 변경 핸들러
   const handleSortChange = (newSort: SortOption) => {
@@ -670,7 +649,6 @@ const NewHomePage: React.FC = () => {
       {/* 푸시 맛집 섹션 - 두 번째 배치 */}
       {pushedRestaurants.length > 0 && (
         <Box
-          ref={pushedSectionRef}
           sx={{
             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
               theme.palette.secondary.main,
@@ -802,24 +780,18 @@ const NewHomePage: React.FC = () => {
       {isMobile ? (
         /* ===== 모바일 레이아웃 ===== */
         <>
-          {/* Fixed 카테고리 + 정렬 필터 바 - 헤더와 동기화 */}
-          {showCategoryBar && (
+          {/* Sticky 카테고리 + 정렬 필터 바 - 푸시 섹션 아래에 배치 */}
           <Box
             sx={{
-              position: 'fixed',
-              top: isHeaderVisible ? 64 : 0, // 헤더 보일 때: 64px (Toolbar 높이), 헤더 숨김 시: 최상단
-              left: 0,
-              right: 0,
+              position: 'sticky',
+              top: isHeaderVisible ? 58 : 0, // 헤더 보일 때: 58px (실제 네비바 높이), 헤더 숨김 시: 최상단
               zIndex: 99,
-              width: '100%',
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               py: 1,
               px: 2,
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
               transition: 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              opacity: showCategoryBar ? 1 : 0,
-              transform: showCategoryBar ? 'translateY(0)' : 'translateY(-20px)',
             }}
           >
             {/* 카테고리 행 */}
@@ -894,10 +866,9 @@ const NewHomePage: React.FC = () => {
               ))}
             </Box>
           </Box>
-          )}
 
           {/* 단일 맛집 목록 - 1열 */}
-          <Container maxWidth="xl" sx={{ px: 2, py: 2, pt: 12 }}>
+          <Container maxWidth="xl" sx={{ px: 2, py: 2 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {mobileRestaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
