@@ -184,10 +184,8 @@ const RestaurantDetailPage: React.FC = () => {
 
   const handleCopyAddress = () => {
     const address = restaurant?.address || '';
-    navigator.clipboard.writeText(address).then(() => {
-      alert('주소가 복사되었습니다.');
-    }).catch(() => {
-      alert('주소 복사에 실패했습니다.');
+    navigator.clipboard.writeText(address).catch(() => {
+      // 복사 실패 시 무시 (사용자에게 불필요한 알림 방지)
     });
   };
 

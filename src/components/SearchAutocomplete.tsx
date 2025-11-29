@@ -349,7 +349,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           </SearchIconWrapper>
           <StyledInputBase
             inputRef={inputRef}
-            placeholder={placeholder || t.nav.searchPlaceholder}
+            placeholder={placeholder !== undefined ? placeholder : t.nav.searchPlaceholder}
             inputProps={{ 'aria-label': 'search' }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
