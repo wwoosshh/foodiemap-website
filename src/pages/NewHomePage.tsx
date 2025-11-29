@@ -62,6 +62,8 @@ const NewHomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [showCategoryBar, setShowCategoryBar] = useState(false);
+  const pushedSectionRef = useRef<HTMLDivElement | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
@@ -255,6 +257,25 @@ const NewHomePage: React.FC = () => {
       }
     };
   }, [isMobile, hasMore, selectedCategoryId, sortOption, loadMobileRestaurants]);
+
+  // 푸시 섹션을 지나면 카테고리바 표시
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      if (pushedSectionRef.current) {
+        const rect = pushedSectionRef.current.getBoundingClientRect();
+        const headerHeight = isHeaderVisible ? 64 : 0;
+        // 푸시 섹션이 헤더 아래로 완전히 지나갔으면 카테고리바 표시
+        setShowCategoryBar(rect.bottom <= headerHeight);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // 초기 상태 확인
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile, isHeaderVisible]);
 
   // 정렬 변경 핸들러
   const handleSortChange = (newSort: SortOption) => {
@@ -649,6 +670,7 @@ const NewHomePage: React.FC = () => {
       {/* 푸시 맛집 섹션 - 두 번째 배치 */}
       {pushedRestaurants.length > 0 && (
         <Box
+          ref={pushedSectionRef}
           sx={{
             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
               theme.palette.secondary.main,
@@ -781,10 +803,11 @@ const NewHomePage: React.FC = () => {
         /* ===== 모바일 레이아웃 ===== */
         <>
           {/* Fixed 카테고리 + 정렬 필터 바 - 헤더와 동기화 */}
+          {showCategoryBar && (
           <Box
             sx={{
               position: 'fixed',
-              top: isHeaderVisible ? 73 : 0, // 헤더 보일 때: 73px, 헤더 숨김 시: 최상단
+              top: isHeaderVisible ? 64 : 0, // 헤더 보일 때: 64px (Toolbar 높이), 헤더 숨김 시: 최상단
               left: 0,
               right: 0,
               zIndex: 99,
@@ -795,6 +818,8 @@ const NewHomePage: React.FC = () => {
               px: 2,
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
               transition: 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              opacity: showCategoryBar ? 1 : 0,
+              transform: showCategoryBar ? 'translateY(0)' : 'translateY(-20px)',
             }}
           >
             {/* 카테고리 행 */}
@@ -869,6 +894,7 @@ const NewHomePage: React.FC = () => {
               ))}
             </Box>
           </Box>
+          )}
 
           {/* 단일 맛집 목록 - 1열 */}
           <Container maxWidth="xl" sx={{ px: 2, py: 2, pt: 12 }}>
