@@ -39,6 +39,7 @@ import {
 } from '../components/icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 import { useLanguage } from '../context/LanguageContext';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 
 // 정렬 옵션 타입
 type SortOption = 'rating_desc' | 'review_count_desc' | 'view_count_desc' | 'created_at_desc' | 'created_at_asc';
@@ -58,8 +59,10 @@ const NewHomePage: React.FC = () => {
   const theme = useTheme();
   const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // 카테고리바를 위한 헤더 가시성 및 높이 (MainLayout Context에서 가져옴)
-  const { isHeaderVisible, headerHeight } = useHeaderVisibility();
+  // 스크롤 방향 감지 (카테고리바 표시/숨김용)
+  const { isVisible: isHeaderVisible } = useScrollDirection({ threshold: 10, alwaysShowAtTop: true });
+  // 헤더 높이는 Context에서 가져옴 (MainLayout에서 측정)
+  const { headerHeight } = useHeaderVisibility();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
