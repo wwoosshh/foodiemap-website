@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Container,
@@ -88,6 +88,11 @@ const RestaurantDetailPage: React.FC = () => {
   const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
+
+  // 메인 이미지 스와이프 관련
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const mainImageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id) {
@@ -346,6 +351,30 @@ const RestaurantDetailPage: React.FC = () => {
     }
   };
 
+  // 메인 이미지 스와이프 핸들러
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const diffX = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50; // 최소 스와이프 거리
+
+    if (Math.abs(diffX) > minSwipeDistance && photos.all.length > 1) {
+      if (diffX > 0) {
+        // 왼쪽으로 스와이프 -> 다음 이미지
+        setSelectedImage((prev) => (prev + 1) % photos.all.length);
+      } else {
+        // 오른쪽으로 스와이프 -> 이전 이미지
+        setSelectedImage((prev) => (prev - 1 + photos.all.length) % photos.all.length);
+      }
+    }
+  }, [photos.all.length]);
+
   // 영업시간 렌더링
   const renderBusinessHours = () => {
     const hours = operations?.business_hours;
@@ -475,15 +504,21 @@ const RestaurantDetailPage: React.FC = () => {
           <Box sx={{ width: '100%', maxWidth: '100%', overflow: { xs: 'hidden', md: 'visible' } }}>
             {/* 대표 이미지 */}
             {photos.all.length > 0 && (
-              <Box sx={{
-                mb: 4,
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: { xs: 2, md: 0 },
-                '&:hover .main-restaurant-image': {
-                  transform: 'scale(1.05)',
-                },
-              }}>
+              <Box
+                ref={mainImageRef}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                sx={{
+                  mb: { xs: 1.5, md: 4 },
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: { xs: 2, md: 0 },
+                  '&:hover .main-restaurant-image': {
+                    transform: 'scale(1.05)',
+                  },
+                }}
+              >
                 <Box
                   component="img"
                   className="main-restaurant-image"
@@ -495,9 +530,41 @@ const RestaurantDetailPage: React.FC = () => {
                     objectFit: 'cover',
                     cursor: 'pointer',
                     transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    userSelect: 'none',
+                    WebkitUserDrag: 'none',
                   }}
                   onClick={() => window.open(photos.all[selectedImage]?.url, '_blank')}
                 />
+                {/* 모바일 이미지 인디케이터 */}
+                {photos.all.length > 1 && (
+                  <Box
+                    sx={{
+                      display: { xs: 'flex', md: 'none' },
+                      position: 'absolute',
+                      bottom: 12,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      gap: 0.5,
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 2,
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                  >
+                    {photos.all.map((_: any, idx: number) => (
+                      <Box
+                        key={idx}
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          backgroundColor: selectedImage === idx ? 'white' : 'rgba(255, 255, 255, 0.4)',
+                          transition: 'background-color 0.3s',
+                        }}
+                      />
+                    ))}
+                  </Box>
+                )}
               </Box>
             )}
 
@@ -505,10 +572,10 @@ const RestaurantDetailPage: React.FC = () => {
             {photos.all.length > 0 && (
               <Box sx={{
                 display: { xs: 'block', md: 'none' },
-                mb: 4,
+                mb: 3,
               }}>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" fontWeight={700}>
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="subtitle1" fontWeight={700}>
                     {t('restaurant.photos')} ({photos.all.length})
                   </Typography>
                 </Box>
