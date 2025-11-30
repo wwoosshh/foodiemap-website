@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -46,8 +46,8 @@ const SlideTransition = React.forwardRef(function Transition(
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-// 헤더 가시성 Context
-export const HeaderVisibilityContext = createContext<{ isHeaderVisible: boolean }>({ isHeaderVisible: true });
+// 헤더 가시성 및 높이 Context
+export const HeaderVisibilityContext = createContext<{ isHeaderVisible: boolean; headerHeight: number }>({ isHeaderVisible: true, headerHeight: 73 });
 export const useHeaderVisibility = () => useContext(HeaderVisibilityContext);
 
 interface MainLayoutProps {
@@ -67,6 +67,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(73); // 기본값 73px
+  const appBarRef = useRef<HTMLDivElement>(null);
+
+  // 헤더 높이 측정
+  useEffect(() => {
+    const measureHeaderHeight = () => {
+      if (appBarRef.current) {
+        const height = appBarRef.current.getBoundingClientRect().height;
+        setHeaderHeight(height);
+      }
+    };
+
+    measureHeaderHeight();
+    window.addEventListener('resize', measureHeaderHeight);
+    return () => window.removeEventListener('resize', measureHeaderHeight);
+  }, []);
 
   const menuItems = [
     { label: t.nav.home, path: '/', icon: <RestaurantIcon /> },
@@ -94,10 +110,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <HeaderVisibilityContext.Provider value={{ isHeaderVisible }}>
+    <HeaderVisibilityContext.Provider value={{ isHeaderVisible, headerHeight }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', maxWidth: '100vw' }}>
       {/* 헤더 */}
       <AppBar
+        ref={appBarRef}
         position={isMobile ? 'fixed' : 'sticky'}
         elevation={0}
         sx={{
@@ -300,7 +317,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             ? 'linear-gradient(180deg, #0D0D0D 0%, #121212 50%, #0F0F0F 100%)'
             : 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
           // 모바일에서 고정 헤더 높이만큼 상단 패딩 추가
-          paddingTop: isMobile ? '73px' : 0,
+          paddingTop: isMobile ? `${headerHeight}px` : 0,
           // 모바일에서 하단 네비게이션 바의 높이만큼 하단 패딩 추가
           paddingBottom: isMobile ? '90px' : 0,
         }}

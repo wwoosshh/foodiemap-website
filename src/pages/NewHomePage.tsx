@@ -23,7 +23,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import MainLayout from '../components/layout/MainLayout';
+import MainLayout, { useHeaderVisibility } from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchAutocomplete from '../components/SearchAutocomplete';
 import { ApiService } from '../services/api';
@@ -39,7 +39,6 @@ import {
 } from '../components/icons/CustomIcons';
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 import { useLanguage } from '../context/LanguageContext';
-import { useScrollDirection } from '../hooks/useScrollDirection';
 
 // 정렬 옵션 타입
 type SortOption = 'rating_desc' | 'review_count_desc' | 'view_count_desc' | 'created_at_desc' | 'created_at_asc';
@@ -59,8 +58,8 @@ const NewHomePage: React.FC = () => {
   const theme = useTheme();
   const { t } = useLanguage();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // 카테고리바를 위한 독립적인 스크롤 감지 (상단 네비게이션바와 동일한 설정)
-  const { isVisible: isHeaderVisible } = useScrollDirection({ threshold: 10, alwaysShowAtTop: true });
+  // 카테고리바를 위한 헤더 가시성 및 높이 (MainLayout Context에서 가져옴)
+  const { isHeaderVisible, headerHeight } = useHeaderVisibility();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -788,7 +787,7 @@ const NewHomePage: React.FC = () => {
           <Box
             sx={{
               position: 'sticky',
-              top: isHeaderVisible ? 57 : 0, // 헤더 보일 때: 57px (실제 네비바 높이), 헤더 숨김 시: 최상단
+              top: isHeaderVisible ? headerHeight : 0, // 헤더 보일 때: 네비바 높이만큼, 헤더 숨김 시: 최상단
               zIndex: 99,
               backgroundColor: theme.palette.background.paper,
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
