@@ -70,18 +70,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [headerHeight, setHeaderHeight] = useState(73); // 기본값 73px
   const appBarRef = useRef<HTMLDivElement>(null);
 
-  // 헤더 높이 측정
+  // 헤더 높이 측정 (DOM이 완전히 렌더링된 후 측정)
   useEffect(() => {
     const measureHeaderHeight = () => {
       if (appBarRef.current) {
-        const height = appBarRef.current.getBoundingClientRect().height;
-        setHeaderHeight(height);
+        const height = appBarRef.current.offsetHeight;
+        if (height > 0 && height < 150) { // 유효한 범위 내에서만 업데이트
+          setHeaderHeight(height);
+        }
       }
     };
 
-    measureHeaderHeight();
+    // 초기 렌더링 후 약간의 지연을 두고 측정
+    const timer = setTimeout(measureHeaderHeight, 100);
     window.addEventListener('resize', measureHeaderHeight);
-    return () => window.removeEventListener('resize', measureHeaderHeight);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', measureHeaderHeight);
+    };
   }, []);
 
   const menuItems = [
