@@ -630,7 +630,7 @@ const NewHomePage: React.FC = () => {
     <MainLayout>
       {/* 모바일 검색바 - 배너 위 */}
       {isMobile && (
-        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, mt: 2 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, pt: 1.5 }}>
           <SearchAutocomplete
             variant="mobile"
             placeholder=""
