@@ -458,15 +458,20 @@ const RestaurantDetailPage: React.FC = () => {
     );
   };
 
-  // 태그를 카테고리별로 그룹화
+  // 태그를 카테고리별로 그룹화 (새로운 카테고리 시스템 지원)
   const groupTagsByCategory = () => {
-    const grouped: { [key: string]: any[] } = {};
+    const grouped: { [key: string]: { tags: any[], icon?: string, color?: string } } = {};
     tags.forEach(tag => {
-      const category = tag.category || 'other';
+      // 새로운 category 필드 (tag_categories.name)를 우선 사용
+      const category = tag.category || '기타';
       if (!grouped[category]) {
-        grouped[category] = [];
+        grouped[category] = {
+          tags: [],
+          icon: tag.category_icon,
+          color: tag.category_color
+        };
       }
-      grouped[category].push(tag);
+      grouped[category].tags.push(tag);
     });
     return grouped;
   };
@@ -769,21 +774,32 @@ const RestaurantDetailPage: React.FC = () => {
                 <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
                   {t('restaurant.tags')}
                 </Typography>
-                {Object.entries(groupedTags).map(([category, categoryTags]) => (
+                {Object.entries(groupedTags).map(([category, categoryData]) => (
                   <Box key={category} sx={{ mb: 2 }}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      sx={{
+                        mb: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        color: categoryData.color || 'text.secondary'
+                      }}
+                    >
+                      {categoryData.icon && <span>{categoryData.icon}</span>}
                       {category}
                     </Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {categoryTags.map((tag: any) => (
+                      {categoryData.tags.map((tag: any) => (
                         <Chip
                           key={tag.id}
-                          label={`${tag.icon || ''} ${tag.name}`}
+                          label={`${tag.icon || ''} ${tag.name}`.trim()}
                           size="small"
                           sx={{
-                            backgroundColor: tag.color ? `${tag.color}20` : undefined,
-                            borderColor: tag.color || undefined,
-                            color: tag.color || undefined,
+                            backgroundColor: (tag.color || categoryData.color) ? `${tag.color || categoryData.color}15` : undefined,
+                            borderColor: tag.color || categoryData.color || undefined,
+                            color: tag.color || categoryData.color || undefined,
                           }}
                           variant="outlined"
                         />
