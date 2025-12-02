@@ -145,7 +145,7 @@ const CollectionFormPage: React.FC = () => {
   const loadFavorites = async () => {
     try {
       const response = await ApiService.getUserFavorites();
-      if (response.success) {
+      if (response.success && response.data) {
         setFavorites(response.data.favorites || []);
       }
     } catch (err) {
@@ -156,7 +156,7 @@ const CollectionFormPage: React.FC = () => {
   const loadUserReviews = async () => {
     try {
       const response = await ApiService.getUserReviews({ limit: 50 });
-      if (response.success) {
+      if (response.success && response.data) {
         setUserReviews(response.data.reviews || []);
       }
     } catch (err) {
@@ -174,7 +174,7 @@ const CollectionFormPage: React.FC = () => {
         search: searchQuery,
         limit: 20,
       });
-      if (response.success) {
+      if (response.success && response.data) {
         setSearchResults(response.data.restaurants || []);
       }
     } catch (err) {
@@ -251,7 +251,7 @@ const CollectionFormPage: React.FC = () => {
           cover_image_url: coverImageUrl || undefined,
           restaurant_ids: selectedRestaurants.map((r) => r.id),
         });
-        if (response.success) {
+        if (response.success && response.data) {
           navigate(`/community/collections/${response.data.id}`);
         }
       }

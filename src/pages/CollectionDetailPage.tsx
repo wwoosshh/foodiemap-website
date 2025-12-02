@@ -154,7 +154,7 @@ const CollectionDetailPage: React.FC = () => {
 
     try {
       const response = await ApiService.getCollectionComments(id);
-      if (response.success) {
+      if (response.success && response.data) {
         setComments(response.data.comments || []);
       }
     } catch (err) {
@@ -177,13 +177,14 @@ const CollectionDetailPage: React.FC = () => {
 
     try {
       const response = await ApiService.toggleCollectionLike(collection.id);
-      if (response.success) {
+      if (response.success && response.data) {
+        const isLiked = response.data.is_liked;
         setCollection((prev) =>
           prev
             ? {
                 ...prev,
-                is_liked: response.data.is_liked,
-                like_count: response.data.is_liked ? prev.like_count + 1 : prev.like_count - 1,
+                is_liked: isLiked,
+                like_count: isLiked ? prev.like_count + 1 : prev.like_count - 1,
               }
             : null
         );
@@ -203,13 +204,14 @@ const CollectionDetailPage: React.FC = () => {
 
     try {
       const response = await ApiService.toggleCollectionSave(collection.id);
-      if (response.success) {
+      if (response.success && response.data) {
+        const isSaved = response.data.is_saved;
         setCollection((prev) =>
           prev
             ? {
                 ...prev,
-                is_saved: response.data.is_saved,
-                save_count: response.data.is_saved ? prev.save_count + 1 : prev.save_count - 1,
+                is_saved: isSaved,
+                save_count: isSaved ? prev.save_count + 1 : prev.save_count - 1,
               }
             : null
         );

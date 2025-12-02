@@ -18,7 +18,6 @@ import {
   Avatar,
   TextField,
   InputAdornment,
-  Grid,
   Tabs,
   Tab,
 } from '@mui/material';
@@ -449,14 +448,15 @@ const CommunityPage: React.FC = () => {
 
     try {
       const response = await ApiService.toggleCollectionLike(collectionId);
-      if (response.success) {
+      if (response.success && response.data) {
+        const isLiked = response.data.is_liked;
         setCollections((prev) =>
           prev.map((c) =>
             c.id === collectionId
               ? {
                   ...c,
-                  is_liked: response.data.is_liked,
-                  like_count: response.data.is_liked ? c.like_count + 1 : c.like_count - 1,
+                  is_liked: isLiked,
+                  like_count: isLiked ? c.like_count + 1 : c.like_count - 1,
                 }
               : c
           )
@@ -476,14 +476,15 @@ const CommunityPage: React.FC = () => {
 
     try {
       const response = await ApiService.toggleCollectionSave(collectionId);
-      if (response.success) {
+      if (response.success && response.data) {
+        const isSaved = response.data.is_saved;
         setCollections((prev) =>
           prev.map((c) =>
             c.id === collectionId
               ? {
                   ...c,
-                  is_saved: response.data.is_saved,
-                  save_count: response.data.is_saved ? c.save_count + 1 : c.save_count - 1,
+                  is_saved: isSaved,
+                  save_count: isSaved ? c.save_count + 1 : c.save_count - 1,
                 }
               : c
           )
@@ -662,13 +663,11 @@ const CommunityPage: React.FC = () => {
 
           {/* 컬렉션 그리드 */}
           {loading ? (
-            <Grid container spacing={3}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Grid item xs={12} sm={6} md={4} key={i}>
-                  <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 3 }} />
-                </Grid>
+                <Skeleton key={i} variant="rectangular" height={280} sx={{ borderRadius: 3 }} />
               ))}
-            </Grid>
+            </Box>
           ) : collections.length === 0 ? (
             <Box
               sx={{
@@ -690,18 +689,17 @@ const CommunityPage: React.FC = () => {
               </Button>
             </Box>
           ) : (
-            <Grid container spacing={3}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
               {collections.map((collection) => (
-                <Grid item xs={12} sm={6} md={4} key={collection.id}>
-                  <CollectionCard
-                    collection={collection}
-                    onLike={handleLike}
-                    onSave={handleSave}
-                    onClick={handleCollectionClick}
-                  />
-                </Grid>
+                <CollectionCard
+                  key={collection.id}
+                  collection={collection}
+                  onLike={handleLike}
+                  onSave={handleSave}
+                  onClick={handleCollectionClick}
+                />
               ))}
-            </Grid>
+            </Box>
           )}
 
           {/* 더 보기 로딩 */}
