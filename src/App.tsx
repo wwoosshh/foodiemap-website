@@ -15,6 +15,9 @@ import NoticeDetailPage from './pages/NoticeDetailPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import ContactPage from './pages/ContactPage';
+import CommunityPage from './pages/CommunityPage';
+import CollectionDetailPage from './pages/CollectionDetailPage';
+import CollectionFormPage from './pages/CollectionFormPage';
 
 // Components
 import EmailVerificationModal from './components/EmailVerificationModal';
@@ -77,6 +80,12 @@ const AppContent = () => {
 
             {/* 문의하기 페이지 */}
             <Route path="/contact" element={<ContactPage />} />
+
+            {/* 커뮤니티 (컬렉션) */}
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/community/collections/new" element={<CollectionFormPage />} />
+            <Route path="/community/collections/:id" element={<CollectionDetailPage />} />
+            <Route path="/community/collections/:id/edit" element={<CollectionFormPage />} />
 
             {/* 404 페이지 - 모든 미지정 경로는 홈으로 */}
             <Route path="*" element={<Navigate to="/" replace />} />

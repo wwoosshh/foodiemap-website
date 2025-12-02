@@ -38,6 +38,10 @@ import {
   Notifications as NotificationsIcon,
   Person as PersonIcon,
   Save as SaveIcon,
+  Collections as CollectionsIcon,
+  Add as AddIcon,
+  Favorite as FavoriteIcon,
+  Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import MainLayout from '../components/layout/MainLayout';
 import FavoritesListView from '../components/FavoritesListView';
@@ -62,6 +66,7 @@ const UserProfilePage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [myReviews, setMyReviews] = useState<any[]>([]);
+  const [myCollections, setMyCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 회원 탈퇴 관련 상태
@@ -117,9 +122,10 @@ const UserProfilePage: React.FC = () => {
   const loadUserData = async () => {
     try {
       setLoading(true);
-      const [favoritesRes, reviewsRes] = await Promise.all([
+      const [favoritesRes, reviewsRes, collectionsRes] = await Promise.all([
         ApiService.getUserFavorites(),
         ApiService.getUserReviews({ page: 1, limit: 10 }),
+        ApiService.getMyCollections(),
       ]);
 
       if (favoritesRes.success && favoritesRes.data) {
@@ -128,6 +134,10 @@ const UserProfilePage: React.FC = () => {
 
       if (reviewsRes.success && reviewsRes.data) {
         setMyReviews(reviewsRes.data.reviews || []);
+      }
+
+      if (collectionsRes.success && collectionsRes.data) {
+        setMyCollections(collectionsRes.data || []);
       }
     } catch (err) {
       // 로드 실패 시 빈 배열 유지
@@ -403,7 +413,7 @@ const UserProfilePage: React.FC = () => {
                 <Button
                   variant="contained"
                   startIcon={<SettingsIcon />}
-                  onClick={() => setSelectedTab(2)}
+                  onClick={() => setSelectedTab(3)}
                 >
                   {t.profile.settings}
                 </Button>
@@ -448,6 +458,7 @@ const UserProfilePage: React.FC = () => {
           <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
             <Tab label={`${t.profile.myFavorites} (${favorites.length})`} />
             <Tab label={`${t.profile.myReviews} (${myReviews.length})`} />
+            <Tab label={`내 컬렉션 (${myCollections.length})`} icon={<CollectionsIcon />} iconPosition="start" />
             <Tab label={t.profile.settings} icon={<SettingsIcon />} iconPosition="start" />
           </Tabs>
         </Box>
@@ -505,8 +516,108 @@ const UserProfilePage: React.FC = () => {
               />
             )}
 
-            {/* 설정 탭 */}
+            {/* 내 컬렉션 탭 */}
             {selectedTab === 2 && (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate('/community/collections/new')}
+                  >
+                    컬렉션 만들기
+                  </Button>
+                </Box>
+
+                {myCollections.length === 0 ? (
+                  <Card sx={{ textAlign: 'center', py: 6 }}>
+                    <CollectionsIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      아직 컬렉션이 없습니다
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                      나만의 맛집 컬렉션을 만들어보세요!
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => navigate('/community/collections/new')}
+                    >
+                      첫 컬렉션 만들기
+                    </Button>
+                  </Card>
+                ) : (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+                    {myCollections.map((collection) => (
+                      <Card
+                        key={collection.id}
+                        sx={{
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: 4,
+                          },
+                        }}
+                        onClick={() => navigate(`/community/collections/${collection.id}`)}
+                      >
+                        <Box
+                          sx={{
+                            height: 120,
+                            bgcolor: 'grey.100',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {collection.cover_image_url ? (
+                            <Box
+                              component="img"
+                              src={collection.cover_image_url}
+                              alt={collection.title}
+                              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <CollectionsIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                          )}
+                        </Box>
+                        <CardContent sx={{ py: 1.5 }}>
+                          <Typography variant="subtitle2" fontWeight={600} noWrap>
+                            {collection.title}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                            <Typography variant="caption" color="text.secondary">
+                              {collection.item_count}개 맛집
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <FavoriteIcon sx={{ fontSize: 12, color: 'error.main' }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {collection.like_count}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <VisibilityIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {collection.view_count}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Chip
+                            label={collection.visibility === 'public' ? '공개' : collection.visibility === 'private' ? '비공개' : '팔로워만'}
+                            size="small"
+                            sx={{ mt: 1 }}
+                            color={collection.visibility === 'public' ? 'success' : 'default'}
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {/* 설정 탭 */}
+            {selectedTab === 3 && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {/* 메시지 표시 */}
                 {settingsMessage && (

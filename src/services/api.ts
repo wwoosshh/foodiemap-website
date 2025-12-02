@@ -703,6 +703,147 @@ export class ApiService {
     const response = await api.post('/api/contact', contactData);
     return response.data;
   }
+
+  // ==================== 컬렉션 API ====================
+
+  // 컬렉션 목록 조회
+  static async getCollections(params: {
+    sort?: 'popular' | 'recent' | 'most_saved';
+    type?: 'favorites' | 'reviewed' | 'wishlist' | 'custom';
+    page?: number;
+    limit?: number;
+  } = {}): Promise<ApiResponse<{
+    collections: any[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      total_pages: number;
+    };
+  }>> {
+    const response = await api.get('/api/collections', { params });
+    return response.data;
+  }
+
+  // 추천 컬렉션 조회
+  static async getFeaturedCollections(): Promise<ApiResponse<any[]>> {
+    const response = await api.get('/api/collections/featured');
+    return response.data;
+  }
+
+  // 컬렉션 상세 조회
+  static async getCollectionById(id: string): Promise<ApiResponse<any>> {
+    const response = await api.get(`/api/collections/${id}`);
+    return response.data;
+  }
+
+  // 컬렉션 생성
+  static async createCollection(data: {
+    title: string;
+    description?: string;
+    type?: 'favorites' | 'reviewed' | 'wishlist' | 'custom';
+    visibility?: 'public' | 'private' | 'followers_only';
+    cover_image_url?: string;
+    restaurant_ids?: string[];
+  }): Promise<ApiResponse<{ id: string }>> {
+    const response = await api.post('/api/collections', data);
+    return response.data;
+  }
+
+  // 컬렉션 수정
+  static async updateCollection(id: string, data: {
+    title?: string;
+    description?: string;
+    visibility?: 'public' | 'private' | 'followers_only';
+    cover_image_url?: string;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.put(`/api/collections/${id}`, data);
+    return response.data;
+  }
+
+  // 컬렉션 삭제
+  static async deleteCollection(id: string): Promise<ApiResponse<any>> {
+    const response = await api.delete(`/api/collections/${id}`);
+    return response.data;
+  }
+
+  // 컬렉션에 맛집 추가
+  static async addRestaurantToCollection(collectionId: string, data: {
+    restaurant_id: string;
+    note?: string;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/collections/${collectionId}/items`, data);
+    return response.data;
+  }
+
+  // 컬렉션에서 맛집 제거
+  static async removeRestaurantFromCollection(collectionId: string, itemId: string): Promise<ApiResponse<any>> {
+    const response = await api.delete(`/api/collections/${collectionId}/items/${itemId}`);
+    return response.data;
+  }
+
+  // 컬렉션 좋아요 토글
+  static async toggleCollectionLike(id: string): Promise<ApiResponse<{ is_liked: boolean }>> {
+    const response = await api.post(`/api/collections/${id}/like`);
+    return response.data;
+  }
+
+  // 컬렉션 저장 토글
+  static async toggleCollectionSave(id: string): Promise<ApiResponse<{ is_saved: boolean }>> {
+    const response = await api.post(`/api/collections/${id}/save`);
+    return response.data;
+  }
+
+  // 컬렉션 댓글 목록 조회
+  static async getCollectionComments(id: string, params: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<ApiResponse<{
+    comments: any[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+    };
+  }>> {
+    const response = await api.get(`/api/collections/${id}/comments`, { params });
+    return response.data;
+  }
+
+  // 컬렉션 댓글 작성
+  static async createCollectionComment(id: string, data: {
+    content: string;
+    parent_comment_id?: string;
+  }): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/collections/${id}/comments`, data);
+    return response.data;
+  }
+
+  // 내 컬렉션 목록 조회
+  static async getMyCollections(): Promise<ApiResponse<any[]>> {
+    const response = await api.get('/api/collections/my/list');
+    return response.data;
+  }
+
+  // 특정 사용자의 공개 컬렉션 조회
+  static async getUserCollections(userId: string): Promise<ApiResponse<any[]>> {
+    const response = await api.get(`/api/collections/user/${userId}`);
+    return response.data;
+  }
+
+  // ==================== 팔로우 API ====================
+
+  // 사용자 팔로우
+  static async followUser(userId: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/users/${userId}/follow`);
+    return response.data;
+  }
+
+  // 사용자 언팔로우
+  static async unfollowUser(userId: string): Promise<ApiResponse<any>> {
+    const response = await api.delete(`/api/users/${userId}/follow`);
+    return response.data;
+  }
 }
 
 export default api;
