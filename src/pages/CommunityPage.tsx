@@ -36,7 +36,7 @@ import {
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
+import { handleImageError } from '../constants/images';
 
 interface Collection {
   id: string;

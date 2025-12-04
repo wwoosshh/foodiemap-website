@@ -1,19 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
   Box,
   Typography,
   Card,
-  CardContent,
-  CardMedia,
   Button,
   TextField,
   Alert,
   useTheme,
   alpha,
   Skeleton,
-  useMediaQuery,
   IconButton,
   FormControl,
   FormLabel,
@@ -47,7 +44,7 @@ import {
 import MainLayout from '../components/layout/MainLayout';
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
+import { handleImageError } from '../constants/images';
 
 interface SelectedRestaurant {
   id: string;
@@ -63,7 +60,6 @@ const CollectionFormPage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { user } = useAuth();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isEditMode = Boolean(id);
 
   const [loading, setLoading] = useState(isEditMode);

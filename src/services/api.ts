@@ -745,6 +745,7 @@ export class ApiService {
     visibility?: 'public' | 'private' | 'followers_only';
     cover_image_url?: string;
     restaurant_ids?: string[];
+    restaurants?: { id: string; note: string | null }[];
   }): Promise<ApiResponse<{ id: string }>> {
     const response = await api.post('/api/collections', data);
     return response.data;
