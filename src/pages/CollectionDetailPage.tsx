@@ -8,7 +8,6 @@ import {
   CardContent,
   CardMedia,
   Button,
-  Chip,
   Alert,
   useTheme,
   alpha,
@@ -16,7 +15,6 @@ import {
   useMediaQuery,
   IconButton,
   Avatar,
-  TextField,
   Divider,
   Menu,
   MenuItem,
@@ -38,11 +36,9 @@ import {
   MoreVert as MoreVertIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Send as SendIcon,
   Star as StarIcon,
   LocationOn as LocationIcon,
   Restaurant as RestaurantIcon,
-  Comment as CommentIcon,
   PersonAdd as PersonAddIcon,
   PersonRemove as PersonRemoveIcon,
 } from '@mui/icons-material';
@@ -73,18 +69,6 @@ interface CollectionItem {
   };
 }
 
-interface Comment {
-  id: string;
-  content: string;
-  like_count: number;
-  created_at: string;
-  user: {
-    id: string;
-    name: string;
-    avatar_url: string;
-  };
-}
-
 interface CollectionDetail {
   id: string;
   title: string;
@@ -96,7 +80,6 @@ interface CollectionDetail {
   like_count: number;
   save_count: number;
   view_count: number;
-  comment_count: number;
   is_featured: boolean;
   created_at: string;
   updated_at: string;
@@ -124,9 +107,6 @@ const CollectionDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collection, setCollection] = useState<CollectionDetail | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [submittingComment, setSubmittingComment] = useState(false);
 
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -148,24 +128,9 @@ const CollectionDetailPage: React.FC = () => {
     }
   }, [id]);
 
-  // 댓글 로드
-  const loadComments = useCallback(async () => {
-    if (!id) return;
-
-    try {
-      const response = await ApiService.getCollectionComments(id);
-      if (response.success && response.data) {
-        setComments(response.data.comments || []);
-      }
-    } catch (err) {
-      console.error('Failed to load comments:', err);
-    }
-  }, [id]);
-
   useEffect(() => {
     loadCollection();
-    loadComments();
-  }, [loadCollection, loadComments]);
+  }, [loadCollection]);
 
   // 좋아요 토글
   const handleLike = async () => {
@@ -262,35 +227,6 @@ const CollectionDetailPage: React.FC = () => {
     }
   };
 
-  // 댓글 작성
-  const handleSubmitComment = async () => {
-    if (!user) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
-    if (!newComment.trim() || !id) return;
-
-    setSubmittingComment(true);
-    try {
-      const response = await ApiService.createCollectionComment(id, {
-        content: newComment.trim(),
-      });
-      if (response.success) {
-        setComments((prev) => [response.data, ...prev]);
-        setNewComment('');
-        if (collection) {
-          setCollection((prev) =>
-            prev ? { ...prev, comment_count: prev.comment_count + 1 } : null
-          );
-        }
-      }
-    } catch (err) {
-      console.error('Failed to submit comment:', err);
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
   // 삭제
   const handleDelete = async () => {
     if (!id) return;
@@ -383,7 +319,7 @@ const CollectionDetailPage: React.FC = () => {
             borderRadius: 3,
             overflow: 'hidden',
             mb: 3,
-            bgcolor: 'grey.100',
+            bgcolor: 'action.hover',
           }}
         >
           {collection.cover_image_url ? (
@@ -530,12 +466,6 @@ const CollectionDetailPage: React.FC = () => {
                   {collection.view_count.toLocaleString()}
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <CommentIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {collection.comment_count}
-                </Typography>
-              </Box>
             </Box>
           </Box>
         </Box>
@@ -553,11 +483,11 @@ const CollectionDetailPage: React.FC = () => {
               sx={{
                 textAlign: 'center',
                 py: 6,
-                bgcolor: 'grey.50',
+                bgcolor: 'action.hover',
                 borderRadius: 3,
               }}
             >
-              <RestaurantIcon sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
+              <RestaurantIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
               <Typography color="text.secondary">아직 추가된 맛집이 없습니다</Typography>
             </Box>
           ) : (
@@ -583,7 +513,7 @@ const CollectionDetailPage: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      bgcolor: 'grey.100',
+                      bgcolor: 'action.hover',
                       fontWeight: 700,
                       color: 'text.secondary',
                     }}
@@ -653,84 +583,6 @@ const CollectionDetailPage: React.FC = () => {
                     )}
                   </CardContent>
                 </Card>
-              ))}
-            </Box>
-          )}
-        </Box>
-
-        <Divider sx={{ mb: 4 }} />
-
-        {/* 댓글 섹션 */}
-        <Box>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            댓글 ({collection.comment_count})
-          </Typography>
-
-          {/* 댓글 작성 */}
-          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-            <Avatar src={user?.avatar_url} sx={{ width: 40, height: 40 }} />
-            <TextField
-              fullWidth
-              placeholder={user ? '댓글을 작성해주세요...' : '로그인 후 댓글을 작성할 수 있습니다'}
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              disabled={!user || submittingComment}
-              multiline
-              maxRows={4}
-              InputProps={{
-                endAdornment: (
-                  <IconButton
-                    onClick={handleSubmitComment}
-                    disabled={!newComment.trim() || submittingComment}
-                    color="primary"
-                  >
-                    <SendIcon />
-                  </IconButton>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                },
-              }}
-            />
-          </Box>
-
-          {/* 댓글 목록 */}
-          {comments.length === 0 ? (
-            <Box
-              sx={{
-                textAlign: 'center',
-                py: 4,
-                bgcolor: 'grey.50',
-                borderRadius: 3,
-              }}
-            >
-              <CommentIcon sx={{ fontSize: 40, color: 'grey.300', mb: 1 }} />
-              <Typography color="text.secondary">아직 댓글이 없습니다</Typography>
-              <Typography variant="caption" color="text.secondary">
-                첫 댓글을 남겨보세요!
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {comments.map((comment) => (
-                <Box key={comment.id} sx={{ display: 'flex', gap: 2 }}>
-                  <Avatar src={comment.user.avatar_url} sx={{ width: 36, height: 36 }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {comment.user.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {formatDate(comment.created_at)}
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" sx={{ mt: 0.5 }}>
-                      {comment.content}
-                    </Typography>
-                  </Box>
-                </Box>
               ))}
             </Box>
           )}

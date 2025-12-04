@@ -633,7 +633,7 @@ const CommunityPage: React.FC = () => {
                 borderRadius: 2,
                 mr: 1,
                 minHeight: 36,
-                bgcolor: sortTab === 0 ? 'primary.main' : 'grey.100',
+                bgcolor: sortTab === 0 ? 'primary.main' : 'action.hover',
                 color: sortTab === 0 ? 'white' : 'text.primary',
                 '&.Mui-selected': { color: 'white' },
               }}
@@ -644,7 +644,7 @@ const CommunityPage: React.FC = () => {
                 borderRadius: 2,
                 mr: 1,
                 minHeight: 36,
-                bgcolor: sortTab === 1 ? 'primary.main' : 'grey.100',
+                bgcolor: sortTab === 1 ? 'primary.main' : 'action.hover',
                 color: sortTab === 1 ? 'white' : 'text.primary',
                 '&.Mui-selected': { color: 'white' },
               }}
@@ -654,7 +654,7 @@ const CommunityPage: React.FC = () => {
               sx={{
                 borderRadius: 2,
                 minHeight: 36,
-                bgcolor: sortTab === 2 ? 'primary.main' : 'grey.100',
+                bgcolor: sortTab === 2 ? 'primary.main' : 'action.hover',
                 color: sortTab === 2 ? 'white' : 'text.primary',
                 '&.Mui-selected': { color: 'white' },
               }}
@@ -673,11 +673,11 @@ const CommunityPage: React.FC = () => {
               sx={{
                 textAlign: 'center',
                 py: 8,
-                bgcolor: 'grey.50',
+                bgcolor: 'action.hover',
                 borderRadius: 3,
               }}
             >
-              <RestaurantIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
+              <RestaurantIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6" color="text.secondary" gutterBottom>
                 아직 컬렉션이 없습니다
               </Typography>

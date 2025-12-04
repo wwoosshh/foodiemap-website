@@ -12,9 +12,9 @@ import {
 import {
   RestaurantIcon,
   GiftIcon,
-  InfoIcon,
   UserIcon,
   HomeIcon,
+  CommunityIcon,
 } from './icons/CustomIcons';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -38,7 +38,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
     if (path === '/') return 0;
     if (path.startsWith('/restaurants')) return 1;
     if (path.startsWith('/events')) return 2;
-    if (path.startsWith('/notices')) return 3;
+    if (path.startsWith('/community')) return 3;
     if (path.startsWith('/profile')) return 4;
     return 0;
   };
@@ -55,7 +55,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
         navigate('/events');
         break;
       case 3:
-        navigate('/notices');
+        navigate('/community');
         break;
       case 4:
         if (user) {
@@ -167,12 +167,8 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
             }
           />
           <BottomNavigationAction
-            label={t.nav.notices}
-            icon={
-              <Badge badgeContent={0} color="error" max={9}>
-                <InfoIcon />
-              </Badge>
-            }
+            label={t.nav.community}
+            icon={<CommunityIcon />}
           />
           <BottomNavigationAction
             label={user ? t.nav.myProfile : t.nav.login}

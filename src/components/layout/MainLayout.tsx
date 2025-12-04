@@ -36,6 +36,7 @@ import {
   InfoIcon,
   SearchIcon,
   CloseIcon,
+  CommunityIcon,
 } from '../icons/CustomIcons';
 
 // 검색 모달 슬라이드 트랜지션
@@ -96,6 +97,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { label: t.nav.restaurantSearch, path: '/restaurants', icon: <RestaurantIcon /> },
     { label: t.nav.events, path: '/events', icon: <GiftIcon /> },
     { label: t.nav.notices, path: '/notices', icon: <InfoIcon /> },
+    { label: t.nav.community, path: '/community', icon: <CommunityIcon /> },
   ];
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -490,6 +492,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
                 >
                   {t.nav.notices}
+                </Link>
+                <Link
+                  to="/community"
+                  style={{
+                    color: 'rgba(255,255,255,0.7)',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    fontSize: '0.875rem',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6B6B')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+                >
+                  {t.nav.community}
                 </Link>
                 <Link
                   to="/contact"

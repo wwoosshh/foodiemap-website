@@ -794,31 +794,6 @@ export class ApiService {
     return response.data;
   }
 
-  // 컬렉션 댓글 목록 조회
-  static async getCollectionComments(id: string, params: {
-    page?: number;
-    limit?: number;
-  } = {}): Promise<ApiResponse<{
-    comments: any[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-    };
-  }>> {
-    const response = await api.get(`/api/collections/${id}/comments`, { params });
-    return response.data;
-  }
-
-  // 컬렉션 댓글 작성
-  static async createCollectionComment(id: string, data: {
-    content: string;
-    parent_comment_id?: string;
-  }): Promise<ApiResponse<any>> {
-    const response = await api.post(`/api/collections/${id}/comments`, data);
-    return response.data;
-  }
-
   // 내 컬렉션 목록 조회
   static async getMyCollections(): Promise<ApiResponse<any[]>> {
     const response = await api.get('/api/collections/my/list');
