@@ -236,6 +236,10 @@ const CollectionFormPage: React.FC = () => {
           description: description.trim(),
           visibility,
           cover_image_url: coverImageUrl || undefined,
+          restaurants: selectedRestaurants.map((r) => ({
+            id: r.id,
+            note: r.note || null,
+          })),
         });
         navigate(`/community/collections/${id}`);
       } else {
