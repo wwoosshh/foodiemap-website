@@ -249,7 +249,10 @@ const CollectionFormPage: React.FC = () => {
           description: description.trim(),
           visibility,
           cover_image_url: coverImageUrl || undefined,
-          restaurant_ids: selectedRestaurants.map((r) => r.id),
+          restaurants: selectedRestaurants.map((r) => ({
+            id: r.id,
+            note: r.note || null,
+          })),
         });
         if (response.success && response.data) {
           navigate(`/community/collections/${response.data.id}`);
