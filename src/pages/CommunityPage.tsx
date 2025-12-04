@@ -70,6 +70,21 @@ interface CollectionCardProps {
 const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onSave, onClick }) => {
   const theme = useTheme();
 
+  // 이미지 그리드를 위한 이미지 배열 (4칸 채우기)
+  const getGridImages = () => {
+    const images = collection.preview_images || [];
+    if (images.length === 0) return [];
+    if (images.length >= 4) return images.slice(0, 4);
+    // 이미지가 4개 미만이면 있는 이미지를 반복해서 4칸 채우기
+    const result = [...images];
+    while (result.length < 4) {
+      result.push(images[result.length % images.length]);
+    }
+    return result;
+  };
+
+  const gridImages = getGridImages();
+
   return (
     <Card
       sx={{
@@ -77,6 +92,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
         overflow: 'hidden',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
+        bgcolor: 'background.paper',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[8],
@@ -85,7 +101,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
       onClick={() => onClick(collection.id)}
     >
       {/* 커버 이미지 또는 프리뷰 그리드 */}
-      <Box sx={{ position: 'relative', paddingTop: '60%', bgcolor: 'grey.100' }}>
+      <Box sx={{ position: 'relative', paddingTop: '60%', bgcolor: 'action.hover' }}>
         {collection.cover_image_url ? (
           <CardMedia
             component="img"
@@ -101,7 +117,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
               objectFit: 'cover',
             }}
           />
-        ) : collection.preview_images && collection.preview_images.length > 0 ? (
+        ) : gridImages.length > 0 ? (
           <Box
             sx={{
               position: 'absolute',
@@ -113,9 +129,10 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
               gridTemplateColumns: 'repeat(2, 1fr)',
               gridTemplateRows: 'repeat(2, 1fr)',
               gap: '2px',
+              bgcolor: 'action.hover',
             }}
           >
-            {collection.preview_images.slice(0, 4).map((img, idx) => (
+            {gridImages.map((img, idx) => (
               <Box
                 key={idx}
                 component="img"
@@ -140,7 +157,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
               bgcolor: alpha(theme.palette.primary.main, 0.1),
             }}
           >
-            <RestaurantIcon sx={{ fontSize: 48, color: 'grey.400' }} />
+            <RestaurantIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
           </Box>
         )}
 
@@ -271,6 +288,7 @@ const FeaturedCollectionCard: React.FC<{ collection: Collection; onClick: (id: s
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         flexShrink: 0,
+        bgcolor: 'background.paper',
         '&:hover': {
           transform: 'translateY(-2px)',
           boxShadow: theme.shadows[4],
@@ -278,7 +296,7 @@ const FeaturedCollectionCard: React.FC<{ collection: Collection; onClick: (id: s
       }}
       onClick={() => onClick(collection.id)}
     >
-      <Box sx={{ position: 'relative', paddingTop: '100%', bgcolor: 'grey.100' }}>
+      <Box sx={{ position: 'relative', paddingTop: '100%', bgcolor: 'action.hover' }}>
         {collection.cover_image_url ? (
           <CardMedia
             component="img"
@@ -308,7 +326,7 @@ const FeaturedCollectionCard: React.FC<{ collection: Collection; onClick: (id: s
               bgcolor: alpha(theme.palette.primary.main, 0.1),
             }}
           >
-            <RestaurantIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+            <RestaurantIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
           </Box>
         )}
       </Box>
