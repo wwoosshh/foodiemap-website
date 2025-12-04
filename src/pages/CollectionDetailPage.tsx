@@ -111,9 +111,13 @@ const CollectionDetailPage: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  // 중복 로드 방지
+  const loadedRef = React.useRef(false);
+
   // 컬렉션 로드
   const loadCollection = useCallback(async () => {
-    if (!id) return;
+    if (!id || loadedRef.current) return;
+    loadedRef.current = true;
 
     setLoading(true);
     try {
@@ -123,12 +127,14 @@ const CollectionDetailPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.userMessage || '컬렉션을 불러오는데 실패했습니다.');
+      loadedRef.current = false; // 에러 시 재시도 허용
     } finally {
       setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
+    loadedRef.current = false; // id 변경 시 리셋
     loadCollection();
   }, [loadCollection]);
 
@@ -243,22 +249,6 @@ const CollectionDetailPage: React.FC = () => {
   // 맛집 클릭
   const handleRestaurantClick = (restaurantId: string) => {
     navigate(`/restaurants/${restaurantId}`);
-  };
-
-  // 가격 범위 표시
-  const getPriceDisplay = (priceRange: string) => {
-    switch (priceRange) {
-      case 'low':
-        return '₩';
-      case 'medium':
-        return '₩₩';
-      case 'high':
-        return '₩₩₩';
-      case 'very_high':
-        return '₩₩₩₩';
-      default:
-        return '';
-    }
   };
 
   // 날짜 포맷
@@ -496,92 +486,111 @@ const CollectionDetailPage: React.FC = () => {
                 <Card
                   key={item.id}
                   sx={{
-                    display: 'flex',
                     borderRadius: 2,
                     cursor: 'pointer',
+                    overflow: 'hidden',
                     transition: 'all 0.2s ease',
+                    bgcolor: 'background.paper',
                     '&:hover': {
                       boxShadow: theme.shadows[4],
                     },
                   }}
                   onClick={() => handleRestaurantClick(item.restaurant.id)}
                 >
-                  {/* 순서 번호 */}
-                  <Box
-                    sx={{
-                      width: 40,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'action.hover',
-                      fontWeight: 700,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {index + 1}
+                  <Box sx={{ display: 'flex' }}>
+                    {/* 순서 번호 */}
+                    <Box
+                      sx={{
+                        width: 36,
+                        minWidth: 36,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'action.hover',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {index + 1}
+                    </Box>
+
+                    {/* 이미지 */}
+                    <Box
+                      sx={{
+                        width: 100,
+                        minWidth: 100,
+                        height: 100,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={item.restaurant.thumbnail || item.restaurant.image || DEFAULT_RESTAURANT_IMAGE}
+                        alt={item.restaurant.name}
+                        onError={handleImageError}
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                    </Box>
+
+                    {/* 정보 */}
+                    <CardContent sx={{ flex: 1, py: 1.5, minWidth: 0 }}>
+                      <Typography variant="subtitle1" fontWeight={600} noWrap>
+                        {item.restaurant.name}
+                      </Typography>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                          <StarIcon sx={{ fontSize: 16, color: 'warning.main' }} />
+                          <Typography variant="body2">{item.restaurant.rating?.toFixed(1) || '-'}</Typography>
+                        </Box>
+                        {item.restaurant.category?.name && (
+                          <Typography variant="body2" color="text.secondary">
+                            · {item.restaurant.category.name}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationIcon sx={{ fontSize: 14, color: 'text.secondary', flexShrink: 0 }} />
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {item.restaurant.address}
+                        </Typography>
+                      </Box>
+                    </CardContent>
                   </Box>
 
-                  {/* 이미지 */}
-                  <CardMedia
-                    component="img"
-                    sx={{ width: 120, height: 100, objectFit: 'cover' }}
-                    image={item.restaurant.thumbnail || item.restaurant.image || DEFAULT_RESTAURANT_IMAGE}
-                    alt={item.restaurant.name}
-                    onError={handleImageError}
-                  />
-
-                  {/* 정보 */}
-                  <CardContent sx={{ flex: 1, py: 1.5 }}>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      {item.restaurant.name}
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                        <StarIcon sx={{ fontSize: 16, color: 'warning.main' }} />
-                        <Typography variant="body2">{item.restaurant.rating?.toFixed(1)}</Typography>
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        · {item.restaurant.category?.name}
-                      </Typography>
-                      {item.restaurant.price_range && (
-                        <Typography variant="body2" color="text.secondary">
-                          · {getPriceDisplay(item.restaurant.price_range)}
-                        </Typography>
-                      )}
-                    </Box>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <LocationIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {item.restaurant.address}
-                      </Typography>
-                    </Box>
-
-                    {/* 메모 */}
-                    {item.note && (
+                  {/* 메모 - 컬렉션 작성자의 추천 이유 */}
+                  {item.note && (
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 1.5,
+                        bgcolor: alpha(theme.palette.primary.main, 0.08),
+                        borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         sx={{
-                          mt: 1,
-                          p: 1,
-                          bgcolor: alpha(theme.palette.primary.main, 0.05),
-                          borderRadius: 1,
+                          color: 'text.primary',
                           fontStyle: 'italic',
+                          lineHeight: 1.6,
                         }}
                       >
-                        "{item.note}"
+                        💬 "{item.note}"
                       </Typography>
-                    )}
-                  </CardContent>
+                    </Box>
+                  )}
                 </Card>
               ))}
             </Box>
