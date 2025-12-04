@@ -101,7 +101,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
       onClick={() => onClick(collection.id)}
     >
       {/* 커버 이미지 또는 프리뷰 그리드 */}
-      <Box sx={{ position: 'relative', paddingTop: '60%', bgcolor: 'action.hover' }}>
+      <Box sx={{ position: 'relative', height: 180, bgcolor: 'action.hover', overflow: 'hidden' }}>
         {collection.cover_image_url ? (
           <CardMedia
             component="img"
@@ -109,9 +109,6 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
             alt={collection.title}
             onError={handleImageError}
             sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
               width: '100%',
               height: '100%',
               objectFit: 'cover',
@@ -120,16 +117,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
         ) : gridImages.length > 0 ? (
           <Box
             sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
               width: '100%',
               height: '100%',
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
               gridTemplateRows: 'repeat(2, 1fr)',
               gap: '2px',
-              bgcolor: 'action.hover',
             }}
           >
             {gridImages.map((img, idx) => (
@@ -146,9 +139,6 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onLike, onS
         ) : (
           <Box
             sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
               width: '100%',
               height: '100%',
               display: 'flex',

@@ -281,7 +281,7 @@ const CollectionFormPage: React.FC = () => {
     if (sourceTab === 'search' && searchResults.length === 0 && !searchLoading) {
       return (
         <Box sx={{ textAlign: 'center', py: 4 }}>
-          <SearchIcon sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
+          <SearchIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
           <Typography color="text.secondary">맛집을 검색해주세요</Typography>
         </Box>
       );
@@ -290,7 +290,7 @@ const CollectionFormPage: React.FC = () => {
     if (items.length === 0) {
       return (
         <Box sx={{ textAlign: 'center', py: 4 }}>
-          <RestaurantIcon sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
+          <RestaurantIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
           <Typography color="text.secondary">
             {sourceTab === 'favorites' ? '즐겨찾기한 맛집이 없습니다' : '작성한 리뷰가 없습니다'}
           </Typography>
@@ -390,13 +390,13 @@ const CollectionFormPage: React.FC = () => {
             borderRadius: 3,
             overflow: 'hidden',
             mb: 3,
-            bgcolor: 'grey.100',
+            bgcolor: 'action.hover',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             border: '2px dashed',
-            borderColor: 'grey.300',
+            borderColor: 'divider',
           }}
           onClick={() => {
             const url = prompt('커버 이미지 URL을 입력하세요:', coverImageUrl);
@@ -433,7 +433,7 @@ const CollectionFormPage: React.FC = () => {
             </>
           ) : (
             <Box sx={{ textAlign: 'center' }}>
-              <ImageIcon sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+              <ImageIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
               <Typography color="text.secondary">커버 이미지 추가</Typography>
             </Box>
           )}
@@ -495,13 +495,13 @@ const CollectionFormPage: React.FC = () => {
               sx={{
                 textAlign: 'center',
                 py: 4,
-                bgcolor: 'grey.50',
+                bgcolor: 'action.hover',
                 borderRadius: 3,
                 border: '2px dashed',
-                borderColor: 'grey.300',
+                borderColor: 'divider',
               }}
             >
-              <RestaurantIcon sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
+              <RestaurantIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
               <Typography color="text.secondary">맛집을 추가해주세요</Typography>
               <Button
                 startIcon={<AddIcon />}
@@ -521,9 +521,10 @@ const CollectionFormPage: React.FC = () => {
                     alignItems: 'center',
                     p: 1,
                     borderRadius: 2,
+                    bgcolor: 'background.paper',
                   }}
                 >
-                  <DragIcon sx={{ color: 'grey.400', mr: 1, cursor: 'grab' }} />
+                  <DragIcon sx={{ color: 'text.disabled', mr: 1, cursor: 'grab' }} />
 
                   <Avatar
                     variant="rounded"
