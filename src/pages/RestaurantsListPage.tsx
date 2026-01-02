@@ -144,139 +144,189 @@ const RestaurantsListPage: React.FC = () => {
     navigate(`/restaurants/${restaurantId}`);
   };
 
-  // 데스크탑용 컴포넌트 - 카드 없이 여백 기반 레이아웃
-  const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (
-    <Box
-      sx={{
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        '&:hover': {
-          '& .restaurant-image': {
-            transform: 'scale(1.02)',
-          },
-          '& .restaurant-name': {
-            color: 'primary.main',
-          },
-        },
-      }}
-      onClick={() => handleRestaurantClick(restaurant.id)}
-    >
-      {/* 이미지 영역 - 4:3 비율 */}
+  // 데스크탑용 컴포넌트 - 멀티 이미지 레이아웃
+  const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => {
+    const images = restaurant.images || [];
+    const hasMultipleImages = images.length >= 3;
+
+    return (
       <Box
         sx={{
-          position: 'relative',
-          width: '100%',
-          paddingTop: '75%', // 4:3 비율
-          borderRadius: 2,
-          overflow: 'hidden',
-          mb: 1.5,
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            '& .restaurant-image': {
+              transform: 'scale(1.02)',
+            },
+            '& .restaurant-name': {
+              color: 'primary.main',
+            },
+          },
         }}
+        onClick={() => handleRestaurantClick(restaurant.id)}
       >
-        <Box
-          component="img"
-          className="restaurant-image"
-          src={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-          alt={restaurant.name}
-          onError={handleImageError}
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            transition: 'transform 0.3s ease',
-          }}
-        />
-        {/* 카테고리 배지 */}
-        {restaurant.categories && (
-          <Chip
-            label={restaurant.categories.name}
-            size="small"
-            sx={{
-              position: 'absolute',
-              top: 12,
-              left: 12,
-              backgroundColor: 'rgba(0,0,0,0.6)',
-              color: '#fff',
-              fontWeight: 500,
-              fontSize: '0.75rem',
-              height: 24,
-            }}
-          />
-        )}
-        {/* 평점 배지 */}
+        {/* 이미지 영역 - 멀티 이미지 레이아웃 */}
         <Box
           sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
             display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1,
-            py: 0.5,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            borderRadius: 1,
-          }}
-        >
-          <StarFilledIcon sx={{ fontSize: 14, color: '#FFD93D' }} />
-          <Typography variant="caption" fontWeight={600} sx={{ color: '#FFF' }}>
-            {restaurant.rating.toFixed(1)}
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* 텍스트 영역 */}
-      <Box sx={{ px: 0.5 }}>
-        {/* 가게 이름 */}
-        <Typography
-          className="restaurant-name"
-          sx={{
-            fontWeight: 700,
-            fontSize: '1.05rem',
-            lineHeight: 1.4,
+            gap: '4px',
+            height: 200,
+            borderRadius: 2,
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            mb: 0.5,
-            transition: 'color 0.2s ease',
+            mb: 1.5,
           }}
         >
-          {restaurant.name}
-        </Typography>
-
-        {/* 주소 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <LocationIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-          <Typography
+          {/* 메인 이미지 (왼쪽 큰 이미지) */}
+          <Box
             sx={{
-              fontSize: '0.8rem',
-              color: 'text.secondary',
+              flex: hasMultipleImages ? '0 0 65%' : '1',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <Box
+              component="img"
+              className="restaurant-image"
+              src={images[0] || DEFAULT_RESTAURANT_IMAGE}
+              alt={restaurant.name}
+              onError={handleImageError}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.3s ease',
+              }}
+            />
+            {/* 카테고리 배지 */}
+            {restaurant.categories && (
+              <Chip
+                label={restaurant.categories.name}
+                size="small"
+                sx={{
+                  position: 'absolute',
+                  top: 12,
+                  left: 12,
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  color: '#fff',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  height: 24,
+                }}
+              />
+            )}
+            {/* 평점 배지 - 메인 이미지 하단에 표시 */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 8,
+                left: 8,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                px: 1,
+                py: 0.5,
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                borderRadius: 1,
+              }}
+            >
+              <StarFilledIcon sx={{ fontSize: 14, color: '#FFD93D' }} />
+              <Typography variant="caption" fontWeight={600} sx={{ color: '#FFF' }}>
+                {restaurant.rating.toFixed(1)}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* 서브 이미지들 (오른쪽 작은 이미지 2개) */}
+          {hasMultipleImages && (
+            <Box
+              sx={{
+                flex: '0 0 35%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+              }}
+            >
+              <Box
+                component="img"
+                className="restaurant-image"
+                src={images[1] || DEFAULT_RESTAURANT_IMAGE}
+                alt={`${restaurant.name} 2`}
+                onError={handleImageError}
+                sx={{
+                  flex: 1,
+                  width: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform 0.3s ease',
+                }}
+              />
+              <Box
+                component="img"
+                className="restaurant-image"
+                src={images[2] || DEFAULT_RESTAURANT_IMAGE}
+                alt={`${restaurant.name} 3`}
+                onError={handleImageError}
+                sx={{
+                  flex: 1,
+                  width: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform 0.3s ease',
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+
+        {/* 텍스트 영역 */}
+        <Box sx={{ px: 0.5 }}>
+          {/* 가게 이름 */}
+          <Typography
+            className="restaurant-name"
+            sx={{
+              fontWeight: 700,
+              fontSize: '1.05rem',
+              lineHeight: 1.4,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              mb: 0.5,
+              transition: 'color 0.2s ease',
             }}
           >
-            {restaurant.address}
+            {restaurant.name}
           </Typography>
-        </Box>
 
-        {/* 리뷰 수 · 조회수 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
-            {t('restaurant.reviewCount')} {restaurant.review_count || 0}
-          </Typography>
-          <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
-            ·
-          </Typography>
-          <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
-            {t('restaurant.viewCount')} {restaurant.view_count || 0}
-          </Typography>
+          {/* 주소 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+            <LocationIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+            <Typography
+              sx={{
+                fontSize: '0.8rem',
+                color: 'text.secondary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {restaurant.address}
+            </Typography>
+          </Box>
+
+          {/* 리뷰 수 · 조회수 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
+              {t('restaurant.reviewCount')} {restaurant.review_count || 0}
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
+              ·
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
+              {t('restaurant.viewCount')} {restaurant.view_count || 0}
+            </Typography>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
+    );
+  };
 
   // 모바일용 리스트형 컴포넌트 - 카드 없이 여백 기반
   const RestaurantListItem: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => (

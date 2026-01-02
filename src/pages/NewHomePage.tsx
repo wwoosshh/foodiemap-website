@@ -293,7 +293,10 @@ const NewHomePage: React.FC = () => {
   };
 
   const RestaurantCard: React.FC<{ restaurant: Restaurant }> = ({ restaurant }) => {
-    // 모바일: 카드 없이 이미지 + 텍스트 분리 레이아웃
+    const images = restaurant.images || [];
+    const hasMultipleImages = images.length >= 3;
+
+    // 모바일: 멀티 이미지 레이아웃 (메인 + 서브 2개)
     if (isMobile) {
       return (
         <Box
@@ -305,75 +308,127 @@ const NewHomePage: React.FC = () => {
           }}
           onClick={() => handleRestaurantClick(restaurant.id)}
         >
-          {/* 이미지 영역 - 4:3 비율 */}
+          {/* 이미지 영역 - 멀티 이미지 레이아웃 */}
           <Box
             sx={{
-              position: 'relative',
-              width: '100%',
-              paddingTop: '75%', // 4:3 비율
+              display: 'flex',
+              gap: '3px',
+              height: 180,
               borderRadius: 2,
               overflow: 'hidden',
               mb: 1,
             }}
           >
+            {/* 메인 이미지 (왼쪽 큰 이미지) */}
             <Box
-              component="img"
-              src={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
-              alt={restaurant.name}
-              onError={handleImageError}
               sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
+                flex: hasMultipleImages ? '0 0 65%' : '1',
+                position: 'relative',
+                overflow: 'hidden',
               }}
-            />
-            {/* 카테고리 뱃지 - 이미지 왼쪽 상단 */}
-            {restaurant.categories && (
-              <Chip
-                label={restaurant.categories.name}
-                size="small"
+            >
+              <Box
+                component="img"
+                src={images[0] || DEFAULT_RESTAURANT_IMAGE}
+                alt={restaurant.name}
+                onError={handleImageError}
                 sx={{
-                  position: 'absolute',
-                  top: 8,
-                  left: 8,
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  color: '#fff',
-                  fontWeight: 500,
-                  fontSize: '0.65rem',
-                  height: 20,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
                 }}
               />
-            )}
-          </Box>
-
-          {/* 텍스트 영역 - 이미지 아래 공백 */}
-          <Box sx={{ px: 0.5 }}>
-            {/* 가게 이름 + 별점 */}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.3 }}>
-              <Typography
+              {/* 카테고리 뱃지 */}
+              {restaurant.categories && (
+                <Chip
+                  label={restaurant.categories.name}
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    left: 8,
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    color: '#fff',
+                    fontWeight: 500,
+                    fontSize: '0.65rem',
+                    height: 20,
+                  }}
+                />
+              )}
+              {/* 평점 배지 */}
+              <Box
                 sx={{
-                  fontWeight: 700,
-                  fontSize: '0.95rem',
-                  lineHeight: 1.4,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  flex: 1,
-                  mr: 1,
+                  position: 'absolute',
+                  bottom: 8,
+                  left: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.3,
+                  px: 0.8,
+                  py: 0.3,
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  borderRadius: 1,
                 }}
               >
-                {restaurant.name}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, flexShrink: 0 }}>
                 <StarFilledIcon sx={{ fontSize: 12, color: '#FFD93D' }} />
-                <Typography sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#fff' }}>
                   {restaurant.rating.toFixed(1)}
                 </Typography>
               </Box>
             </Box>
+
+            {/* 서브 이미지들 (오른쪽 작은 이미지 2개) */}
+            {hasMultipleImages && (
+              <Box
+                sx={{
+                  flex: '0 0 35%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '3px',
+                }}
+              >
+                <Box
+                  component="img"
+                  src={images[1] || DEFAULT_RESTAURANT_IMAGE}
+                  alt={`${restaurant.name} 2`}
+                  onError={handleImageError}
+                  sx={{
+                    flex: 1,
+                    width: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+                <Box
+                  component="img"
+                  src={images[2] || DEFAULT_RESTAURANT_IMAGE}
+                  alt={`${restaurant.name} 3`}
+                  onError={handleImageError}
+                  sx={{
+                    flex: 1,
+                    width: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              </Box>
+            )}
+          </Box>
+
+          {/* 텍스트 영역 */}
+          <Box sx={{ px: 0.5 }}>
+            {/* 가게 이름 */}
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                lineHeight: 1.4,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mb: 0.3,
+              }}
+            >
+              {restaurant.name}
+            </Typography>
 
             {/* 주소 */}
             <Typography
