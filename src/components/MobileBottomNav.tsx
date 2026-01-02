@@ -6,7 +6,6 @@ import {
   BottomNavigationAction,
   Box,
   Badge,
-  alpha,
   useTheme,
 } from '@mui/material';
 import {
@@ -83,22 +82,22 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
       }}
     >
       <Paper
-        elevation={12}
+        elevation={0}
         sx={{
-          borderRadius: '50px',
+          borderRadius: '24px',
           backgroundColor: theme.palette.mode === 'dark'
-            ? alpha(theme.palette.background.paper, 0.85)
-            : alpha('#FFFFFF', 0.92),
-          backdropFilter: 'blur(30px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+            ? 'rgba(20, 20, 20, 0.95)'
+            : 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           border: theme.palette.mode === 'dark'
-            ? `1px solid ${alpha('#FFFFFF', 0.1)}`
-            : `1px solid ${alpha('#000000', 0.08)}`,
+            ? '1px solid rgba(255, 255, 255, 0.08)'
+            : '1px solid rgba(0, 0, 0, 0.06)',
           boxShadow: theme.palette.mode === 'dark'
-            ? `0 8px 32px ${alpha('#000000', 0.6)}, 0 0 0 1px ${alpha('#FFFFFF', 0.1)} inset`
-            : `0 8px 32px ${alpha('#000000', 0.12)}, 0 0 0 1px ${alpha('#000000', 0.04)} inset`,
+            ? '0 4px 24px rgba(0, 0, 0, 0.4)'
+            : '0 4px 24px rgba(0, 0, 0, 0.08)',
           width: 'calc(100vw - 32px)',
-          maxWidth: '600px',
+          maxWidth: '420px',
           mx: 'auto',
         }}
       >
@@ -108,44 +107,37 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onLoginClick }) => {
           showLabels
           sx={{
             backgroundColor: 'transparent',
-            height: 68,
-            px: 1,
-            py: 1,
-            borderRadius: '50px',
+            height: 60,
+            px: 0.5,
+            borderRadius: '24px',
             '& .MuiBottomNavigationAction-root': {
               minWidth: 'auto',
-              padding: '8px 6px',
-              gap: '3px',
-              borderRadius: '16px',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              padding: '6px 4px',
+              gap: '2px',
+              borderRadius: '12px',
+              transition: 'all 0.2s ease',
               color: theme.palette.text.secondary,
               '&.Mui-selected': {
                 color: theme.palette.primary.main,
-                backgroundColor: alpha(theme.palette.primary.main, 0.12),
                 '& .MuiBottomNavigationAction-label': {
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  fontSize: '0.65rem',
                 },
                 '& .MuiSvgIcon-root': {
-                  transform: 'scale(1.15)',
-                  filter: theme.palette.mode === 'dark'
-                    ? 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.5))'
-                    : 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
+                  transform: 'scale(1.05)',
                 },
               },
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.08),
-              },
               '& .MuiBottomNavigationAction-label': {
-                fontSize: '0.65rem',
+                fontSize: '0.6rem',
                 fontWeight: 500,
                 opacity: 1,
-                transition: 'all 0.25s ease',
+                transition: 'all 0.2s ease',
                 whiteSpace: 'nowrap',
+                marginTop: '2px',
               },
               '& .MuiSvgIcon-root': {
                 fontSize: 22,
-                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'transform 0.2s ease',
               },
             },
           }}

@@ -414,19 +414,18 @@ const NewHomePage: React.FC = () => {
           height: { sm: 200, md: 220 },
           overflow: 'hidden',
           cursor: 'pointer',
-          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'all 0.25s ease',
           '&:hover': {
-            transform: 'translateY(-8px) scale(1.02)',
-            boxShadow: '0px 20px 40px rgba(255, 107, 107, 0.3)',
+            transform: 'translateY(-4px)',
             '& .restaurant-image': {
-              transform: 'scale(1.15)',
+              transform: 'scale(1.05)',
             },
             '& .restaurant-overlay': {
-              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%)',
             },
           },
           '&:active': {
-            transform: 'translateY(-4px) scale(1.01)',
+            transform: 'translateY(-2px)',
           },
         }}
         onClick={() => handleRestaurantClick(restaurant.id)}
@@ -441,7 +440,7 @@ const NewHomePage: React.FC = () => {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'transform 0.3s ease',
           }}
           image={restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
           alt={restaurant.name}
@@ -456,8 +455,8 @@ const NewHomePage: React.FC = () => {
             left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
-            transition: 'background 0.5s ease',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
+            transition: 'background 0.3s ease',
           }}
         />
 
@@ -530,34 +529,29 @@ const NewHomePage: React.FC = () => {
 
     return (
       <Box sx={{
-        mb: { xs: 6, md: 8 },
-        pb: { xs: 4, md: 0 },
-        borderBottom: { xs: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`, md: 'none' },
+        mb: { xs: 6, md: 10 },
       }}>
         <Box sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: { xs: 3, md: 3 },
-          pb: { xs: 2, md: 0 },
-          borderBottom: { xs: `3px solid ${theme.palette.primary.main}`, md: 'none' },
+          mb: { xs: 3, md: 4 },
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.5 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: { xs: 36, md: 40 },
-                height: { xs: 36, md: 40 },
-                borderRadius: '50%',
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 color: 'primary.main',
+                '& svg': {
+                  fontSize: { xs: 22, md: 26 },
+                },
               }}
             >
               {icon}
             </Box>
-            <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem', md: '2rem' } }}>
+            <Typography variant="h4" fontWeight={600} sx={{ fontSize: { xs: '1.2rem', sm: '1.35rem', md: '1.5rem' }, letterSpacing: '-0.02em' }}>
               {title}
             </Typography>
           </Box>
@@ -568,8 +562,12 @@ const NewHomePage: React.FC = () => {
               navigate(`/restaurants?sort=${sortParam}${categoryParam}`);
             }}
             sx={{
-              fontSize: { xs: '0.75rem', md: '0.875rem' },
-              px: { xs: 1, md: 2 },
+              fontSize: '0.85rem',
+              color: 'text.secondary',
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              },
             }}
           >
             {t('home.viewMore')}
@@ -656,26 +654,24 @@ const NewHomePage: React.FC = () => {
       {pushedRestaurants.length > 0 && (
         <Box
           sx={{
-            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
-              theme.palette.secondary.main,
-              0.08
-            )} 100%)`,
-            py: { xs: 3, md: 6 },
-            mb: { xs: 3, md: 6 },
+            backgroundColor: theme.palette.mode === 'dark'
+              ? 'rgba(255,255,255,0.02)'
+              : 'rgba(0,0,0,0.02)',
+            py: { xs: 5, md: 8 },
+            mb: { xs: 4, md: 8 },
           }}
         >
           <Container maxWidth="xl">
             <Typography
               variant="h3"
-              fontWeight={800}
+              fontWeight={700}
               align="center"
               gutterBottom
               sx={{
-                background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: { xs: 3, md: 5 },
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' },
+                color: 'text.primary',
+                mb: { xs: 4, md: 6 },
+                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.25rem' },
+                letterSpacing: '-0.02em',
               }}
             >
               {t('home.featuredTitle')}
@@ -694,28 +690,15 @@ const NewHomePage: React.FC = () => {
                       position: 'relative',
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      opacity: 0,
-                      animation: `fadeInUp 0.8s ease-out ${index * 0.2}s forwards`,
-                    '@keyframes fadeInUp': {
-                      from: {
-                        opacity: 0,
-                        transform: 'translateY(40px)',
-                      },
-                      to: {
-                        opacity: 1,
-                        transform: 'translateY(0)',
-                      },
-                    },
-                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.25s ease',
                     '&:hover': {
-                      transform: { xs: 'translateY(-8px) scale(1.02)', md: 'translateY(-16px) scale(1.03)' },
-                      boxShadow: '0px 24px 48px rgba(255, 107, 107, 0.35)',
+                      transform: 'translateY(-4px)',
                       '& .pushed-image': {
-                        transform: 'scale(1.1)',
+                        transform: 'scale(1.03)',
                       },
                     },
                     '&:active': {
-                      transform: { xs: 'translateY(-4px) scale(1.01)', md: 'translateY(-12px) scale(1.02)' },
+                      transform: 'translateY(-2px)',
                     },
                   }}
                   onClick={() => handleRestaurantClick(pushed.restaurant.id)}
@@ -724,16 +707,17 @@ const NewHomePage: React.FC = () => {
                   {pushed.badge_text && (
                     <Chip
                       label={pushed.badge_text}
+                      size="small"
                       sx={{
                         position: 'absolute',
-                        top: { xs: 12, md: 16 },
-                        right: { xs: 12, md: 16 },
+                        top: 12,
+                        right: 12,
                         zIndex: 2,
-                        backgroundColor: pushed.badge_color || '#FF6B6B',
+                        backgroundColor: pushed.badge_color || theme.palette.primary.main,
                         color: 'white',
-                        fontWeight: 700,
-                        fontSize: { xs: '0.75rem', md: '0.85rem' },
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        height: 26,
                       }}
                     />
                   )}
@@ -742,9 +726,9 @@ const NewHomePage: React.FC = () => {
                     component="img"
                     className="pushed-image"
                     sx={{
-                      height: { xs: 140, sm: 180, md: 250 },
+                      height: { xs: 160, sm: 180, md: 220 },
                       objectFit: 'cover',
-                      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'transform 0.3s ease',
                     }}
                     image={pushed.restaurant.images?.[0] || DEFAULT_RESTAURANT_IMAGE}
                     alt={pushed.restaurant.name}
@@ -790,23 +774,22 @@ const NewHomePage: React.FC = () => {
           <Box
             sx={{
               position: 'sticky',
-              top: isHeaderVisible ? headerHeight : 0, // 헤더 보일 때: 네비바 높이만큼, 헤더 숨김 시: 최상단
+              top: isHeaderVisible ? headerHeight : 0,
               zIndex: 99,
               backgroundColor: theme.palette.background.paper,
-              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              py: 1,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              py: 1.5,
               px: 2,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-              transition: 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'top 0.3s ease',
             }}
           >
             {/* 카테고리 행 */}
             <Box
               sx={{
                 display: 'flex',
-                gap: 0.8,
+                gap: 1,
                 overflowX: 'auto',
-                pb: 1,
+                pb: 1.5,
                 '&::-webkit-scrollbar': { display: 'none' },
                 scrollbarWidth: 'none',
               }}
@@ -817,12 +800,15 @@ const NewHomePage: React.FC = () => {
                 onClick={() => handleCategoryClick(null)}
                 sx={{
                   flexShrink: 0,
-                  backgroundColor: selectedCategoryId === null ? theme.palette.primary.main : 'transparent',
+                  backgroundColor: selectedCategoryId === null ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                   color: selectedCategoryId === null ? 'white' : 'text.primary',
-                  border: selectedCategoryId === null ? 'none' : `1px solid ${theme.palette.divider}`,
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  height: 28,
+                  border: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.8rem',
+                  height: 32,
+                  '&:hover': {
+                    backgroundColor: selectedCategoryId === null ? theme.palette.primary.dark : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+                  },
                 }}
               />
               {categories.slice(0, 10).map((category) => (
@@ -833,12 +819,15 @@ const NewHomePage: React.FC = () => {
                   onClick={() => handleCategoryClick(category.id)}
                   sx={{
                     flexShrink: 0,
-                    backgroundColor: selectedCategoryId === category.id ? theme.palette.primary.main : 'transparent',
+                    backgroundColor: selectedCategoryId === category.id ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                     color: selectedCategoryId === category.id ? 'white' : 'text.primary',
-                    border: selectedCategoryId === category.id ? 'none' : `1px solid ${theme.palette.divider}`,
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    height: 28,
+                    border: 'none',
+                    fontWeight: 500,
+                    fontSize: '0.8rem',
+                    height: 32,
+                    '&:hover': {
+                      backgroundColor: selectedCategoryId === category.id ? theme.palette.primary.dark : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+                    },
                   }}
                 />
               ))}
@@ -847,28 +836,30 @@ const NewHomePage: React.FC = () => {
             <Box
               sx={{
                 display: 'flex',
-                gap: 0.5,
+                gap: 2,
                 overflowX: 'auto',
                 '&::-webkit-scrollbar': { display: 'none' },
                 scrollbarWidth: 'none',
               }}
             >
               {sortOptions.map((opt) => (
-                <Chip
+                <Typography
                   key={opt.value}
-                  label={opt.label}
-                  size="small"
                   onClick={() => handleSortChange(opt.value)}
                   sx={{
                     flexShrink: 0,
-                    backgroundColor: sortOption === opt.value ? alpha(theme.palette.secondary.main, 0.15) : 'transparent',
-                    color: sortOption === opt.value ? theme.palette.secondary.main : 'text.secondary',
-                    border: 'none',
+                    cursor: 'pointer',
+                    color: sortOption === opt.value ? 'primary.main' : 'text.secondary',
                     fontWeight: sortOption === opt.value ? 600 : 400,
-                    fontSize: '0.7rem',
-                    height: 24,
+                    fontSize: '0.8rem',
+                    py: 0.5,
+                    borderBottom: sortOption === opt.value ? '2px solid' : '2px solid transparent',
+                    borderColor: sortOption === opt.value ? 'primary.main' : 'transparent',
+                    transition: 'all 0.2s ease',
                   }}
-                />
+                >
+                  {opt.label}
+                </Typography>
               ))}
             </Box>
           </Box>
@@ -993,33 +984,36 @@ const NewHomePage: React.FC = () => {
             {/* 카테고리 사이드바 Paper */}
             {showCategorySidebar && (
             <Paper
-              elevation={2}
+              elevation={0}
               sx={{
                 position: 'sticky',
-                top: 156,
+                top: 140,
                 p: 3,
                 borderRadius: 3,
-                background: theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, #1E1E1E 0%, #252525 100%)'
-                  : 'linear-gradient(135deg, #FFFFFF 0%, #FFF8F5 100%)',
-                border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3, color: 'primary.main' }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2.5, color: 'text.primary' }}>
                 {t.home.categories}
               </Typography>
 
               {/* 전체 보기 버튼 */}
               <Button
                 fullWidth
-                variant={selectedCategoryId === null ? 'contained' : 'outlined'}
+                variant={selectedCategoryId === null ? 'contained' : 'text'}
                 onClick={() => handleCategoryClick(null)}
                 sx={{
                   mb: 2,
                   justifyContent: 'flex-start',
-                  textAlign: 'left',
-                  py: 1.5,
-                  fontWeight: selectedCategoryId === null ? 700 : 500,
+                  py: 1.2,
+                  px: 2,
+                  fontWeight: selectedCategoryId === null ? 600 : 500,
+                  backgroundColor: selectedCategoryId === null ? 'primary.main' : 'transparent',
+                  color: selectedCategoryId === null ? 'white' : 'text.primary',
+                  '&:hover': {
+                    backgroundColor: selectedCategoryId === null ? 'primary.dark' : alpha(theme.palette.primary.main, 0.08),
+                  },
                 }}
               >
                 {t('home.viewAll')}
@@ -1028,25 +1022,28 @@ const NewHomePage: React.FC = () => {
               <Divider sx={{ my: 2 }} />
 
               {/* 카테고리 버튼들 - 2열 grid */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
                 {categories.map((category) => (
                   <Button
                     key={category.id}
-                    variant={selectedCategoryId === category.id ? 'contained' : 'outlined'}
+                    variant="text"
                     onClick={() => handleCategoryClick(category.id)}
                     sx={{
                       py: 1,
                       px: 1.5,
                       fontSize: '0.85rem',
-                      fontWeight: selectedCategoryId === category.id ? 700 : 500,
-                      transition: 'all 0.2s ease',
-                      minHeight: '42px',
+                      fontWeight: selectedCategoryId === category.id ? 600 : 400,
+                      color: selectedCategoryId === category.id ? 'primary.main' : 'text.secondary',
+                      backgroundColor: selectedCategoryId === category.id ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                      justifyContent: 'flex-start',
+                      minHeight: '40px',
+                      borderRadius: 2,
                       '&:hover': {
-                        transform: 'scale(1.05)',
+                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
                       },
                     }}
                   >
-                    <Typography variant="caption" fontWeight="inherit" noWrap>
+                    <Typography variant="body2" fontWeight="inherit" noWrap>
                       {category.name}
                     </Typography>
                   </Button>

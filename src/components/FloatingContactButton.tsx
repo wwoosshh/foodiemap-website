@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fab, Tooltip, useTheme, alpha, Zoom, useMediaQuery } from '@mui/material';
+import { Fab, Tooltip, useTheme, Zoom, useMediaQuery } from '@mui/material';
 import { Email } from '@mui/icons-material';
 import { useLanguage } from '../context/LanguageContext';
 import { useScrollDirection } from '../hooks/useScrollDirection';
@@ -38,50 +38,25 @@ const FloatingContactButton: React.FC = () => {
           }}
           sx={{
             position: 'fixed',
-            bottom: { xs: 130, md: 24 },
-            right: { xs: 20, md: 24 },
+            bottom: { xs: 110, md: 24 },
+            right: { xs: 16, md: 24 },
             zIndex: 1200,
-            width: { xs: 56, md: 64 },
-            height: { xs: 56, md: 64 },
-            backgroundColor: theme.palette.mode === 'dark'
-              ? alpha(theme.palette.primary.main, 0.9)
-              : theme.palette.primary.main,
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            boxShadow: theme.palette.mode === 'dark'
-              ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}, 0 0 0 1px ${alpha('#FFFFFF', 0.1)} inset`
-              : `0 8px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
-            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, box-shadow 0.3s',
+            width: { xs: 48, md: 56 },
+            height: { xs: 48, md: 56 },
+            backgroundColor: theme.palette.primary.main,
+            boxShadow: '0 4px 16px rgba(232, 80, 91, 0.3)',
+            transition: 'all 0.2s ease',
             '&:hover': {
-              backgroundColor: theme.palette.mode === 'dark'
-                ? theme.palette.primary.light
-                : theme.palette.primary.dark,
-              boxShadow: theme.palette.mode === 'dark'
-                ? `0 12px 32px ${alpha(theme.palette.primary.main, 0.5)}, 0 0 0 1px ${alpha('#FFFFFF', 0.15)} inset`
-                : `0 12px 32px ${alpha(theme.palette.primary.main, 0.45)}`,
+              backgroundColor: theme.palette.primary.dark,
+              transform: `${getTransformValue()} scale(1.05)`,
+              boxShadow: '0 6px 20px rgba(232, 80, 91, 0.4)',
             },
-            // 애니메이션 효과
-            '@keyframes pulse': {
-              '0%': {
-                boxShadow: theme.palette.mode === 'dark'
-                  ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`
-                  : `0 8px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
-              },
-              '50%': {
-                boxShadow: theme.palette.mode === 'dark'
-                  ? `0 8px 32px ${alpha(theme.palette.primary.main, 0.6)}`
-                  : `0 8px 32px ${alpha(theme.palette.primary.main, 0.5)}`,
-              },
-              '100%': {
-                boxShadow: theme.palette.mode === 'dark'
-                  ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`
-                  : `0 8px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
-              },
+            '&:active': {
+              transform: `${getTransformValue()} scale(0.98)`,
             },
-            animation: 'pulse 2s ease-in-out infinite',
           }}
         >
-          <Email sx={{ fontSize: { xs: 24, md: 28 } }} />
+          <Email sx={{ fontSize: { xs: 22, md: 24 } }} />
         </Fab>
       </Tooltip>
     </Zoom>

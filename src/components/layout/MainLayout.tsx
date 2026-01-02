@@ -147,30 +147,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
               }}
             >
               <CubeLogoIcon
                 sx={{
-                  fontSize: 40,
+                  fontSize: { xs: 32, sm: 36 },
                   color: 'primary.main',
-                  filter: 'drop-shadow(0 2px 4px rgba(255,107,107,0.3))',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'transform 0.2s ease',
                   '&:hover': {
-                    transform: 'rotate(15deg) scale(1.15)',
-                    filter: 'drop-shadow(0 4px 8px rgba(255,107,107,0.5))',
+                    transform: 'scale(1.05)',
                   },
                 }}
               />
               <Typography
                 variant="h5"
                 sx={{
-                  fontWeight: 800,
-                  background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  letterSpacing: '-0.03em',
-                  fontSize: { xs: '1.1rem', sm: '1.5rem' },
+                  fontWeight: 700,
+                  color: 'primary.main',
+                  letterSpacing: '-0.02em',
+                  fontSize: { xs: '1.1rem', sm: '1.35rem' },
                 }}
               >
                 {t.footer.companyName}
@@ -322,9 +318,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          background: currentTheme === 'dark'
-            ? 'linear-gradient(180deg, #0D0D0D 0%, #121212 50%, #0F0F0F 100%)'
-            : 'linear-gradient(180deg, #FFF5F0 0%, #FFF8F5 50%, #FFFBF8 100%)',
+          backgroundColor: 'background.default',
           // 모바일에서 고정 헤더 높이만큼 상단 패딩 추가
           paddingTop: isMobile ? `${headerHeight}px` : 0,
           // 모바일에서 하단 네비게이션 바의 높이만큼 하단 패딩 추가
@@ -339,22 +333,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         component="footer"
         sx={{
           mt: 'auto',
-          py: { xs: 3, md: 6 },
+          py: { xs: 4, md: 6 },
           px: 2,
-          background: currentTheme === 'dark'
-            ? 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0F0F0F 100%)'
-            : 'linear-gradient(135deg, #1a252f 0%, #2C3E50 50%, #34495e 100%)',
+          backgroundColor: currentTheme === 'dark' ? '#0A0A0A' : '#1A1A1A',
           color: 'white',
           position: 'relative',
-          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            height: '4px',
-            background: 'linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #FFD93D 100%)',
+            height: '1px',
+            backgroundColor: currentTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.08)',
           },
         }}
       >
@@ -370,47 +361,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Box
               sx={{
                 gridColumn: { xs: '1 / -1', sm: '1 / -1', md: 'auto' },
-                animation: 'fadeInUp 0.6s ease-out',
-                '@keyframes fadeInUp': {
-                  from: {
-                    opacity: 0,
-                    transform: 'translateY(20px)',
-                  },
-                  to: {
-                    opacity: 1,
-                    transform: 'translateY(0)',
-                  },
-                },
               }}
             >
               <Box sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: 'auto 1fr', md: '1fr' },
-                gap: { xs: 2, md: 0 },
-                alignItems: { xs: 'start', md: 'center' },
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1.5,
               }}>
                 {/* 로고 + 회사명 */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 0, md: 2 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                   <CubeLogoIcon
                     sx={{
-                      fontSize: { xs: 28, md: 36 },
-                      color: '#FF6B6B',
-                      filter: 'drop-shadow(0 2px 8px rgba(255, 107, 107, 0.4))',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'rotate(15deg) scale(1.1)',
-                      },
+                      fontSize: { xs: 28, md: 32 },
+                      color: '#E8505B',
                     }}
                   />
                   <Typography
                     variant="h6"
-                    fontWeight={700}
+                    fontWeight={600}
                     sx={{
-                      fontSize: { xs: '1rem', md: '1.25rem' },
+                      fontSize: { xs: '1rem', md: '1.1rem' },
                       color: '#FFFFFF',
-                      textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                      letterSpacing: '0.5px',
-                      display: { xs: 'none', md: 'block' },
                     }}
                   >
                     {t.footer.companyName}
@@ -421,11 +392,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: 'rgba(255,255,255,0.85)',
-                    lineHeight: 1.6,
-                    fontSize: { xs: '0.75rem', md: '0.875rem' },
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                    color: 'rgba(255,255,255,0.6)',
+                    lineHeight: 1.7,
+                    fontSize: { xs: '0.8rem', md: '0.875rem' },
                     whiteSpace: 'pre-line',
+                    maxWidth: '280px',
                   }}
                 >
                   {t.footer.description}
@@ -436,14 +407,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             {/* 바로가기 */}
             <Box>
               <Typography
-                variant="h6"
+                variant="subtitle2"
                 fontWeight={600}
                 gutterBottom
                 sx={{
-                  color: '#FFFFFF',
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                  fontSize: { xs: '0.95rem', md: '1.25rem' },
-                  mb: { xs: 1, md: 2 },
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.85rem',
+                  mb: 2,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                 }}
               >
                 {t.footer.quickLinks}
@@ -525,14 +497,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             {/* 정책 */}
             <Box>
               <Typography
-                variant="h6"
+                variant="subtitle2"
                 fontWeight={600}
                 gutterBottom
                 sx={{
-                  color: '#FFFFFF',
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                  fontSize: { xs: '0.95rem', md: '1.25rem' },
-                  mb: { xs: 1, md: 2 },
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.85rem',
+                  mb: 2,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                 }}
               >
                 {t.footer.policies}
@@ -575,13 +548,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             {/* 회사 정보 */}
             <Box>
               <Typography
-                variant="h6"
+                variant="subtitle2"
                 fontWeight={600}
                 gutterBottom
                 sx={{
-                  color: '#FFFFFF',
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                  fontSize: { xs: '0.95rem', md: '1.25rem' },
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.85rem',
+                  mb: 2,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                 }}
               >
                 {t.footer.companyInfo}
