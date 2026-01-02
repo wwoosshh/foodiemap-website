@@ -165,22 +165,22 @@ const RestaurantsListPage: React.FC = () => {
         }}
         onClick={() => handleRestaurantClick(restaurant.id)}
       >
-        {/* 이미지 영역 - 멀티 이미지 레이아웃 */}
+        {/* 이미지 영역 - 멀티 이미지 레이아웃 (메인 3:4 + 서브 1:1 x 2) */}
         <Box
           sx={{
             display: 'flex',
             gap: '4px',
-            height: 200,
             borderRadius: 2,
             overflow: 'hidden',
             mb: 1.5,
           }}
         >
-          {/* 메인 이미지 (왼쪽 큰 이미지) */}
+          {/* 메인 이미지 (왼쪽 - 3:4 비율) */}
           <Box
             sx={{
-              flex: hasMultipleImages ? '0 0 65%' : '1',
+              flex: hasMultipleImages ? '0 0 60%' : '1',
               position: 'relative',
+              aspectRatio: hasMultipleImages ? '3/4' : '4/3',
               overflow: 'hidden',
             }}
           >
@@ -191,6 +191,9 @@ const RestaurantsListPage: React.FC = () => {
               alt={restaurant.name}
               onError={handleImageError}
               sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
@@ -206,7 +209,7 @@ const RestaurantsListPage: React.FC = () => {
                   position: 'absolute',
                   top: 12,
                   left: 12,
-                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  backgroundColor: 'rgba(0,0,0,0.7)',
                   color: '#fff',
                   fontWeight: 500,
                   fontSize: '0.75rem',
@@ -214,18 +217,18 @@ const RestaurantsListPage: React.FC = () => {
                 }}
               />
             )}
-            {/* 평점 배지 - 메인 이미지 하단에 표시 */}
+            {/* 평점 배지 */}
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 8,
-                left: 8,
+                bottom: 10,
+                left: 10,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
                 px: 1,
                 py: 0.5,
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
                 borderRadius: 1,
               }}
             >
@@ -236,42 +239,64 @@ const RestaurantsListPage: React.FC = () => {
             </Box>
           </Box>
 
-          {/* 서브 이미지들 (오른쪽 작은 이미지 2개) */}
+          {/* 서브 이미지들 (오른쪽 - 1:1 비율 2개 세로 배치) */}
           {hasMultipleImages && (
             <Box
               sx={{
-                flex: '0 0 35%',
+                flex: '1',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '4px',
               }}
             >
               <Box
-                component="img"
-                className="restaurant-image"
-                src={images[1] || DEFAULT_RESTAURANT_IMAGE}
-                alt={`${restaurant.name} 2`}
-                onError={handleImageError}
                 sx={{
                   flex: 1,
-                  width: '100%',
-                  objectFit: 'cover',
-                  transition: 'transform 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
-              />
+              >
+                <Box
+                  component="img"
+                  className="restaurant-image"
+                  src={images[1] || DEFAULT_RESTAURANT_IMAGE}
+                  alt={`${restaurant.name} 2`}
+                  onError={handleImageError}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.3s ease',
+                  }}
+                />
+              </Box>
               <Box
-                component="img"
-                className="restaurant-image"
-                src={images[2] || DEFAULT_RESTAURANT_IMAGE}
-                alt={`${restaurant.name} 3`}
-                onError={handleImageError}
                 sx={{
                   flex: 1,
-                  width: '100%',
-                  objectFit: 'cover',
-                  transition: 'transform 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
-              />
+              >
+                <Box
+                  component="img"
+                  className="restaurant-image"
+                  src={images[2] || DEFAULT_RESTAURANT_IMAGE}
+                  alt={`${restaurant.name} 3`}
+                  onError={handleImageError}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.3s ease',
+                  }}
+                />
+              </Box>
             </Box>
           )}
         </Box>
