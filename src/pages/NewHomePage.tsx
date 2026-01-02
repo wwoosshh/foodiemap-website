@@ -37,12 +37,13 @@ import {
   HeartFilledIcon,
   NewIcon,
 } from '../components/icons/CustomIcons';
+import { AccessTime, Visibility, RateReview } from '@mui/icons-material';
 import { DEFAULT_RESTAURANT_IMAGE, handleImageError } from '../constants/images';
 import { useLanguage } from '../context/LanguageContext';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 
 // 정렬 옵션 타입
-type SortOption = 'rating_desc' | 'review_count_desc' | 'view_count_desc' | 'created_at_desc' | 'created_at_asc';
+type SortOption = 'rating_desc' | 'review_count_desc' | 'view_count_desc' | 'created_at_desc';
 
 interface PushedRestaurant {
   id: number;
@@ -86,18 +87,17 @@ const NewHomePage: React.FC = () => {
   const [mobilePage, setMobilePage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>('rating_desc');
+  const [sortOption, setSortOption] = useState<SortOption>('created_at_desc');
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const isLoadingRef = useRef(false); // 중복 요청 방지용
   const MOBILE_PAGE_SIZE = 10;
 
-  // 정렬 옵션 목록
-  const sortOptions: { value: SortOption; label: string }[] = [
-    { value: 'rating_desc', label: '별점순' },
-    { value: 'review_count_desc', label: '리뷰순' },
-    { value: 'view_count_desc', label: '조회순' },
-    { value: 'created_at_desc', label: '최신순' },
-    { value: 'created_at_asc', label: '오래된순' },
+  // 정렬 옵션 목록 (아이콘 포함)
+  const sortOptions: { value: SortOption; label: string; icon: React.ReactNode }[] = [
+    { value: 'created_at_desc', label: '최신순', icon: <AccessTime sx={{ fontSize: 18 }} /> },
+    { value: 'rating_desc', label: '별점순', icon: <StarFilledIcon sx={{ fontSize: 18 }} /> },
+    { value: 'review_count_desc', label: '리뷰순', icon: <RateReview sx={{ fontSize: 18 }} /> },
+    { value: 'view_count_desc', label: '조회순', icon: <Visibility sx={{ fontSize: 18 }} /> },
   ];
 
   const loadRestaurantsByCategory = useCallback(async (categoryId: string | null) => {
@@ -187,9 +187,9 @@ const NewHomePage: React.FC = () => {
           setFavoriteRestaurants(homeDataRes.data.multiSort.byFavoriteCount || []);
           setLatestRestaurants(homeDataRes.data.multiSort.byLatest || []);
 
-          // 모바일용 초기 데이터 (byRating 사용)
-          setMobileRestaurants(homeDataRes.data.multiSort.byRating || []);
-          setHasMore((homeDataRes.data.multiSort.byRating || []).length >= MOBILE_PAGE_SIZE);
+          // 모바일용 초기 데이터 (byLatest 사용 - 최신순이 기본)
+          setMobileRestaurants(homeDataRes.data.multiSort.byLatest || []);
+          setHasMore((homeDataRes.data.multiSort.byLatest || []).length >= MOBILE_PAGE_SIZE);
         }
       }
     } catch (err: any) {
@@ -832,35 +832,59 @@ const NewHomePage: React.FC = () => {
                 />
               ))}
             </Box>
-            {/* 정렬 행 */}
+            {/* 정렬 행 - 아이콘 기반 */}
             <Box
               sx={{
                 display: 'flex',
-                gap: 2,
-                overflowX: 'auto',
-                '&::-webkit-scrollbar': { display: 'none' },
-                scrollbarWidth: 'none',
+                alignItems: 'center',
+                gap: 0.5,
               }}
             >
-              {sortOptions.map((opt) => (
-                <Typography
-                  key={opt.value}
-                  onClick={() => handleSortChange(opt.value)}
-                  sx={{
-                    flexShrink: 0,
-                    cursor: 'pointer',
-                    color: sortOption === opt.value ? 'primary.main' : 'text.secondary',
-                    fontWeight: sortOption === opt.value ? 600 : 400,
-                    fontSize: '0.8rem',
-                    py: 0.5,
-                    borderBottom: sortOption === opt.value ? '2px solid' : '2px solid transparent',
-                    borderColor: sortOption === opt.value ? 'primary.main' : 'transparent',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {opt.label}
-                </Typography>
-              ))}
+              {sortOptions.map((opt) => {
+                const isSelected = sortOption === opt.value;
+                return (
+                  <Box
+                    key={opt.value}
+                    onClick={() => handleSortChange(opt.value)}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      cursor: 'pointer',
+                      px: isSelected ? 1.5 : 1,
+                      py: 0.5,
+                      borderRadius: 2,
+                      backgroundColor: isSelected
+                        ? theme.palette.primary.main
+                        : theme.palette.mode === 'dark'
+                          ? 'rgba(255,255,255,0.06)'
+                          : 'rgba(0,0,0,0.04)',
+                      color: isSelected ? 'white' : 'text.secondary',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: isSelected
+                          ? theme.palette.primary.dark
+                          : theme.palette.mode === 'dark'
+                            ? 'rgba(255,255,255,0.1)'
+                            : 'rgba(0,0,0,0.08)',
+                      },
+                    }}
+                  >
+                    {opt.icon}
+                    {isSelected && (
+                      <Typography
+                        sx={{
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {opt.label}
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })}
             </Box>
           </Box>
 
