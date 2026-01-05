@@ -25,7 +25,6 @@ import {
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import MainLayout, { useHeaderVisibility } from '../components/layout/MainLayout';
 import BannerCarousel from '../components/BannerCarousel';
-import SearchAutocomplete from '../components/SearchAutocomplete';
 import { ApiService } from '../services/api';
 import { Restaurant, Category, Banner } from '../types';
 import {
@@ -749,16 +748,6 @@ const NewHomePage: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* 모바일 검색바 - 배너 위 */}
-      {isMobile && (
-        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, pt: 1.5 }}>
-          <SearchAutocomplete
-            variant="mobile"
-            placeholder=""
-          />
-        </Container>
-      )}
-
       {/* 배너 캐러셀 - 상단 여백 추가, PC 폭 제한 */}
       {banners.length > 0 && (
         <Container
