@@ -239,7 +239,7 @@ export class ApiService {
   // === 맛집 상세정보 통합 데이터 API ===
 
   // 맛집 상세정보 모든 데이터 한 번에 조회 (정보, 메뉴, 리뷰, 지도 등)
-  static async getRestaurantCompleteData(restaurantId: string, lang: string = 'ko'): Promise<ApiResponse<{
+  static async getRestaurantCompleteData(restaurantId: string, lang: string = 'ko', skipViewCount: boolean = false): Promise<ApiResponse<{
     restaurant: any;
     contacts?: any;
     facilities?: any;
@@ -275,7 +275,11 @@ export class ApiService {
       address: string;
     } | null;
   }>> {
-    const response = await api.get(`/api/restaurant-details/${restaurantId}/complete?lang=${lang}`);
+    const params = new URLSearchParams({ lang });
+    if (skipViewCount) {
+      params.append('skip_view_count', 'true');
+    }
+    const response = await api.get(`/api/restaurant-details/${restaurantId}/complete?${params.toString()}`);
     return response.data;
   }
 

@@ -94,17 +94,36 @@ const RestaurantDetailPage: React.FC = () => {
   const touchEndX = useRef<number>(0);
   const mainImageRef = useRef<HTMLDivElement>(null);
 
+  // 중복 API 호출 방지 (React.StrictMode 대응)
+  const isLoadingRef = useRef(false);
+  const loadedIdRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (id) {
-      loadRestaurantData();
+    // 이미 같은 ID로 로딩 중이거나 로딩 완료된 경우 스킵
+    if (!id || isLoadingRef.current || loadedIdRef.current === id) {
+      return;
+    }
+    loadRestaurantData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // 언어 변경 시에는 데이터 다시 로드 (조회수 증가 없이)
+  useEffect(() => {
+    if (id && loadedIdRef.current === id && restaurant) {
+      // 언어 변경 시에만 데이터 재로드 (이미 로드된 상태에서)
+      loadRestaurantData(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, language]);
+  }, [language]);
 
-  const loadRestaurantData = async () => {
+  const loadRestaurantData = async (skipViewCount: boolean = false) => {
+    // 중복 호출 방지
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
+
     try {
       setLoading(true);
-      const response = await ApiService.getRestaurantCompleteData(id!, language);
+      const response = await ApiService.getRestaurantCompleteData(id!, language, skipViewCount);
 
       if (response.success && response.data) {
         const restaurantData = response.data.restaurant;
@@ -166,6 +185,8 @@ const RestaurantDetailPage: React.FC = () => {
       setError(err.userMessage || '맛집 정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
+      loadedIdRef.current = id!;
     }
   };
 
