@@ -138,6 +138,11 @@ const RestaurantDetailPage: React.FC = () => {
     // 이미 조회한 맛집이면 조회수 증가 스킵
     const shouldSkipViewCount = skipViewCount || hasAlreadyViewed(id!);
 
+    // 조회수를 증가시킬 경우, API 호출 전에 먼저 마킹 (StrictMode 중복 호출 방지)
+    if (!shouldSkipViewCount) {
+      markAsViewed(id!);
+    }
+
     try {
       setLoading(true);
       const response = await ApiService.getRestaurantCompleteData(id!, language, shouldSkipViewCount);
@@ -202,10 +207,6 @@ const RestaurantDetailPage: React.FC = () => {
       setError(err.userMessage || '맛집 정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
-      // 처음 조회한 경우에만 기록 저장 (조회수 중복 증가 방지)
-      if (!shouldSkipViewCount) {
-        markAsViewed(id!);
-      }
     }
   };
 
