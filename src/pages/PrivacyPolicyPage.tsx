@@ -532,7 +532,7 @@ const PrivacyPolicyPage: React.FC = () => {
                   <br />
                   직책: 정보보호최고책임자(CISO)
                   <br />
-                  연락처: nunconnect1@gmail.com
+                  연락처: ccjsrnl@naver.com
                 </Typography>
               </Box>
               <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
@@ -630,10 +630,10 @@ const PrivacyPolicyPage: React.FC = () => {
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2">
-                  <strong>개인정보 보호책임자 이메일:</strong> nunconnect1@gmail.com
+                  <strong>개인정보 보호책임자 이메일:</strong> ccjsrnl@naver.com
                 </Typography>
                 <Typography variant="body2">
-                  <strong>고객센터 이메일:</strong> nunconnect1@gmail.com
+                  <strong>고객센터 이메일:</strong> ccjsrnl@naver.com
                 </Typography>
                 <Typography variant="body2">
                   <strong>운영시간:</strong> 평일 09:00 - 18:00 (주말 및 공휴일 제외)

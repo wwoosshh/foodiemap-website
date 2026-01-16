@@ -572,7 +572,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   {t.footer.address}: {t.footer.notYetRegistered}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>
-                  {t.footer.adminEmail}: nunconnect1@gmail.com
+                  {t.footer.adminEmail}: ccjsrnl@naver.com
                 </Typography>
               </Box>
             </Box>
