@@ -68,7 +68,7 @@ const NewHomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [pushedRestaurants, setPushedRestaurants] = useState<PushedRestaurant[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showCategorySidebar, setShowCategorySidebar] = useState(true);
@@ -99,10 +99,10 @@ const NewHomePage: React.FC = () => {
     { value: 'view_count_desc', label: '조회순', icon: <Visibility sx={{ fontSize: 18 }} /> },
   ];
 
-  const loadRestaurantsByCategory = useCallback(async (categoryId: string | null) => {
+  const loadRestaurantsByCategory = useCallback(async (categoryIds: string[]) => {
     try {
       // 통합 API로 한 번에 모든 정렬 방식의 맛집 로드
-      const params = categoryId ? { category_id: categoryId, limit: 10 } : { limit: 10 };
+      const params = categoryIds.length > 0 ? { category_ids: categoryIds.join(','), limit: 10 } : { limit: 10 };
 
       const multiSortRes = await ApiService.getRestaurantsMultiSort(params);
 
@@ -119,7 +119,7 @@ const NewHomePage: React.FC = () => {
   }, []);
 
   // 모바일용 맛집 로드 함수
-  const loadMobileRestaurants = useCallback(async (categoryId: string | null, page: number, sort: SortOption, reset: boolean = false) => {
+  const loadMobileRestaurants = useCallback(async (categoryIds: string[], page: number, sort: SortOption, reset: boolean = false) => {
     // 중복 요청 방지
     if (isLoadingRef.current && !reset) return;
 
@@ -132,8 +132,8 @@ const NewHomePage: React.FC = () => {
         limit: MOBILE_PAGE_SIZE,
         sort,
       };
-      if (categoryId) {
-        params.category_id = categoryId;
+      if (categoryIds.length > 0) {
+        params.category_ids = categoryIds.join(',');
       }
 
       const res = await ApiService.getRestaurants(params);
@@ -219,17 +219,17 @@ const NewHomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // 초기 로드가 완료되고, 카테고리가 변경되었을 때 실행 (null 포함)
+    // 초기 로드가 완료되고, 카테고리가 변경되었을 때 실행
     if (!isInitialLoad) {
-      loadRestaurantsByCategory(selectedCategoryId);
+      loadRestaurantsByCategory(selectedCategoryIds);
       // 모바일: 카테고리 변경 시 목록 리셋
       if (isMobile) {
         setMobilePage(1);
         setHasMore(true);
-        loadMobileRestaurants(selectedCategoryId, 1, sortOption, true);
+        loadMobileRestaurants(selectedCategoryIds, 1, sortOption, true);
       }
     }
-  }, [selectedCategoryId, isInitialLoad, loadRestaurantsByCategory, isMobile, loadMobileRestaurants, sortOption]);
+  }, [selectedCategoryIds, isInitialLoad, loadRestaurantsByCategory, isMobile, loadMobileRestaurants, sortOption]);
 
   // 모바일 무한 스크롤: IntersectionObserver
   useEffect(() => {
@@ -241,7 +241,7 @@ const NewHomePage: React.FC = () => {
         if (target.isIntersecting && hasMore && !isLoadingRef.current) {
           setMobilePage(prev => {
             const nextPage = prev + 1;
-            loadMobileRestaurants(selectedCategoryId, nextPage, sortOption, false);
+            loadMobileRestaurants(selectedCategoryIds, nextPage, sortOption, false);
             return nextPage;
           });
         }
@@ -259,7 +259,7 @@ const NewHomePage: React.FC = () => {
         observer.unobserve(currentRef);
       }
     };
-  }, [isMobile, hasMore, selectedCategoryId, sortOption, loadMobileRestaurants]);
+  }, [isMobile, hasMore, selectedCategoryIds, sortOption, loadMobileRestaurants]);
 
   // 정렬 변경 핸들러
   const handleSortChange = (newSort: SortOption) => {
@@ -268,12 +268,26 @@ const NewHomePage: React.FC = () => {
       setMobilePage(1);
       setHasMore(true);
       setMobileRestaurants([]);
-      loadMobileRestaurants(selectedCategoryId, 1, newSort, true);
+      loadMobileRestaurants(selectedCategoryIds, 1, newSort, true);
     }
   };
 
+  // 카테고리 클릭 핸들러 (토글 방식 - 중복 선택 가능)
   const handleCategoryClick = (categoryId: string | null) => {
-    setSelectedCategoryId(categoryId);
+    if (categoryId === null) {
+      // "전체" 클릭 시 모든 선택 해제
+      setSelectedCategoryIds([]);
+    } else {
+      setSelectedCategoryIds(prev => {
+        if (prev.includes(categoryId)) {
+          // 이미 선택된 카테고리면 제거
+          return prev.filter(id => id !== categoryId);
+        } else {
+          // 선택되지 않은 카테고리면 추가
+          return [...prev, categoryId];
+        }
+      });
+    }
   };
 
   const handleRestaurantClick = (restaurantId: string) => {
@@ -680,7 +694,7 @@ const NewHomePage: React.FC = () => {
           <Button
             endIcon={<ArrowRightIcon />}
             onClick={() => {
-              const categoryParam = selectedCategoryId ? `&category=${selectedCategoryId}` : '';
+              const categoryParam = selectedCategoryIds.length > 0 ? `&categories=${selectedCategoryIds.join(',')}` : '';
               navigate(`/restaurants?sort=${sortParam}${categoryParam}`);
             }}
             sx={{
@@ -744,7 +758,7 @@ const NewHomePage: React.FC = () => {
     );
   }
 
-  const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+  const selectedCategories = categories.filter((c) => selectedCategoryIds.includes(c.id));
 
   return (
     <MainLayout>
@@ -912,14 +926,14 @@ const NewHomePage: React.FC = () => {
                 onClick={() => handleCategoryClick(null)}
                 sx={{
                   flexShrink: 0,
-                  backgroundColor: selectedCategoryId === null ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                  color: selectedCategoryId === null ? 'white' : 'text.primary',
+                  backgroundColor: selectedCategoryIds.length === 0 ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                  color: selectedCategoryIds.length === 0 ? 'white' : 'text.primary',
                   border: 'none',
                   fontWeight: 500,
                   fontSize: '0.8rem',
                   height: 32,
                   '&:hover': {
-                    backgroundColor: selectedCategoryId === null ? theme.palette.primary.dark : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+                    backgroundColor: selectedCategoryIds.length === 0 ? theme.palette.primary.dark : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
                   },
                 }}
               />
@@ -931,14 +945,14 @@ const NewHomePage: React.FC = () => {
                   onClick={() => handleCategoryClick(category.id)}
                   sx={{
                     flexShrink: 0,
-                    backgroundColor: selectedCategoryId === category.id ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                    color: selectedCategoryId === category.id ? 'white' : 'text.primary',
+                    backgroundColor: selectedCategoryIds.includes(category.id) ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                    color: selectedCategoryIds.includes(category.id) ? 'white' : 'text.primary',
                     border: 'none',
                     fontWeight: 500,
                     fontSize: '0.8rem',
                     height: 32,
                     '&:hover': {
-                      backgroundColor: selectedCategoryId === category.id ? theme.palette.primary.dark : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+                      backgroundColor: selectedCategoryIds.includes(category.id) ? theme.palette.primary.dark : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
                     },
                   }}
                 />
@@ -1029,24 +1043,27 @@ const NewHomePage: React.FC = () => {
             {/* 메인 콘텐츠 영역 */}
             <Box sx={{ flex: 1, minWidth: 0, transition: 'all 0.3s ease' }}>
               {/* 선택된 카테고리 표시 */}
-              {selectedCategoryId && selectedCategory && (
+              {selectedCategoryIds.length > 0 && selectedCategories.length > 0 && (
                 <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Chip
-                      label={selectedCategory.name}
-                      onDelete={() => handleCategoryClick(null)}
-                      sx={{
-                        backgroundColor: theme.palette.primary.main,
-                        color: 'white',
-                        fontWeight: 700,
-                        fontSize: '1rem',
-                        py: 2.5,
-                        '& .MuiChip-deleteIcon': {
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                    {selectedCategories.map((category) => (
+                      <Chip
+                        key={category.id}
+                        label={category.name}
+                        onDelete={() => handleCategoryClick(category.id)}
+                        sx={{
+                          backgroundColor: theme.palette.primary.main,
                           color: 'white',
-                        },
-                      }}
-                    />
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          py: 2.5,
+                          '& .MuiChip-deleteIcon': {
+                            color: 'white',
+                          },
+                        }}
+                      />
+                    ))}
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', ml: 1 }}>
                       {t('home.selectedCategory')}
                     </Typography>
                   </Box>
@@ -1137,18 +1154,18 @@ const NewHomePage: React.FC = () => {
               {/* 전체 보기 버튼 */}
               <Button
                 fullWidth
-                variant={selectedCategoryId === null ? 'contained' : 'text'}
+                variant={selectedCategoryIds.length === 0 ? 'contained' : 'text'}
                 onClick={() => handleCategoryClick(null)}
                 sx={{
                   mb: 2,
                   justifyContent: 'flex-start',
                   py: 1.2,
                   px: 2,
-                  fontWeight: selectedCategoryId === null ? 600 : 500,
-                  backgroundColor: selectedCategoryId === null ? 'primary.main' : 'transparent',
-                  color: selectedCategoryId === null ? 'white' : 'text.primary',
+                  fontWeight: selectedCategoryIds.length === 0 ? 600 : 500,
+                  backgroundColor: selectedCategoryIds.length === 0 ? 'primary.main' : 'transparent',
+                  color: selectedCategoryIds.length === 0 ? 'white' : 'text.primary',
                   '&:hover': {
-                    backgroundColor: selectedCategoryId === null ? 'primary.dark' : alpha(theme.palette.primary.main, 0.08),
+                    backgroundColor: selectedCategoryIds.length === 0 ? 'primary.dark' : alpha(theme.palette.primary.main, 0.08),
                   },
                 }}
               >
@@ -1168,9 +1185,9 @@ const NewHomePage: React.FC = () => {
                       py: 1,
                       px: 1.5,
                       fontSize: '0.85rem',
-                      fontWeight: selectedCategoryId === category.id ? 600 : 400,
-                      color: selectedCategoryId === category.id ? 'primary.main' : 'text.secondary',
-                      backgroundColor: selectedCategoryId === category.id ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                      fontWeight: selectedCategoryIds.includes(category.id) ? 600 : 400,
+                      color: selectedCategoryIds.includes(category.id) ? 'primary.main' : 'text.secondary',
+                      backgroundColor: selectedCategoryIds.includes(category.id) ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
                       justifyContent: 'flex-start',
                       minHeight: '40px',
                       borderRadius: 2,

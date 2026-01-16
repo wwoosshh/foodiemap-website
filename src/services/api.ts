@@ -149,6 +149,7 @@ export class ApiService {
     page?: number;
     limit?: number;
     category_id?: string;
+    category_ids?: string; // 쉼표로 구분된 여러 카테고리 ID (OR 조건)
     search?: string;
     sort?: 'view_count_desc' | 'review_count_desc' | 'rating_desc' | 'created_at_desc' | 'favorite_count_desc';
   } = {}): Promise<ApiResponse<{
@@ -175,6 +176,7 @@ export class ApiService {
   static async getRestaurantsMultiSort(params: {
     limit?: number;
     category_id?: string;
+    category_ids?: string; // 쉼표로 구분된 여러 카테고리 ID (OR 조건)
   } = {}): Promise<ApiResponse<{
     byRating: Restaurant[];
     byReviewCount: Restaurant[];
