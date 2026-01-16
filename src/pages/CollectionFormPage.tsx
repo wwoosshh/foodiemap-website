@@ -101,6 +101,7 @@ const CollectionFormPage: React.FC = () => {
     if (isEditMode && id) {
       loadCollection();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, id]);
 
   // 즐겨찾기, 리뷰 로드

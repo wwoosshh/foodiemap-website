@@ -415,6 +415,7 @@ const CommunityPage: React.FC = () => {
         setLoadingMore(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sortTab]
   );
 
@@ -427,6 +428,7 @@ const CommunityPage: React.FC = () => {
   // 정렬 변경 시 다시 로드
   useEffect(() => {
     loadCollections(1, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortTab]);
 
   // 무한 스크롤
