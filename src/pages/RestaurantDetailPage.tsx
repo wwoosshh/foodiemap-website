@@ -17,12 +17,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tab,
-  Tabs,
   FormControlLabel,
   Checkbox,
   Stack,
   Link,
+  Paper,
+  LinearProgress,
+  Skeleton,
 } from '@mui/material';
 import MainLayout from '../components/layout/MainLayout';
 import NaverMap from '../components/NaverMap';
@@ -46,21 +47,74 @@ import {
   Delete,
   CloudUpload,
   Close,
-  KeyboardArrowUp,
-  KeyboardArrowDown,
+  Phone,
+  Place,
+  AccessTime,
   ContentCopy,
+  NavigationOutlined,
+  CheckCircleOutline,
+  ExpandMore,
+  ExpandLess,
+  ArrowForward,
+  ArrowBack,
 } from '@mui/icons-material';
 import { openCloudinaryWidget } from '../lib/cloudinary';
+
+// 영업 상태 계산 함수
+const getBusinessStatus = (operations: any): { status: 'open' | 'break' | 'closed'; text: string } => {
+  if (!operations?.business_hours) {
+    return { status: 'closed', text: '정보 없음' };
+  }
+
+  const now = new Date();
+  const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const today = dayNames[now.getDay()];
+  const currentTime = now.getHours() * 100 + now.getMinutes();
+
+  const todayHours = operations.business_hours[today];
+
+  if (!todayHours || todayHours.closed) {
+    return { status: 'closed', text: '휴무일' };
+  }
+
+  const parseTime = (timeStr: string): number => {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 100 + m;
+  };
+
+  const openTime = parseTime(todayHours.open);
+  const closeTime = parseTime(todayHours.close);
+
+  // 브레이크 타임 체크
+  if (operations.break_time) {
+    const breakMatch = operations.break_time.match(/(\d{2}:\d{2})\s*[-~]\s*(\d{2}:\d{2})/);
+    if (breakMatch) {
+      const breakStart = parseTime(breakMatch[1]);
+      const breakEnd = parseTime(breakMatch[2]);
+      if (currentTime >= breakStart && currentTime < breakEnd) {
+        return { status: 'break', text: '브레이크타임' };
+      }
+    }
+  }
+
+  if (currentTime >= openTime && currentTime < closeTime) {
+    return { status: 'open', text: '영업중' };
+  }
+
+  return { status: 'closed', text: '영업 종료' };
+};
 
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { t, language } = useLanguage();
 
+  // 데이터 상태
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [restaurant, setRestaurant] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewStats, setReviewStats] = useState<any>(null);
   const [menus, setMenus] = useState<any>({ all: [], signature: [], popular: [] });
   const [photos, setPhotos] = useState<any>({ all: [], representative: [] });
   const [tags, setTags] = useState<any[]>([]);
@@ -69,40 +123,45 @@ const RestaurantDetailPage: React.FC = () => {
   const [operations, setOperations] = useState<any>({});
   const [services, setServices] = useState<any>({});
   const [isFavorited, setIsFavorited] = useState(false);
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [isImageListExpanded, setIsImageListExpanded] = useState(false);
+
+  // UI 상태
+  const [activeSection, setActiveSection] = useState('menu');
+  const [isTabSticky, setIsTabSticky] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [showAllMenu, setShowAllMenu] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   // 리뷰 작성 상태
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewContent, setReviewContent] = useState('');
   const [reviewIsAnonymous, setReviewIsAnonymous] = useState(false);
   const [reviewImages, setReviewImages] = useState<string[]>([]);
-
-  // 리뷰 인터랙션 상태
-  const [helpfulReviews, setHelpfulReviews] = useState<Set<string>>(new Set());
   const [editingReview, setEditingReview] = useState<any>(null);
+
+  // 리뷰 인터랙션
+  const [helpfulReviews, setHelpfulReviews] = useState<Set<string>>(new Set());
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
 
-  // 메인 이미지 스와이프 관련
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
-  const mainImageRef = useRef<HTMLDivElement>(null);
+  // Refs
+  const tabRef = useRef<HTMLDivElement>(null);
+  const menuSectionRef = useRef<HTMLDivElement>(null);
+  const reviewSectionRef = useRef<HTMLDivElement>(null);
+  const infoSectionRef = useRef<HTMLDivElement>(null);
+  const mapSectionRef = useRef<HTMLDivElement>(null);
 
-  // 중복 조회수 증가 방지를 위한 sessionStorage 키
+  // 조회수 중복 방지
   const getViewedKey = (restaurantId: string) => `viewed_restaurant_${restaurantId}`;
 
-  // 이미 조회한 맛집인지 확인
   const hasAlreadyViewed = (restaurantId: string): boolean => {
     try {
       const viewedTime = sessionStorage.getItem(getViewedKey(restaurantId));
       if (!viewedTime) return false;
-      // 30분 이내에 조회한 경우 true 반환
       const thirtyMinutes = 30 * 60 * 1000;
       return Date.now() - parseInt(viewedTime, 10) < thirtyMinutes;
     } catch {
@@ -110,35 +169,65 @@ const RestaurantDetailPage: React.FC = () => {
     }
   };
 
-  // 조회 기록 저장
   const markAsViewed = (restaurantId: string) => {
     try {
       sessionStorage.setItem(getViewedKey(restaurantId), Date.now().toString());
-    } catch {
-      // sessionStorage 실패 무시
-    }
+    } catch {}
   };
 
+  // 데이터 로드
   useEffect(() => {
     if (id) {
       loadRestaurantData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // 언어 변경 시에는 데이터 다시 로드 (조회수 증가 없이)
   useEffect(() => {
     if (id && restaurant) {
       loadRestaurantData(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
-  const loadRestaurantData = async (skipViewCount: boolean = false) => {
-    // 이미 조회한 맛집이면 조회수 증가 스킵
-    const shouldSkipViewCount = skipViewCount || hasAlreadyViewed(id!);
+  // Sticky Tab & Section Observer
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tabRef.current) {
+        const tabTop = tabRef.current.getBoundingClientRect().top;
+        setIsTabSticky(tabTop <= 64);
+      }
+    };
 
-    // 조회수를 증가시킬 경우, API 호출 전에 먼저 마킹 (StrictMode 중복 호출 방지)
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -50% 0px',
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('data-section');
+          if (id) setActiveSection(id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    [menuSectionRef, reviewSectionRef, infoSectionRef, mapSectionRef].forEach((ref) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
+  }, [restaurant]);
+
+  const loadRestaurantData = async (skipViewCount: boolean = false) => {
+    const shouldSkipViewCount = skipViewCount || hasAlreadyViewed(id!);
     if (!shouldSkipViewCount) {
       markAsViewed(id!);
     }
@@ -151,12 +240,11 @@ const RestaurantDetailPage: React.FC = () => {
         const restaurantData = response.data.restaurant;
         setRestaurant(restaurantData);
         setReviews(response.data.reviews?.items || []);
+        setReviewStats(response.data.reviews?.stats || null);
 
-        // SEO: 메타 태그 업데이트
+        // SEO
         if (restaurantData) {
           updateMetaTags(generateRestaurantMeta(restaurantData));
-
-          // SEO: 구조화된 데이터 (Schema.org) 추가
           const schemas = [
             generateRestaurantSchema({
               ...restaurantData,
@@ -172,25 +260,19 @@ const RestaurantDetailPage: React.FC = () => {
           insertMultipleStructuredData(schemas);
         }
 
-        // 메뉴 데이터
+        // 메뉴
         if (response.data.menus && typeof response.data.menus === 'object' && 'all' in response.data.menus) {
           setMenus(response.data.menus);
         } else {
           setMenus({ all: response.data.menus || [], signature: [], popular: [] });
         }
 
-        // 사진 데이터
         setPhotos(response.data.photos || { all: [], representative: [] });
-
-        // 태그 데이터
         setTags(response.data.tags || []);
-
-        // 추가 데이터
         setContacts(response.data.contacts || {});
         setFacilities(response.data.facilities || {});
         setOperations(response.data.operations || {});
         setServices(response.data.services || {});
-
         setIsFavorited(response.data.userInfo?.isFavorited || false);
 
         if (user && response.data.reviews?.items) {
@@ -210,12 +292,12 @@ const RestaurantDetailPage: React.FC = () => {
     }
   };
 
+  // 핸들러들
   const handleToggleFavorite = async () => {
     if (!user) {
       alert('로그인이 필요합니다.');
       return;
     }
-
     try {
       if (isFavorited) {
         await ApiService.removeFromFavorites(id!);
@@ -224,15 +306,47 @@ const RestaurantDetailPage: React.FC = () => {
       }
       setIsFavorited(!isFavorited);
     } catch (err: any) {
-      alert(err.userMessage || '즐겨찾기 처리에 실패했습니다.');
+      alert(err.userMessage || '처리에 실패했습니다.');
     }
   };
 
   const handleCopyAddress = () => {
     const address = restaurant?.address || '';
-    navigator.clipboard.writeText(address).catch(() => {
-      // 복사 실패 시 무시 (사용자에게 불필요한 알림 방지)
-    });
+    navigator.clipboard.writeText(address).then(() => {
+      // 복사 완료 (토스트 메시지 대신 조용히 처리)
+    }).catch(() => {});
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: restaurant?.name,
+      text: restaurant?.introduction || restaurant?.name,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {}
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const refs: { [key: string]: React.RefObject<HTMLDivElement> } = {
+      menu: menuSectionRef,
+      review: reviewSectionRef,
+      info: infoSectionRef,
+      map: mapSectionRef,
+    };
+
+    const ref = refs[sectionId];
+    if (ref?.current) {
+      const yOffset = -120;
+      const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
   };
 
   const handleSubmitReview = async () => {
@@ -240,7 +354,6 @@ const RestaurantDetailPage: React.FC = () => {
       alert('로그인이 필요합니다.');
       return;
     }
-
     if (!reviewTitle.trim() || !reviewContent.trim()) {
       alert('제목과 내용을 모두 입력해주세요.');
       return;
@@ -255,65 +368,16 @@ const RestaurantDetailPage: React.FC = () => {
         is_anonymous: reviewIsAnonymous,
         images: reviewImages.length > 0 ? reviewImages : undefined,
       });
-
       alert('리뷰가 작성되었습니다.');
-      setReviewDialogOpen(false);
-      setReviewTitle('');
-      setReviewContent('');
-      setReviewRating(5);
-      setReviewIsAnonymous(false);
-      setReviewImages([]);
-      loadRestaurantData();
+      closeReviewDialog();
+      loadRestaurantData(true);
     } catch (err: any) {
       alert(err.userMessage || '리뷰 작성에 실패했습니다.');
     }
   };
 
-  const handleToggleHelpful = async (reviewId: string) => {
-    if (!user) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
-
-    try {
-      const response = await ApiService.toggleReviewHelpful(reviewId);
-      if (response.success && response.data) {
-        const responseData = response.data;
-
-        const newHelpfulReviews = new Set(helpfulReviews);
-        if (responseData.is_helpful) {
-          newHelpfulReviews.add(reviewId);
-        } else {
-          newHelpfulReviews.delete(reviewId);
-        }
-        setHelpfulReviews(newHelpfulReviews);
-
-        setReviews(reviews.map(review =>
-          review.id === reviewId
-            ? { ...review, helpful_count: responseData.helpful_count }
-            : review
-        ));
-      }
-    } catch (err: any) {
-      alert(err.userMessage || '도움이 돼요 처리에 실패했습니다.');
-    }
-  };
-
-  const handleOpenEditDialog = (review: any) => {
-    setEditingReview(review);
-    setReviewRating(review.rating);
-    setReviewTitle(review.title || '');
-    setReviewContent(review.content || '');
-    setReviewIsAnonymous(review.is_anonymous || false);
-    setReviewImages(review.images || []);
-    setReviewDialogOpen(true);
-  };
-
   const handleUpdateReview = async () => {
-    if (!user || !editingReview) {
-      return;
-    }
-
+    if (!user || !editingReview) return;
     if (!reviewTitle.trim() || !reviewContent.trim()) {
       alert('제목과 내용을 모두 입력해주세요.');
       return;
@@ -327,47 +391,62 @@ const RestaurantDetailPage: React.FC = () => {
         is_anonymous: reviewIsAnonymous,
         images: reviewImages.length > 0 ? reviewImages : undefined,
       });
-
       alert('리뷰가 수정되었습니다.');
-      setReviewDialogOpen(false);
-      setEditingReview(null);
-      setReviewTitle('');
-      setReviewContent('');
-      setReviewRating(5);
-      setReviewIsAnonymous(false);
-      setReviewImages([]);
-      loadRestaurantData();
+      closeReviewDialog();
+      loadRestaurantData(true);
     } catch (err: any) {
       alert(err.userMessage || '리뷰 수정에 실패했습니다.');
     }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
-    if (!user) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
-
-    if (!window.confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
-      return;
-    }
+    if (!user) return;
+    if (!window.confirm('리뷰를 삭제하시겠습니까?')) return;
 
     try {
       await ApiService.deleteReview(reviewId);
       alert('리뷰가 삭제되었습니다.');
-      loadRestaurantData();
+      loadRestaurantData(true);
     } catch (err: any) {
       alert(err.userMessage || '리뷰 삭제에 실패했습니다.');
     }
   };
 
-  const handleOpenReportDialog = (reviewId: string) => {
+  const handleToggleHelpful = async (reviewId: string) => {
     if (!user) {
       alert('로그인이 필요합니다.');
       return;
     }
-    setReportingReviewId(reviewId);
-    setReportDialogOpen(true);
+
+    try {
+      const response = await ApiService.toggleReviewHelpful(reviewId);
+      if (response.success && response.data) {
+        const newHelpfulReviews = new Set(helpfulReviews);
+        if (response.data.is_helpful) {
+          newHelpfulReviews.add(reviewId);
+        } else {
+          newHelpfulReviews.delete(reviewId);
+        }
+        setHelpfulReviews(newHelpfulReviews);
+        setReviews(reviews.map(review =>
+          review.id === reviewId
+            ? { ...review, helpful_count: response.data.helpful_count }
+            : review
+        ));
+      }
+    } catch (err: any) {
+      alert(err.userMessage || '처리에 실패했습니다.');
+    }
+  };
+
+  const handleOpenEditDialog = (review: any) => {
+    setEditingReview(review);
+    setReviewRating(review.rating);
+    setReviewTitle(review.title || '');
+    setReviewContent(review.content || '');
+    setReviewIsAnonymous(review.is_anonymous || false);
+    setReviewImages(review.images || []);
+    setReviewDialogOpen(true);
   };
 
   const handleSubmitReport = async () => {
@@ -381,7 +460,6 @@ const RestaurantDetailPage: React.FC = () => {
         reason: reportReason,
         details: reportDetails,
       });
-
       alert('신고가 접수되었습니다.');
       setReportDialogOpen(false);
       setReportingReviewId(null);
@@ -392,1222 +470,1513 @@ const RestaurantDetailPage: React.FC = () => {
     }
   };
 
-  // 메인 이미지 스와이프 핸들러
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    const diffX = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50; // 최소 스와이프 거리
-
-    if (Math.abs(diffX) > minSwipeDistance && photos.all.length > 1) {
-      if (diffX > 0) {
-        // 왼쪽으로 스와이프 -> 다음 이미지
-        setSelectedImage((prev) => (prev + 1) % photos.all.length);
-      } else {
-        // 오른쪽으로 스와이프 -> 이전 이미지
-        setSelectedImage((prev) => (prev - 1 + photos.all.length) % photos.all.length);
-      }
-    }
-  }, [photos.all.length]);
+  const closeReviewDialog = () => {
+    setReviewDialogOpen(false);
+    setEditingReview(null);
+    setReviewTitle('');
+    setReviewContent('');
+    setReviewRating(5);
+    setReviewIsAnonymous(false);
+    setReviewImages([]);
+  };
 
   // 영업시간 렌더링
   const renderBusinessHours = () => {
     const hours = operations?.business_hours;
     if (!hours || typeof hours !== 'object') {
-      return <Typography variant="body2" color="text.secondary">{t('restaurant.noHoursInfo')}</Typography>;
+      return <Typography variant="body2" color="text.secondary">정보 없음</Typography>;
     }
 
     const weekdays = [
-      { key: 'mon', label: t('restaurant.mon') },
-      { key: 'tue', label: t('restaurant.tue') },
-      { key: 'wed', label: t('restaurant.wed') },
-      { key: 'thu', label: t('restaurant.thu') },
-      { key: 'fri', label: t('restaurant.fri') },
-      { key: 'sat', label: t('restaurant.sat') },
-      { key: 'sun', label: t('restaurant.sun') },
+      { key: 'mon', label: '월' },
+      { key: 'tue', label: '화' },
+      { key: 'wed', label: '수' },
+      { key: 'thu', label: '목' },
+      { key: 'fri', label: '금' },
+      { key: 'sat', label: '토' },
+      { key: 'sun', label: '일' },
     ];
 
     return (
-      <Stack spacing={0.5}>
+      <Box>
         {weekdays.map((day) => {
           const dayData = hours[day.key];
-          let displayText = t('restaurant.noInfo');
+          let displayText = '-';
+          const isClosed = dayData?.closed;
 
-          if (dayData) {
-            if (dayData.closed) {
-              displayText = t('restaurant.closed');
-            } else if (dayData.open && dayData.close) {
-              displayText = `${dayData.open} - ${dayData.close}`;
-            }
+          if (dayData && !isClosed && dayData.open && dayData.close) {
+            displayText = `${dayData.open} - ${dayData.close}`;
+          } else if (isClosed) {
+            displayText = '휴무';
           }
 
           return (
-            <Box key={day.key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 30, flexShrink: 0 }}>
+            <Box key={day.key} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ width: 24 }}>
                 {day.label}
               </Typography>
-              <Box
-                sx={{
-                  flex: 1,
-                  borderBottom: '1px dotted',
-                  borderColor: 'divider',
-                  minWidth: 20,
-                  mb: 0.5
-                }}
-              />
-              <Typography variant="body2" color={dayData?.closed ? 'error.main' : 'text.primary'} sx={{ flexShrink: 0 }}>
+              <Typography
+                variant="body2"
+                color={isClosed ? 'error.main' : 'text.primary'}
+                fontWeight={isClosed ? 500 : 400}
+              >
                 {displayText}
               </Typography>
             </Box>
           );
         })}
-        {(operations?.break_time || restaurant?.break_time) && (
-          <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
+        {operations?.break_time && (
+          <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
             <Typography variant="caption" color="text.secondary">
-              {t('restaurant.breakTime')}: {(operations?.break_time || restaurant?.break_time)}
+              브레이크타임: {operations.break_time}
             </Typography>
           </Box>
         )}
-        {(operations?.last_order || restaurant?.last_order) && (
-          <Box>
+        {operations?.last_order && (
+          <Box sx={{ mt: 0.5 }}>
             <Typography variant="caption" color="text.secondary">
-              {t('restaurant.lastOrder')}: {(operations?.last_order || restaurant?.last_order)}
+              라스트오더: {operations.last_order}
             </Typography>
           </Box>
         )}
-        {operations?.regular_holidays && operations.regular_holidays.length > 0 && (
-          <Box sx={{ pt: 0.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="caption" color="error.main">
-              {t('restaurant.regularHolidays')}: {operations.regular_holidays.join(', ')}
-            </Typography>
-          </Box>
-        )}
-        {operations?.holiday_notice && (
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              {t('restaurant.holidayNotice')}: {operations.holiday_notice}
-            </Typography>
-          </Box>
-        )}
-      </Stack>
+      </Box>
     );
   };
 
-  // 태그를 카테고리별로 그룹화 (새로운 카테고리 시스템 지원)
-  const groupTagsByCategory = () => {
-    const grouped: { [key: string]: { tags: any[], icon?: string, color?: string } } = {};
-    tags.forEach(tag => {
-      // 새로운 category 필드 (tag_categories.name)를 우선 사용
-      const category = tag.category || '기타';
-      if (!grouped[category]) {
-        grouped[category] = {
-          tags: [],
-          icon: tag.category_icon,
-          color: tag.category_color
-        };
+  // 평점 분포 계산
+  const getRatingDistribution = () => {
+    if (!reviews.length) return { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    const dist: { [key: number]: number } = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach(r => {
+      const rating = Math.round(r.rating);
+      if (rating >= 1 && rating <= 5) {
+        dist[rating]++;
       }
-      grouped[category].tags.push(tag);
     });
-    return grouped;
+    return dist;
   };
 
+  // 로딩 상태
   if (loading) {
     return (
       <MainLayout>
-        <Container maxWidth="xl" sx={{ py: 8 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress />
+        <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
+          <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2, mb: 3 }} />
+          <Skeleton variant="text" width="60%" height={48} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width="40%" height={24} sx={{ mb: 3 }} />
+          <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+            <Skeleton variant="rectangular" width={100} height={40} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rectangular" width={100} height={40} sx={{ borderRadius: 1 }} />
           </Box>
-        </Container>
+        </Box>
       </MainLayout>
     );
   }
 
+  // 에러 상태
   if (error || !restaurant) {
     return (
       <MainLayout>
-        <Container maxWidth="xl" sx={{ py: 8 }}>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
           <Alert severity="error">{error || '맛집을 찾을 수 없습니다.'}</Alert>
         </Container>
       </MainLayout>
     );
   }
 
-  const groupedTags = groupTagsByCategory();
+  const businessStatus = getBusinessStatus(operations);
+  const ratingDist = getRatingDistribution();
+  const maxRatingCount = Math.max(...Object.values(ratingDist), 1);
 
   return (
     <MainLayout>
-      <Box sx={{ width: '100%', maxWidth: '100vw', overflowX: { xs: 'hidden', md: 'visible' } }}>
-        <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3 } }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" }, gap: { xs: 2, md: 4 } }}>
-          {/* 왼쪽: 메인 콘텐츠 */}
-          <Box sx={{ width: '100%', maxWidth: '100%', overflow: { xs: 'hidden', md: 'visible' } }}>
-            {/* 대표 이미지 */}
-            {photos.all.length > 0 && (
+      <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 8 }}>
+        {/* Hero 이미지 섹션 */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '3fr 2fr' },
+            gap: 0.5,
+            height: { xs: 280, md: 420 },
+            mb: { xs: 0, md: 0 },
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            setGalleryIndex(0);
+            setGalleryOpen(true);
+          }}
+        >
+          {/* 대표 이미지 */}
+          <Box
+            sx={{
+              position: 'relative',
+              overflow: 'hidden',
+              backgroundColor: 'grey.200',
+              borderRadius: { xs: 0, md: '0 0 0 0' },
+            }}
+          >
+            {photos.all.length > 0 ? (
               <Box
-                ref={mainImageRef}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
+                component="img"
+                src={photos.all[0]?.url}
+                alt={restaurant.name}
                 sx={{
-                  mb: { xs: 1.5, md: 4 },
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform 0.3s ease',
+                  '&:hover': { transform: 'scale(1.02)' },
+                }}
+              />
+            ) : (
+              <Box sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'grey.100',
+              }}>
+                <Typography color="text.secondary">이미지 없음</Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* 서브 이미지 그리드 (PC only) */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'grid' },
+              gridTemplateColumns: '1fr 1fr',
+              gridTemplateRows: '1fr 1fr',
+              gap: 0.5,
+            }}
+          >
+            {[1, 2, 3, 4].map((idx) => (
+              <Box
+                key={idx}
+                sx={{
                   position: 'relative',
                   overflow: 'hidden',
-                  borderRadius: { xs: 2, md: 0 },
-                  '&:hover .main-restaurant-image': {
-                    transform: 'scale(1.05)',
-                  },
+                  backgroundColor: 'grey.200',
                 }}
               >
-                <Box
-                  component="img"
-                  className="main-restaurant-image"
-                  src={photos.all[selectedImage]?.url}
-                  alt="맛집 사진"
-                  sx={{
+                {photos.all[idx] ? (
+                  <Box
+                    component="img"
+                    src={photos.all[idx]?.thumbnail || photos.all[idx]?.url}
+                    alt={`${restaurant.name} ${idx + 1}`}
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.3s ease',
+                      '&:hover': { transform: 'scale(1.05)' },
+                    }}
+                  />
+                ) : (
+                  <Box sx={{
                     width: '100%',
-                    height: { xs: 250, md: 500 },
-                    objectFit: 'cover',
-                    cursor: 'pointer',
-                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                    userSelect: 'none',
-                    WebkitUserDrag: 'none',
-                  }}
-                  onClick={() => window.open(photos.all[selectedImage]?.url, '_blank')}
-                />
-                {/* 모바일 이미지 인디케이터 */}
-                {photos.all.length > 1 && (
+                    height: '100%',
+                    backgroundColor: 'grey.100',
+                  }} />
+                )}
+
+                {/* 더보기 오버레이 */}
+                {idx === 4 && photos.all.length > 5 && (
                   <Box
                     sx={{
-                      display: { xs: 'flex', md: 'none' },
                       position: 'absolute',
-                      bottom: 12,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      gap: 0.5,
-                      px: 1.5,
-                      py: 0.5,
-                      borderRadius: 2,
+                      inset: 0,
                       backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'background-color 0.2s',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                      },
                     }}
                   >
-                    {photos.all.map((_: any, idx: number) => (
-                      <Box
-                        key={idx}
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: '50%',
-                          backgroundColor: selectedImage === idx ? 'white' : 'rgba(255, 255, 255, 0.4)',
-                          transition: 'background-color 0.3s',
-                        }}
-                      />
-                    ))}
+                    <Typography color="white" fontWeight={600}>
+                      +{photos.all.length - 5}
+                    </Typography>
                   </Box>
                 )}
               </Box>
-            )}
+            ))}
+          </Box>
+        </Box>
 
-            {/* 모바일: 사진 갤러리 - 대표 이미지 바로 아래 */}
-            {photos.all.length > 0 && (
-              <Box sx={{
-                display: { xs: 'block', md: 'none' },
-                mb: 3,
-              }}>
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="subtitle1" fontWeight={700}>
-                    {t('restaurant.photos')} ({photos.all.length})
+        {/* 모바일 이미지 인디케이터 */}
+        {photos.all.length > 1 && (
+          <Box sx={{
+            display: { xs: 'flex', md: 'none' },
+            justifyContent: 'center',
+            py: 1.5,
+            gap: 0.5,
+          }}>
+            {photos.all.slice(0, 5).map((_, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  backgroundColor: idx === 0 ? 'primary.main' : 'grey.300',
+                }}
+              />
+            ))}
+            {photos.all.length > 5 && (
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                +{photos.all.length - 5}
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {/* 맛집 헤더 정보 */}
+        <Box sx={{ px: { xs: 2, md: 4 }, pt: { xs: 2, md: 4 }, pb: 3 }}>
+          {/* 카테고리 */}
+          {restaurant.categories && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: restaurant.categories.color || 'primary.main',
+                fontWeight: 600,
+                mb: 1,
+              }}
+            >
+              {restaurant.categories.name}
+              {restaurant.sub_category && ` · ${restaurant.sub_category}`}
+            </Typography>
+          )}
+
+          {/* 맛집명 */}
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            {restaurant.name}
+          </Typography>
+
+          {/* 소개 */}
+          {restaurant.introduction && (
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ mb: 2 }}
+            >
+              {restaurant.introduction}
+            </Typography>
+          )}
+
+          {/* 평점 & 통계 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <StarFilledIcon sx={{ fontSize: 20, color: '#FFB800' }} />
+              <Typography variant="body1" fontWeight={700}>
+                {restaurant.rating ? restaurant.rating.toFixed(1) : '-'}
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              리뷰 {restaurant.review_count || 0}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              조회 {restaurant.view_count?.toLocaleString() || 0}
+            </Typography>
+          </Box>
+
+          {/* 액션 버튼 */}
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            <Button
+              variant={isFavorited ? 'contained' : 'outlined'}
+              startIcon={isFavorited ? <HeartFilledIcon /> : <HeartOutlineIcon />}
+              onClick={handleToggleFavorite}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+              }}
+            >
+              {isFavorited ? '저장됨' : '저장'}
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ShareIcon />}
+              onClick={handleShare}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+              }}
+            >
+              공유
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ReviewIcon />}
+              onClick={() => setReviewDialogOpen(true)}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+              }}
+            >
+              리뷰 작성
+            </Button>
+          </Box>
+
+          {/* 태그 */}
+          {tags && tags.length > 0 && (
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 3 }}>
+              {tags.slice(0, 8).map((tag: any) => (
+                <Chip
+                  key={tag.id}
+                  label={tag.name}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 1,
+                    fontSize: '0.8125rem',
+                    height: 28,
+                  }}
+                />
+              ))}
+              {tags.length > 8 && (
+                <Chip
+                  label={`+${tags.length - 8}`}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 1,
+                    fontSize: '0.8125rem',
+                    height: 28,
+                  }}
+                />
+              )}
+            </Box>
+          )}
+        </Box>
+
+        {/* Sticky 탭 네비게이션 */}
+        <Box
+          ref={tabRef}
+          sx={{
+            position: 'sticky',
+            top: 64,
+            zIndex: 100,
+            backgroundColor: 'background.paper',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            transition: 'box-shadow 0.2s',
+            boxShadow: isTabSticky ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+          }}
+        >
+          <Box sx={{
+            display: 'flex',
+            px: { xs: 2, md: 4 },
+            maxWidth: 1200,
+            mx: 'auto',
+          }}>
+            {[
+              { id: 'menu', label: '메뉴' },
+              { id: 'review', label: `리뷰 ${reviews.length > 0 ? `(${reviews.length})` : ''}` },
+              { id: 'info', label: '정보' },
+              { id: 'map', label: '위치' },
+            ].map((tab) => (
+              <Box
+                key={tab.id}
+                onClick={() => scrollToSection(tab.id)}
+                sx={{
+                  py: 2,
+                  px: { xs: 2, md: 3 },
+                  cursor: 'pointer',
+                  borderBottom: '2px solid',
+                  borderColor: activeSection === tab.id ? 'primary.main' : 'transparent',
+                  transition: 'border-color 0.2s',
+                  '&:hover': {
+                    borderColor: activeSection === tab.id ? 'primary.main' : 'grey.300',
+                  },
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  fontWeight={activeSection === tab.id ? 700 : 500}
+                  color={activeSection === tab.id ? 'primary.main' : 'text.secondary'}
+                >
+                  {tab.label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Quick Info 카드 */}
+        <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: 2,
+            }}
+          >
+            {/* 위치 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Place sx={{ fontSize: 20, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  위치
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
+                {restaurant.address || '주소 정보 없음'}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+                <Button
+                  size="small"
+                  startIcon={<ContentCopy sx={{ fontSize: 16 }} />}
+                  onClick={(e) => { e.stopPropagation(); handleCopyAddress(); }}
+                  sx={{ textTransform: 'none', fontSize: '0.8125rem' }}
+                >
+                  복사
+                </Button>
+                <Button
+                  size="small"
+                  startIcon={<NavigationOutlined sx={{ fontSize: 16 }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.address)}`, '_blank');
+                  }}
+                  sx={{ textTransform: 'none', fontSize: '0.8125rem' }}
+                >
+                  길찾기
+                </Button>
+              </Box>
+            </Paper>
+
+            {/* 영업시간 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <AccessTime sx={{ fontSize: 20, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  영업시간
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor:
+                      businessStatus.status === 'open' ? '#22C55E' :
+                      businessStatus.status === 'break' ? '#F59E0B' : '#EF4444',
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color={
+                    businessStatus.status === 'open' ? 'success.main' :
+                    businessStatus.status === 'break' ? 'warning.main' : 'error.main'
+                  }
+                >
+                  {businessStatus.text}
+                </Typography>
+              </Box>
+              {operations?.business_hours && (
+                <Typography variant="body2" color="text.secondary">
+                  {(() => {
+                    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                    const today = dayNames[new Date().getDay()];
+                    const todayHours = operations.business_hours[today];
+                    if (todayHours?.open && todayHours?.close) {
+                      return `오늘 ${todayHours.open} - ${todayHours.close}`;
+                    }
+                    return '';
+                  })()}
+                </Typography>
+              )}
+            </Paper>
+
+            {/* 연락처 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Phone sx={{ fontSize: 20, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  연락처
+                </Typography>
+              </Box>
+              <Typography variant="body2">
+                {contacts?.phone || restaurant?.phone || '전화번호 없음'}
+              </Typography>
+              {(contacts?.phone || restaurant?.phone) && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  href={`tel:${contacts?.phone || restaurant?.phone}`}
+                  sx={{
+                    textTransform: 'none',
+                    fontSize: '0.8125rem',
+                    mt: 'auto',
+                    alignSelf: 'flex-start',
+                  }}
+                >
+                  전화하기
+                </Button>
+              )}
+            </Paper>
+
+            {/* 편의정보 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 0.5 }}>
+                편의정보
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {(facilities?.parking_available || restaurant?.parking_available) && (
+                  <Chip label="주차" size="small" sx={{ height: 24, fontSize: '0.75rem' }} />
+                )}
+                {(facilities?.wifi_available || restaurant?.wifi_available) && (
+                  <Chip label="WiFi" size="small" sx={{ height: 24, fontSize: '0.75rem' }} />
+                )}
+                {(services?.reservation_available || restaurant?.reservation_available) && (
+                  <Chip label="예약" size="small" sx={{ height: 24, fontSize: '0.75rem' }} />
+                )}
+                {(services?.delivery_available || restaurant?.delivery_available) && (
+                  <Chip label="배달" size="small" sx={{ height: 24, fontSize: '0.75rem' }} />
+                )}
+                {(services?.takeout_available || restaurant?.takeout_available) && (
+                  <Chip label="포장" size="small" sx={{ height: 24, fontSize: '0.75rem' }} />
+                )}
+              </Box>
+            </Paper>
+          </Box>
+        </Box>
+
+        <Divider sx={{ mx: { xs: 2, md: 4 } }} />
+
+        {/* 메뉴 섹션 */}
+        <Box
+          ref={menuSectionRef}
+          data-section="menu"
+          sx={{ px: { xs: 2, md: 4 }, py: 4 }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h5" fontWeight={700}>
+              메뉴
+            </Typography>
+            {menus.all.length > 4 && (
+              <Button
+                endIcon={<ArrowForward />}
+                onClick={() => setShowAllMenu(true)}
+                sx={{ textTransform: 'none' }}
+              >
+                전체 메뉴
+              </Button>
+            )}
+          </Box>
+
+          {menus.all.length === 0 ? (
+            <Typography color="text.secondary">메뉴 정보가 없습니다.</Typography>
+          ) : (
+            <Box>
+              {/* 시그니처 메뉴 */}
+              {menus.signature && menus.signature.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                    시그니처
+                  </Typography>
+                  <Stack spacing={2}>
+                    {menus.signature.slice(0, 2).map((menu: any) => (
+                      <Paper
+                        key={menu.id}
+                        variant="outlined"
+                        sx={{
+                          display: 'flex',
+                          overflow: 'hidden',
+                          borderRadius: 2,
+                        }}
+                      >
+                        {menu.images?.[0]?.url && (
+                          <Box
+                            component="img"
+                            src={menu.images[0].medium || menu.images[0].url}
+                            alt={menu.name}
+                            sx={{
+                              width: { xs: 100, sm: 140 },
+                              height: { xs: 100, sm: 140 },
+                              objectFit: 'cover',
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Box>
+                              <Typography variant="subtitle1" fontWeight={600}>
+                                {menu.name}
+                              </Typography>
+                              {menu.name_en && (
+                                <Typography variant="caption" color="text.secondary">
+                                  {menu.name_en}
+                                </Typography>
+                              )}
+                            </Box>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                              {menu.price?.toLocaleString()}원
+                            </Typography>
+                          </Box>
+                          {menu.description && (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                              }}
+                            >
+                              {menu.description}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Paper>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+
+              {/* 인기 메뉴 (수평 스크롤) */}
+              {menus.popular && menus.popular.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                    인기 메뉴
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 2,
+                      overflowX: 'auto',
+                      pb: 1,
+                      mx: { xs: -2, md: 0 },
+                      px: { xs: 2, md: 0 },
+                      '&::-webkit-scrollbar': { display: 'none' },
+                      scrollbarWidth: 'none',
+                    }}
+                  >
+                    {menus.popular.map((menu: any) => (
+                      <Box
+                        key={menu.id}
+                        sx={{
+                          minWidth: 160,
+                          maxWidth: 160,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 160,
+                            height: 160,
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            mb: 1.5,
+                            backgroundColor: 'grey.100',
+                          }}
+                        >
+                          {menu.images?.[0]?.url ? (
+                            <Box
+                              component="img"
+                              src={menu.images[0].medium || menu.images[0].url}
+                              alt={menu.name}
+                              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <Box sx={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <Typography variant="caption" color="text.secondary">
+                                이미지 없음
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                        <Typography variant="body2" fontWeight={600} noWrap>
+                          {menu.name}
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700}>
+                          {menu.price?.toLocaleString()}원
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {/* 전체 메뉴 (일부만 표시) */}
+              <Box>
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                  전체 메뉴
+                </Typography>
+                <Stack spacing={0} divider={<Divider />}>
+                  {menus.all.slice(0, 6).map((menu: any) => (
+                    <Box
+                      key={menu.id}
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        py: 2,
+                      }}
+                    >
+                      <Box sx={{ flex: 1, mr: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Typography variant="body1" fontWeight={500}>
+                            {menu.name}
+                          </Typography>
+                          {menu.is_signature && (
+                            <Chip
+                              label="시그니처"
+                              size="small"
+                              color="primary"
+                              sx={{ height: 20, fontSize: '0.7rem' }}
+                            />
+                          )}
+                          {menu.is_popular && (
+                            <Chip
+                              label="인기"
+                              size="small"
+                              sx={{
+                                height: 20,
+                                fontSize: '0.7rem',
+                                backgroundColor: '#FEF3C7',
+                                color: '#92400E',
+                              }}
+                            />
+                          )}
+                          {!menu.is_available && (
+                            <Chip
+                              label="품절"
+                              size="small"
+                              color="error"
+                              sx={{ height: 20, fontSize: '0.7rem' }}
+                            />
+                          )}
+                        </Box>
+                        {menu.description && (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {menu.description}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Typography variant="body1" fontWeight={600} sx={{ flexShrink: 0 }}>
+                        {menu.price?.toLocaleString()}원
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+
+                {menus.all.length > 6 && (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => setShowAllMenu(true)}
+                    sx={{ mt: 2, textTransform: 'none', borderRadius: 2 }}
+                  >
+                    전체 메뉴 보기 ({menus.all.length}개)
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          )}
+        </Box>
+
+        <Divider sx={{ mx: { xs: 2, md: 4 } }} />
+
+        {/* 리뷰 섹션 */}
+        <Box
+          ref={reviewSectionRef}
+          data-section="review"
+          sx={{ px: { xs: 2, md: 4 }, py: 4 }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h5" fontWeight={700}>
+              리뷰
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<ReviewIcon />}
+              onClick={() => setReviewDialogOpen(true)}
+              sx={{ textTransform: 'none', borderRadius: 2 }}
+            >
+              리뷰 작성
+            </Button>
+          </Box>
+
+          {reviews.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 6 }}>
+              <Typography color="text.secondary" sx={{ mb: 2 }}>
+                아직 작성된 리뷰가 없습니다.
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => setReviewDialogOpen(true)}
+                sx={{ textTransform: 'none', borderRadius: 2 }}
+              >
+                첫 리뷰 작성하기
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              {/* 평점 요약 */}
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 3,
+                  mb: 4,
+                  borderRadius: 2,
+                  display: 'flex',
+                  gap: { xs: 3, md: 6 },
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: { xs: 'stretch', sm: 'center' },
+                }}
+              >
+                {/* 평균 평점 */}
+                <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+                  <Typography variant="h3" fontWeight={700}>
+                    {restaurant.rating?.toFixed(1) || '-'}
+                  </Typography>
+                  <Rating
+                    value={restaurant.rating || 0}
+                    precision={0.1}
+                    readOnly
+                    size="small"
+                    sx={{ mb: 0.5 }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {reviews.length}개 리뷰
                   </Typography>
                 </Box>
 
-                {/* 이미지 스와이프 캐러셀 */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    width: '100%',
-                    maxWidth: '100%',
-                    gap: 1.5,
-                    overflowX: 'auto',
-                    overflowY: 'hidden',
-                    scrollSnapType: 'x mandatory',
-                    WebkitOverflowScrolling: 'touch',
-                    pb: 1,
-                    // 스크롤바 숨기기
-                    '&::-webkit-scrollbar': {
-                      display: 'none',
-                    },
-                    scrollbarWidth: 'none', // Firefox
-                    msOverflowStyle: 'none', // IE/Edge
-                  }}
-                >
-                  {photos.all.map((photo: any, idx: number) => (
+                {/* 평점 분포 */}
+                <Box sx={{ flex: 1 }}>
+                  {[5, 4, 3, 2, 1].map((rating) => (
                     <Box
-                      key={idx}
+                      key={rating}
                       sx={{
-                        minWidth: 'calc((100vw - 56px) / 3)', // 뷰포트 기준: (100vw - 패딩32px - gap24px) / 3
-                        width: 'calc((100vw - 56px) / 3)',
-                        maxWidth: 'calc((100vw - 56px) / 3)',
-                        flexShrink: 0,
-                        scrollSnapAlign: 'start',
-                        scrollSnapStop: 'always',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        mb: 0.5,
                       }}
                     >
-                      <Box
+                      <Typography variant="body2" sx={{ width: 16, textAlign: 'right' }}>
+                        {rating}
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={(ratingDist[rating] / maxRatingCount) * 100}
                         sx={{
-                          width: '100%',
-                          paddingTop: '100%', // 정사각형 비율
-                          position: 'relative',
-                          overflow: 'hidden',
-                          cursor: 'pointer',
-                          borderRadius: 2,
-                          border: selectedImage === idx ? '3px solid' : '3px solid transparent',
-                          borderColor: selectedImage === idx ? 'primary.main' : 'transparent',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                          '&:active': {
-                            transform: 'scale(0.95)',
+                          flex: 1,
+                          height: 8,
+                          borderRadius: 1,
+                          backgroundColor: 'grey.200',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: '#FFB800',
+                            borderRadius: 1,
                           },
                         }}
-                        onClick={() => setSelectedImage(idx)}
+                      />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ width: 24, textAlign: 'right' }}
                       >
-                        <Box
-                          component="img"
-                          className="thumbnail-image"
-                          src={photo.thumbnail || photo.url}
-                          alt={`사진 ${idx + 1}`}
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            opacity: selectedImage === idx ? 1 : 0.8,
-                            transition: 'opacity 0.3s',
-                          }}
-                        />
-                      </Box>
+                        {ratingDist[rating]}
+                      </Typography>
                     </Box>
                   ))}
                 </Box>
+              </Paper>
 
-                {/* 스와이프 힌트 (첫 방문자를 위한 안내) */}
-                {photos.all.length > 3 && (
-                  <Box sx={{ mt: 1, textAlign: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      ← 좌우로 스와이프하여 더 많은 사진 보기 →
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            )}
+              {/* 리뷰 목록 */}
+              <Stack spacing={3}>
+                {(showAllReviews ? reviews : reviews.slice(0, 5)).map((review) => {
+                  const isOwnReview = user?.id === review.user_id;
+                  const isHelpful = helpfulReviews.has(review.id);
 
-            {/* 헤더 - 신문 스타일 */}
-            <Box sx={{ mb: 4 }}>
-              {/* 카테고리 레이블 */}
-              {restaurant.categories && (
-                <Box sx={{ mb: 1 }}>
-                  <Typography
-                    variant="overline"
-                    sx={{
-                      color: restaurant.categories.color || 'primary.main',
-                      fontWeight: 700,
-                      letterSpacing: 2,
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {restaurant.categories.icon} {restaurant.categories.name}
-                    {restaurant.sub_category && ` / ${restaurant.sub_category}`}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* 레스토랑 이름 - 대형 헤드라인 */}
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 800,
-                  mb: 2,
-                  lineHeight: 1.2,
-                  fontSize: { xs: '2.5rem', md: '3.5rem' }
-                }}
-              >
-                {restaurant.name}
-              </Typography>
-
-              {/* 간단 소개 */}
-              {restaurant.introduction && (
-                <Typography variant="h6" color="text.secondary" sx={{ mb: 2, fontWeight: 400 }}>
-                  {restaurant.introduction}
-                </Typography>
-              )}
-
-              {/* 평점 및 메타 정보 */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <StarFilledIcon sx={{ fontSize: 24, color: '#FFD93D' }} />
-                  <Typography variant="h5" fontWeight={700}>
-                    {restaurant.rating ? restaurant.rating.toFixed(1) : '0.0'}
-                  </Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary">
-                  {t('restaurant.reviewCount')} {restaurant.review_count || 0}
-                </Typography>
-                <Typography color="text.secondary">•</Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {t('restaurant.viewCount')} {restaurant.view_count || 0}
-                </Typography>
-              </Box>
-
-              {/* 액션 버튼 */}
-              <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
-                <Button
-                  variant={isFavorited ? "contained" : "outlined"}
-                  startIcon={isFavorited ? <HeartFilledIcon /> : <HeartOutlineIcon />}
-                  onClick={handleToggleFavorite}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                  }}
-                >
-                  {isFavorited ? t('restaurant.unfavorite') : t('restaurant.favorite')}
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<ShareIcon />}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                  }}
-                >
-                  {t('restaurant.share')}
-                </Button>
-              </Box>
-            </Box>
-
-            {/* 소개 - 신문 스타일 */}
-            {restaurant.description && (
-              <Box sx={{ mb: 4 }}>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    lineHeight: 1.8,
-                    fontSize: '1.125rem',
-                    color: 'text.primary',
-                    fontWeight: 400,
-                  }}
-                >
-                  {restaurant.description}
-                </Typography>
-              </Box>
-            )}
-
-            <Divider sx={{ my: 4 }} />
-
-            {/* 태그 섹션 - 카테고리별 분류 */}
-            {tags && tags.length > 0 && (
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
-                  {t('restaurant.tags')}
-                </Typography>
-                {Object.entries(groupedTags).map(([category, categoryData]) => (
-                  <Box key={category} sx={{ mb: 2 }}>
-                    <Typography
-                      variant="caption"
-                      fontWeight={600}
-                      sx={{
-                        mb: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        color: categoryData.color || 'text.secondary'
-                      }}
-                    >
-                      {categoryData.icon && <span>{categoryData.icon}</span>}
-                      {category}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {categoryData.tags.map((tag: any) => (
-                        <Chip
-                          key={tag.id}
-                          label={`${tag.icon || ''} ${tag.name}`.trim()}
-                          size="small"
-                          sx={{
-                            backgroundColor: (tag.color || categoryData.color) ? `${tag.color || categoryData.color}15` : undefined,
-                            borderColor: tag.color || categoryData.color || undefined,
-                            color: tag.color || categoryData.color || undefined,
-                          }}
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            )}
-
-            <Divider sx={{ my: 4 }} />
-
-            {/* 핵심 정보 - 신문 2컬럼 레이아웃 */}
-            <Box sx={{ mb: 4, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
-              <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                {t('restaurant.info')}
-              </Typography>
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 }, width: '100%', maxWidth: '100%' }}>
-                {/* 주소 */}
-                <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ textTransform: 'uppercase' }}>
-                      {t('restaurant.address')}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={handleCopyAddress}
-                      sx={{
-                        ml: 1,
-                        color: 'text.secondary',
-                        '&:hover': { color: 'primary.main' }
-                      }}
-                    >
-                      <ContentCopy fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    {restaurant.address}
-                  </Typography>
-                  {restaurant.road_address && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      도로명: {restaurant.road_address}
-                    </Typography>
-                  )}
-                  {restaurant.jibun_address && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      지번: {restaurant.jibun_address}
-                    </Typography>
-                  )}
-                  {restaurant.building_name && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      건물명: {restaurant.building_name}
-                    </Typography>
-                  )}
-                  {restaurant.detailed_address && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      상세주소: {restaurant.detailed_address}
-                    </Typography>
-                  )}
-                  {restaurant.postal_code && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      우편번호: {restaurant.postal_code}
-                    </Typography>
-                  )}
-                </Box>
-
-                {/* 연락처 */}
-                <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    {t('restaurant.contact')}
-                  </Typography>
-                  {(contacts?.phone || restaurant?.phone) && (
-                    <Typography variant="body2" display="block">
-                      {t('restaurant.phone')}: {(contacts?.phone || restaurant?.phone)}
-                    </Typography>
-                  )}
-                  {contacts?.secondary_phone && (
-                    <Typography variant="body2" display="block">
-                      보조: {contacts.secondary_phone}
-                    </Typography>
-                  )}
-                  {contacts?.email && (
-                    <Typography variant="body2" display="block">
-                      이메일: {contacts.email}
-                    </Typography>
-                  )}
-                  {contacts?.fax && (
-                    <Typography variant="body2" display="block">
-                      팩스: {contacts.fax}
-                    </Typography>
-                  )}
-                </Box>
-
-                {/* 영업시간 */}
-                <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                    {t('restaurant.hours')}
-                  </Typography>
-                  {renderBusinessHours()}
-                </Box>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 4 }} />
-
-            {/* 시설 / 서비스 정보 */}
-            <Box sx={{ mb: 4, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
-              <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                시설 / 서비스
-              </Typography>
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 4 }, width: '100%', maxWidth: '100%' }}>
-                {/* 주차 시설 */}
-                {((facilities?.parking_available ?? restaurant?.parking_available) || (facilities?.valet_parking ?? restaurant?.valet_parking) || (facilities?.parking_spaces || restaurant?.parking_spaces) || (facilities?.parking_info || restaurant?.parking_info)) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      {t('restaurant.parkingFacilities')}
-                    </Typography>
-                    <Stack spacing={0.5}>
-                      {(facilities?.parking_available ?? restaurant?.parking_available) && (
-                        <Typography variant="body2">주차 가능</Typography>
-                      )}
-                      {(facilities?.valet_parking ?? restaurant?.valet_parking) && (
-                        <Typography variant="body2">발렛파킹</Typography>
-                      )}
-                      {(facilities?.parking_spaces || restaurant?.parking_spaces) && (
-                        <Typography variant="body2">주차 공간: {(facilities?.parking_spaces || restaurant?.parking_spaces)}대</Typography>
-                      )}
-                      {(facilities?.parking_info || restaurant?.parking_info) && (
-                        <Typography variant="caption" color="text.secondary">{(facilities?.parking_info || restaurant?.parking_info)}</Typography>
-                      )}
-                    </Stack>
-                  </Box>
-                )}
-
-                {/* 편의 시설 */}
-                {((facilities?.wifi_available ?? restaurant?.wifi_available) || (facilities?.wheelchair_accessible ?? restaurant?.wheelchair_accessible) || (facilities?.elevator_available ?? restaurant?.elevator_available) || (facilities?.nursing_room ?? restaurant?.nursing_room) || (facilities?.kids_zone ?? restaurant?.kids_zone) || (facilities?.pet_friendly ?? restaurant?.pet_friendly) || (facilities?.kids_menu ?? restaurant?.kids_menu)) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      {t('restaurant.amenities')}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {(facilities?.wifi_available ?? restaurant?.wifi_available) && <Chip label="무료 와이파이" size="small" variant="outlined" />}
-                      {(facilities?.wheelchair_accessible ?? restaurant?.wheelchair_accessible) && <Chip label="휠체어 접근" size="small" variant="outlined" />}
-                      {(facilities?.elevator_available ?? restaurant?.elevator_available) && <Chip label="엘리베이터" size="small" variant="outlined" />}
-                      {(facilities?.nursing_room ?? restaurant?.nursing_room) && <Chip label="수유실" size="small" variant="outlined" />}
-                      {(facilities?.kids_zone ?? restaurant?.kids_zone) && <Chip label="키즈존" size="small" variant="outlined" />}
-                      {(facilities?.pet_friendly ?? restaurant?.pet_friendly) && <Chip label="반려동물 동반" size="small" variant="outlined" />}
-                      {(facilities?.kids_menu ?? restaurant?.kids_menu) && <Chip label={t('restaurant.kidsMenu')} size="small" variant="outlined" />}
-                    </Box>
-                  </Box>
-                )}
-
-                {/* 좌석 정보 */}
-                {((facilities?.group_seating ?? restaurant?.group_seating) || (facilities?.private_room ?? restaurant?.private_room) || (facilities?.outdoor_seating ?? restaurant?.outdoor_seating) || (facilities?.bar_seating ?? restaurant?.bar_seating) || (facilities?.total_seats || restaurant?.total_seats)) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      {t('restaurant.seatingInfo')}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {(facilities?.group_seating ?? restaurant?.group_seating) && <Chip label="단체석" size="small" variant="outlined" />}
-                      {(facilities?.private_room ?? restaurant?.private_room) && <Chip label="프라이빗 룸" size="small" variant="outlined" />}
-                      {(facilities?.outdoor_seating ?? restaurant?.outdoor_seating) && <Chip label="야외 좌석" size="small" variant="outlined" />}
-                      {(facilities?.bar_seating ?? restaurant?.bar_seating) && <Chip label="바 좌석" size="small" variant="outlined" />}
-                      {(facilities?.total_seats || restaurant?.total_seats) && (
-                        <Typography variant="body2" sx={{ mt: 1 }}>총 좌석 수: {(facilities?.total_seats || restaurant?.total_seats)}석</Typography>
-                      )}
-                    </Box>
-                  </Box>
-                )}
-
-                {/* 예약 서비스 */}
-                {((services?.reservation_available ?? restaurant?.reservation_available) || (services?.online_booking_available ?? restaurant?.online_booking_available) || services?.reservation_phone || services?.reservation_url) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      {t('restaurant.reservationService')}
-                    </Typography>
-                    <Stack spacing={0.5}>
-                      {(services?.reservation_available ?? restaurant?.reservation_available) && (
-                        <Typography variant="body2">{t('restaurant.reservation')}</Typography>
-                      )}
-                      {(services?.online_booking_available ?? restaurant?.online_booking_available) && (
-                        <Typography variant="body2">온라인 예약 가능</Typography>
-                      )}
-                      {services?.reservation_phone && (
-                        <Typography variant="body2">{t('restaurant.reservationPhone')}: {services.reservation_phone}</Typography>
-                      )}
-                      {services?.reservation_url && (
-                        <Link href={services.reservation_url} target="_blank" rel="noopener" underline="hover">
-                          <Typography variant="body2">예약 URL: {services.reservation_url}</Typography>
-                        </Link>
-                      )}
-                    </Stack>
-                  </Box>
-                )}
-
-                {/* 배달/포장 */}
-                {((services?.delivery_available ?? restaurant?.delivery_available) || (services?.takeout_available ?? restaurant?.takeout_available)) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      배달/포장
-                    </Typography>
-                    <Stack spacing={0.5}>
-                      {(services?.delivery_available ?? restaurant?.delivery_available) && (
-                        <Box>
-                          <Typography variant="body2">배달 가능</Typography>
-                          {(services?.delivery_fee ?? restaurant?.delivery_fee) !== null && (services?.delivery_fee ?? restaurant?.delivery_fee) !== undefined && (
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              배달비: {(services?.delivery_fee ?? restaurant?.delivery_fee) === 0 ? '무료' : `${(services?.delivery_fee ?? restaurant?.delivery_fee).toLocaleString()}원`}
+                  return (
+                    <Box key={review.id}>
+                      {/* 리뷰 헤더 */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', gap: 1.5 }}>
+                          <Avatar
+                            src={review.is_anonymous ? undefined : review.avatar_url}
+                            sx={{ width: 40, height: 40 }}
+                          >
+                            {(review.username?.[0] || '익').toUpperCase()}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" fontWeight={600}>
+                              {review.is_anonymous ? '익명' : (review.username || '사용자')}
                             </Typography>
-                          )}
-                          {(services?.min_order_amount || restaurant?.min_order_amount) && (
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              최소 주문금액: {(services?.min_order_amount || restaurant?.min_order_amount).toLocaleString()}원
-                            </Typography>
-                          )}
-                        </Box>
-                      )}
-                      {(services?.takeout_available ?? restaurant?.takeout_available) && (
-                        <Typography variant="body2">포장 가능</Typography>
-                      )}
-                    </Stack>
-                  </Box>
-                )}
-
-                {/* 결제 수단 */}
-                {((services?.card_payment ?? restaurant?.card_payment) || (services?.cash_payment ?? restaurant?.cash_payment) || (services?.mobile_payment ?? restaurant?.mobile_payment)) && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase' }}>
-                      결제 수단
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {(services?.card_payment ?? restaurant?.card_payment) && <Chip label="카드 결제" size="small" variant="outlined" />}
-                      {(services?.cash_payment ?? restaurant?.cash_payment) && <Chip label="현금 결제" size="small" variant="outlined" />}
-                      {(services?.mobile_payment ?? restaurant?.mobile_payment) && <Chip label="모바일 결제" size="small" variant="outlined" />}
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 4 }} />
-
-            {/* 탭 네비게이션 */}
-            <Box sx={{ mb: 3 }}>
-              <Tabs
-                value={selectedTab}
-                onChange={(_, v) => setSelectedTab(v)}
-                sx={{
-                  borderBottom: 1,
-                  borderColor: 'divider',
-                  '& .MuiTab-root': {
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    fontSize: 16,
-                  },
-                }}
-              >
-                <Tab label={`${t('restaurant.reviews')} (${reviews.length})`} />
-                <Tab label={`${t('restaurant.menu')} (${menus.all.length})`} />
-                <Tab label={t('restaurant.map')} />
-              </Tabs>
-            </Box>
-
-            {/* 리뷰 탭 */}
-            {selectedTab === 0 && (
-              <Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    {t('restaurant.reviews')}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<ReviewIcon />}
-                    onClick={() => setReviewDialogOpen(true)}
-                    sx={{
-                      textTransform: 'none',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {t('restaurant.addReview')}
-                  </Button>
-                </Box>
-
-                {reviews.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">첫 번째 리뷰를 작성해보세요!</Typography>
-                ) : (
-                  <Stack spacing={3} divider={<Divider />}>
-                    {reviews.map((review) => {
-                      const isOwnReview = user?.id === review.user_id;
-                      const isHelpful = helpfulReviews.has(review.id);
-
-                      return (
-                        <Box key={review.id}>
-                          {/* 리뷰 헤더 */}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Box sx={{ display: 'flex', gap: 2 }}>
-                              <Avatar src={review.is_anonymous ? undefined : review.avatar_url} sx={{ width: 48, height: 48 }}>
-                                {review.username?.[0] || '익'}
-                              </Avatar>
-                              <Box>
-                                <Typography variant="body1" fontWeight={600}>
-                                  {review.username || '익명'}
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <Rating value={review.rating || 0} size="small" readOnly />
-                                  <Typography variant="caption" color="text.secondary">
-                                    {new Date(review.created_at).toLocaleDateString()}
-                                  </Typography>
-                                </Box>
-                              </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Rating value={review.rating || 0} size="small" readOnly />
+                              <Typography variant="caption" color="text.secondary">
+                                {new Date(review.created_at).toLocaleDateString('ko-KR')}
+                              </Typography>
                             </Box>
-
-                            {isOwnReview && (
-                              <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                <IconButton size="small" onClick={() => handleOpenEditDialog(review)}>
-                                  <Edit fontSize="small" />
-                                </IconButton>
-                                <IconButton size="small" onClick={() => handleDeleteReview(review.id)}>
-                                  <Delete fontSize="small" />
-                                </IconButton>
-                              </Box>
-                            )}
                           </Box>
-
-                          {review.title && (
-                            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                              {review.title}
-                            </Typography>
-                          )}
-
-                          <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.7 }}>
-                            {review.content}
-                          </Typography>
-
-                          {review.images && review.images.length > 0 && (
-                            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1, mb: 2 }}>
-                              {review.images.map((img: string, idx: number) => (
-                                <Box
-                                  key={idx}
-                                  sx={{
-                                    width: '100%',
-                                    paddingTop: '100%',
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                  }}
-                                  onClick={() => window.open(img, '_blank')}
-                                >
-                                  <Box
-                                    component="img"
-                                    src={img}
-                                    sx={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                      width: '100%',
-                                      height: '100%',
-                                      objectFit: 'cover',
-                                    }}
-                                  />
-                                </Box>
-                              ))}
-                            </Box>
-                          )}
-
-                          {!isOwnReview && user && (
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              <Button
-                                size="small"
-                                variant={isHelpful ? "contained" : "outlined"}
-                                startIcon={isHelpful ? <ThumbUp /> : <ThumbUpOutlined />}
-                                onClick={() => handleToggleHelpful(review.id)}
-                                sx={{ textTransform: 'none' }}
-                              >
-                                도움돼요 {review.helpful_count > 0 && `(${review.helpful_count})`}
-                              </Button>
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                color="error"
-                                startIcon={<Report />}
-                                onClick={() => handleOpenReportDialog(review.id)}
-                                sx={{ textTransform: 'none' }}
-                              >
-                                신고
-                              </Button>
-                            </Box>
-                          )}
                         </Box>
-                      );
-                    })}
-                  </Stack>
-                )}
-              </Box>
-            )}
 
-            {/* 메뉴 탭 */}
-            {selectedTab === 1 && (
-              <Box>
-                <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                  {t('restaurant.menu')}
-                </Typography>
-                {menus.all.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">{t('restaurant.noMenuInfo')}</Typography>
-                ) : (
-                  <Box>
-                    {/* 시그니처 메뉴 */}
-                    {menus.signature && menus.signature.length > 0 && (
-                      <Box sx={{ mb: 4 }}>
-                        <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                          {t('restaurant.signatureMenu')}
+                        {isOwnReview && (
+                          <Box>
+                            <IconButton size="small" onClick={() => handleOpenEditDialog(review)}>
+                              <Edit fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" onClick={() => handleDeleteReview(review.id)}>
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* 리뷰 내용 */}
+                      {review.title && (
+                        <Typography variant="body1" fontWeight={600} sx={{ mb: 1 }}>
+                          {review.title}
                         </Typography>
-                        <Stack spacing={3} divider={<Divider />}>
-                          {menus.signature.map((menu: any) => (
-                            <Box key={menu.id} sx={{ display: 'flex', gap: 3 }}>
-                              {menu.images && menu.images.length > 0 && menu.images[0].url && (
-                                <Box
-                                  component="img"
-                                  src={menu.images[0].medium || menu.images[0].url}
-                                  alt={menu.name}
-                                  sx={{
-                                    width: 120,
-                                    height: 120,
-                                    objectFit: 'cover',
-                                    flexShrink: 0,
-                                  }}
-                                />
-                              )}
-                              <Box sx={{ flex: 1 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                                  <Box>
-                                    <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
-                                      {menu.is_signature && (
-                                        <Chip label={t('restaurant.signature')} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                      {menu.is_seasonal && (
-                                        <Chip label={t('restaurant.seasonalMenu')} size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#4ECDC4', color: 'white' }} />
-                                      )}
-                                      {menu.category && (
-                                        <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                    </Box>
-                                    <Typography variant="h6" fontWeight={700}>
-                                      {menu.name}
-                                    </Typography>
-                                    {menu.name_en && (
-                                      <Typography variant="caption" color="text.secondary">
-                                        {menu.name_en}
-                                      </Typography>
-                                    )}
-                                  </Box>
-                                  <Box sx={{ textAlign: 'right' }}>
-                                    {menu.original_price && menu.original_price > menu.price && (
-                                      <Typography variant="caption" color="text.secondary" sx={{ textDecoration: 'line-through', display: 'block' }}>
-                                        {menu.original_price.toLocaleString()}원
-                                      </Typography>
-                                    )}
-                                    <Typography variant="h6" fontWeight={700}>
-                                      {menu.price?.toLocaleString()}원
-                                    </Typography>
-                                  </Box>
-                                </Box>
+                      )}
+                      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.7 }}>
+                        {review.content}
+                      </Typography>
 
-                                {menu.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    {menu.description}
-                                  </Typography>
-                                )}
-
-                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                                  {menu.portion_size && (
-                                    <Typography variant="caption" color="text.secondary">
-                                      용량: {menu.portion_size}
-                                    </Typography>
-                                  )}
-                                  {menu.spicy_level && menu.spicy_level > 0 && (
-                                    <Typography variant="caption" color="error.main">
-                                      맵기: {menu.spicy_level}/5
-                                    </Typography>
-                                  )}
-                                  {menu.calories && (
-                                    <Typography variant="caption" color="text.secondary">
-                                      {menu.calories} kcal
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </Box>
+                      {/* 리뷰 이미지 */}
+                      {review.images && review.images.length > 0 && (
+                        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                          {review.images.map((img: string, idx: number) => (
+                            <Box
+                              key={idx}
+                              sx={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: 1,
+                                overflow: 'hidden',
+                                cursor: 'pointer',
+                              }}
+                              onClick={() => window.open(img, '_blank')}
+                            >
+                              <Box
+                                component="img"
+                                src={img}
+                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
                             </Box>
                           ))}
-                        </Stack>
+                        </Box>
+                      )}
+
+                      {/* 리뷰 액션 */}
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        {!isOwnReview && user && (
+                          <>
+                            <Button
+                              size="small"
+                              variant={isHelpful ? 'contained' : 'text'}
+                              startIcon={isHelpful ? <ThumbUp /> : <ThumbUpOutlined />}
+                              onClick={() => handleToggleHelpful(review.id)}
+                              sx={{
+                                textTransform: 'none',
+                                color: isHelpful ? undefined : 'text.secondary',
+                              }}
+                            >
+                              도움돼요 {review.helpful_count > 0 && review.helpful_count}
+                            </Button>
+                            <Button
+                              size="small"
+                              startIcon={<Report />}
+                              onClick={() => {
+                                setReportingReviewId(review.id);
+                                setReportDialogOpen(true);
+                              }}
+                              sx={{ textTransform: 'none', color: 'text.secondary' }}
+                            >
+                              신고
+                            </Button>
+                          </>
+                        )}
+                        {!user && (
+                          <Typography variant="caption" color="text.secondary">
+                            {review.helpful_count > 0 && `${review.helpful_count}명에게 도움됨`}
+                          </Typography>
+                        )}
                       </Box>
-                    )}
 
-                    {/* 인기 메뉴 */}
-                    {menus.popular && menus.popular.length > 0 && (
-                      <Box sx={{ mb: 4 }}>
-                        <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                          {t('restaurant.popularMenu')}
-                        </Typography>
-                        <Stack spacing={3} divider={<Divider />}>
-                          {menus.popular.map((menu: any) => (
-                            <Box key={menu.id} sx={{ display: 'flex', gap: 3 }}>
-                              {menu.images && menu.images.length > 0 && menu.images[0].url && (
-                                <Box
-                                  component="img"
-                                  src={menu.images[0].medium || menu.images[0].url}
-                                  alt={menu.name}
-                                  sx={{
-                                    width: 120,
-                                    height: 120,
-                                    objectFit: 'cover',
-                                    flexShrink: 0,
-                                  }}
-                                />
-                              )}
-                              <Box sx={{ flex: 1 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                                  <Box>
-                                    <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
-                                      {menu.is_popular && (
-                                        <Chip label="인기" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#FFD93D', color: '#2C3E50' }} />
-                                      )}
-                                      {menu.category && (
-                                        <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                    </Box>
-                                    <Typography variant="h6" fontWeight={700}>
-                                      {menu.name}
-                                    </Typography>
-                                  </Box>
-                                  <Typography variant="h6" fontWeight={700}>
-                                    {menu.price?.toLocaleString()}원
-                                  </Typography>
-                                </Box>
+                      <Divider sx={{ mt: 3 }} />
+                    </Box>
+                  );
+                })}
+              </Stack>
 
-                                {menu.description && (
-                                  <Typography variant="body2" color="text.secondary">
-                                    {menu.description}
-                                  </Typography>
-                                )}
-                              </Box>
-                            </Box>
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
+              {reviews.length > 5 && !showAllReviews && (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => setShowAllReviews(true)}
+                  sx={{ mt: 3, textTransform: 'none', borderRadius: 2 }}
+                >
+                  리뷰 더보기 ({reviews.length - 5}개)
+                </Button>
+              )}
+            </Box>
+          )}
+        </Box>
 
-                    {/* 전체 메뉴 */}
-                    {menus.all && menus.all.length > 0 && (
-                      <Box>
-                        <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                          {t('restaurant.allMenu')}
-                        </Typography>
-                        <Stack spacing={3} divider={<Divider />}>
-                          {menus.all.map((menu: any) => (
-                            <Box key={menu.id} sx={{ display: 'flex', gap: 3 }}>
-                              {menu.images && menu.images.length > 0 && menu.images[0].url && (
-                                <Box
-                                  component="img"
-                                  src={menu.images[0].medium || menu.images[0].url}
-                                  alt={menu.name}
-                                  sx={{
-                                    width: 120,
-                                    height: 120,
-                                    objectFit: 'cover',
-                                    flexShrink: 0,
-                                  }}
-                                />
-                              )}
-                              <Box sx={{ flex: 1 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                                  <Box>
-                                    <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
-                                      {menu.is_signature && (
-                                        <Chip label={t('restaurant.signature')} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                      {menu.is_popular && (
-                                        <Chip label="인기" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#FFD93D', color: '#2C3E50' }} />
-                                      )}
-                                      {menu.is_new && (
-                                        <Chip label={t('restaurant.newMenu')} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                      {menu.category && (
-                                        <Chip label={menu.category} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                      {!menu.is_available && (
-                                        <Chip label="품절" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                      )}
-                                    </Box>
-                                    <Typography variant="h6" fontWeight={700}>
-                                      {menu.name}
-                                    </Typography>
-                                    {menu.name_en && (
-                                      <Typography variant="caption" color="text.secondary">
-                                        {menu.name_en}
-                                      </Typography>
-                                    )}
-                                  </Box>
-                                  <Box sx={{ textAlign: 'right' }}>
-                                    {menu.original_price && menu.original_price > menu.price && (
-                                      <Typography variant="caption" color="text.secondary" sx={{ textDecoration: 'line-through', display: 'block' }}>
-                                        {menu.original_price.toLocaleString()}원
-                                      </Typography>
-                                    )}
-                                    <Typography variant="h6" fontWeight={700}>
-                                      {menu.price?.toLocaleString()}원
-                                    </Typography>
-                                  </Box>
-                                </Box>
+        <Divider sx={{ mx: { xs: 2, md: 4 } }} />
 
-                                {menu.description && (
-                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    {menu.description}
-                                  </Typography>
-                                )}
+        {/* 상세 정보 섹션 */}
+        <Box
+          ref={infoSectionRef}
+          data-section="info"
+          sx={{ px: { xs: 2, md: 4 }, py: 4 }}
+        >
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+            상세 정보
+          </Typography>
 
-                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                                  {menu.portion_size && (
-                                    <Typography variant="caption" color="text.secondary">
-                                      용량: {menu.portion_size}
-                                    </Typography>
-                                  )}
-                                  {menu.spicy_level && menu.spicy_level > 0 && (
-                                    <Typography variant="caption" color="error.main">
-                                      맵기: {menu.spicy_level}/5
-                                    </Typography>
-                                  )}
-                                  {menu.calories && (
-                                    <Typography variant="caption" color="text.secondary">
-                                      {menu.calories} kcal
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </Box>
-                            </Box>
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+              gap: 3,
+            }}
+          >
+            {/* 영업 정보 */}
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                영업 정보
+              </Typography>
+              {renderBusinessHours()}
+
+              {operations?.regular_holidays && operations.regular_holidays.length > 0 && (
+                <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    정기휴무: {operations.regular_holidays.join(', ')}
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
+
+            {/* 시설 정보 */}
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                시설
+              </Typography>
+              <Stack spacing={1}>
+                {(facilities?.parking_available || restaurant?.parking_available) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">
+                      주차 가능
+                      {facilities?.parking_spaces && ` (${facilities.parking_spaces}대)`}
+                    </Typography>
                   </Box>
                 )}
-              </Box>
-            )}
+                {facilities?.valet_parking && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">발렛파킹</Typography>
+                  </Box>
+                )}
+                {(facilities?.wifi_available || restaurant?.wifi_available) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">무료 WiFi</Typography>
+                  </Box>
+                )}
+                {(facilities?.wheelchair_accessible || restaurant?.wheelchair_accessible) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">휠체어 접근 가능</Typography>
+                  </Box>
+                )}
+                {(facilities?.kids_zone || restaurant?.kids_zone) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">키즈존</Typography>
+                  </Box>
+                )}
+                {(facilities?.pet_friendly || restaurant?.pet_friendly) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">반려동물 동반 가능</Typography>
+                  </Box>
+                )}
+                {(facilities?.private_room || restaurant?.private_room) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">프라이빗 룸</Typography>
+                  </Box>
+                )}
+                {(facilities?.outdoor_seating || restaurant?.outdoor_seating) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">야외 좌석</Typography>
+                  </Box>
+                )}
+              </Stack>
+            </Paper>
 
-            {/* 지도 탭 */}
-            {selectedTab === 2 && (
-              <Box>
-                <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                  위치
-                </Typography>
-                <Box sx={{ height: 400, overflow: 'hidden' }}>
-                  <NaverMap
-                    latitude={restaurant.latitude || 37.5665}
-                    longitude={restaurant.longitude || 126.9780}
-                    address={restaurant.address}
-                    restaurantName={restaurant.name}
-                  />
-                </Box>
+            {/* 서비스 */}
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                서비스
+              </Typography>
+              <Stack spacing={1}>
+                {(services?.reservation_available || restaurant?.reservation_available) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">예약 가능</Typography>
+                  </Box>
+                )}
+                {services?.online_booking_available && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">온라인 예약</Typography>
+                  </Box>
+                )}
+                {(services?.delivery_available || restaurant?.delivery_available) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">
+                      배달 가능
+                      {services?.min_order_amount && ` (최소 ${services.min_order_amount.toLocaleString()}원)`}
+                    </Typography>
+                  </Box>
+                )}
+                {(services?.takeout_available || restaurant?.takeout_available) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutline sx={{ fontSize: 18, color: 'success.main' }} />
+                    <Typography variant="body2">포장 가능</Typography>
+                  </Box>
+                )}
+              </Stack>
+            </Paper>
+
+            {/* 결제 */}
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                결제 수단
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {(services?.card_payment ?? restaurant?.card_payment ?? true) && (
+                  <Chip label="카드" size="small" variant="outlined" />
+                )}
+                {(services?.cash_payment ?? restaurant?.cash_payment ?? true) && (
+                  <Chip label="현금" size="small" variant="outlined" />
+                )}
+                {(services?.mobile_payment || restaurant?.mobile_payment) && (
+                  <Chip label="모바일 결제" size="small" variant="outlined" />
+                )}
               </Box>
+            </Paper>
+          </Box>
+
+          {/* 상세 설명 */}
+          {restaurant.description && (
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                소개
+              </Typography>
+              <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
+                {restaurant.description}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        <Divider sx={{ mx: { xs: 2, md: 4 } }} />
+
+        {/* 위치 섹션 */}
+        <Box
+          ref={mapSectionRef}
+          data-section="map"
+          sx={{ px: { xs: 2, md: 4 }, py: 4 }}
+        >
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+            위치
+          </Typography>
+
+          <Box sx={{ borderRadius: 2, overflow: 'hidden', mb: 3 }}>
+            <NaverMap
+              latitude={restaurant.latitude || 37.5665}
+              longitude={restaurant.longitude || 126.9780}
+              address={restaurant.address}
+              restaurantName={restaurant.name}
+            />
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" fontWeight={500} sx={{ mb: 0.5 }}>
+              {restaurant.address}
+            </Typography>
+            {restaurant.road_address && restaurant.road_address !== restaurant.address && (
+              <Typography variant="body2" color="text.secondary">
+                {restaurant.road_address}
+              </Typography>
+            )}
+            {restaurant.detailed_address && (
+              <Typography variant="body2" color="text.secondary">
+                {restaurant.detailed_address}
+              </Typography>
             )}
           </Box>
 
-          {/* 오른쪽: 사진 갤러리 (PC만 표시) */}
-          <Box sx={{ display: { xs: 'none', md: 'block' }, position: 'sticky', top: 80, alignSelf: 'start' }}>
-            {photos.all.length > 0 && (
-              <Box
-                sx={{
-                  mb: 4,
-                }}
-              >
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>
-                    {t('restaurant.photos')} ({photos.all.length})
-                  </Typography>
-                </Box>
-
-                {/* 이미지 그리드 */}
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 0.5,
-                  }}
-                >
-                  {photos.all
-                    .slice(0, isImageListExpanded ? undefined : 12)
-                    .map((photo: any, idx: number) => (
-                      <Box
-                        key={idx}
-                        sx={{
-                          width: '100%',
-                          paddingTop: '100%',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          cursor: 'pointer',
-                          opacity: selectedImage === idx ? 1 : 0.7,
-                          transition: 'opacity 0.2s',
-                          '&:hover': {
-                            opacity: 1,
-                          },
-                        }}
-                        onClick={() => setSelectedImage(idx)}
-                      >
-                        <Box
-                          component="img"
-                          className="thumbnail-image"
-                          src={photo.thumbnail || photo.url}
-                          alt={`사진 ${idx + 1}`}
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                          }}
-                        />
-                      </Box>
-                    ))}
-                </Box>
-
-                {/* 더보기 버튼 */}
-                {photos.all.length > 12 && (
-                  <Button
-                    fullWidth
-                    variant="text"
-                    size="small"
-                    onClick={() => setIsImageListExpanded(!isImageListExpanded)}
-                    sx={{
-                      mt: 1,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                    }}
-                    endIcon={isImageListExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                  >
-                    {isImageListExpanded ? '접기' : `${photos.all.length - 12}장 더보기`}
-                  </Button>
-                )}
-              </Box>
-            )}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              variant="outlined"
+              startIcon={<ContentCopy />}
+              onClick={handleCopyAddress}
+              sx={{ textTransform: 'none', borderRadius: 2 }}
+            >
+              주소 복사
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<NavigationOutlined />}
+              onClick={() => window.open(`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.address)}`, '_blank')}
+              sx={{ textTransform: 'none', borderRadius: 2 }}
+            >
+              네이버 지도
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => window.open(`https://map.kakao.com/link/search/${encodeURIComponent(restaurant.address)}`, '_blank')}
+              sx={{ textTransform: 'none', borderRadius: 2 }}
+            >
+              카카오맵
+            </Button>
           </Box>
         </Box>
-      </Container>
       </Box>
+
+      {/* 이미지 갤러리 모달 */}
+      <Dialog
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: 'black',
+            maxHeight: '90vh',
+          },
+        }}
+      >
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          color: 'white',
+          py: 1.5,
+        }}>
+          <Typography>
+            {galleryIndex + 1} / {photos.all.length}
+          </Typography>
+          <IconButton onClick={() => setGalleryOpen(false)} sx={{ color: 'white' }}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          p: 0,
+          minHeight: 400,
+        }}>
+          {photos.all.length > 0 && (
+            <Box
+              component="img"
+              src={photos.all[galleryIndex]?.url}
+              alt={`사진 ${galleryIndex + 1}`}
+              sx={{
+                maxWidth: '100%',
+                maxHeight: '70vh',
+                objectFit: 'contain',
+              }}
+            />
+          )}
+
+          {/* 이전 버튼 */}
+          {photos.all.length > 1 && (
+            <IconButton
+              onClick={() => setGalleryIndex((prev) => (prev - 1 + photos.all.length) % photos.all.length)}
+              sx={{
+                position: 'absolute',
+                left: 8,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                '&:hover': { backgroundColor: 'white' },
+              }}
+            >
+              <ArrowBack />
+            </IconButton>
+          )}
+
+          {/* 다음 버튼 */}
+          {photos.all.length > 1 && (
+            <IconButton
+              onClick={() => setGalleryIndex((prev) => (prev + 1) % photos.all.length)}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                '&:hover': { backgroundColor: 'white' },
+              }}
+            >
+              <ArrowForward />
+            </IconButton>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 전체 메뉴 모달 */}
+      <Dialog
+        open={showAllMenu}
+        onClose={() => setShowAllMenu(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          전체 메뉴
+          <IconButton onClick={() => setShowAllMenu(false)}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={0} divider={<Divider />}>
+            {menus.all.map((menu: any) => (
+              <Box
+                key={menu.id}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  py: 2,
+                }}
+              >
+                <Box sx={{ flex: 1, mr: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Typography variant="body1" fontWeight={500}>
+                      {menu.name}
+                    </Typography>
+                    {menu.is_signature && (
+                      <Chip label="시그니처" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                    )}
+                    {menu.is_popular && (
+                      <Chip label="인기" size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: '#FEF3C7', color: '#92400E' }} />
+                    )}
+                    {!menu.is_available && (
+                      <Chip label="품절" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem' }} />
+                    )}
+                  </Box>
+                  {menu.description && (
+                    <Typography variant="body2" color="text.secondary">
+                      {menu.description}
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+                  {menu.original_price && menu.original_price > menu.price && (
+                    <Typography variant="caption" color="text.secondary" sx={{ textDecoration: 'line-through', display: 'block' }}>
+                      {menu.original_price.toLocaleString()}원
+                    </Typography>
+                  )}
+                  <Typography variant="body1" fontWeight={600}>
+                    {menu.price?.toLocaleString()}원
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        </DialogContent>
+      </Dialog>
 
       {/* 리뷰 작성/수정 다이얼로그 */}
       <Dialog
         open={reviewDialogOpen}
-        onClose={() => {
-          setReviewDialogOpen(false);
-          setEditingReview(null);
-          setReviewTitle('');
-          setReviewContent('');
-          setReviewRating(5);
-          setReviewIsAnonymous(false);
-          setReviewImages([]);
-        }}
+        onClose={closeReviewDialog}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>{editingReview ? '리뷰 수정' : '리뷰 작성'}</DialogTitle>
+        <DialogTitle>
+          {editingReview ? '리뷰 수정' : '리뷰 작성'}
+        </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
               평점
             </Typography>
             <Rating
@@ -1629,15 +1998,16 @@ const RestaurantDetailPage: React.FC = () => {
               fullWidth
               label="내용"
               multiline
-              rows={6}
+              rows={5}
               value={reviewContent}
               onChange={(e) => setReviewContent(e.target.value)}
+              placeholder="방문 경험을 공유해주세요"
               sx={{ mb: 2 }}
             />
 
             {/* 이미지 업로드 */}
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 사진 ({reviewImages.length}/5)
               </Typography>
               <Button
@@ -1652,58 +2022,47 @@ const RestaurantDetailPage: React.FC = () => {
                     (result) => {
                       setReviewImages([...reviewImages, result.secure_url]);
                     },
-                    {
-                      multiple: false,
-                      folder: 'reviews',
-                      tags: ['review'],
-                    }
+                    { multiple: false, folder: 'reviews', tags: ['review'] }
                   );
                 }}
                 disabled={reviewImages.length >= 5}
-                sx={{ mb: 1 }}
+                sx={{ mb: 1, textTransform: 'none' }}
               >
                 사진 추가
               </Button>
 
               {reviewImages.length > 0 && (
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 1, mt: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
                   {reviewImages.map((img, idx) => (
                     <Box
                       key={idx}
                       sx={{
-                        width: '100%',
-                        paddingTop: '100%',
+                        width: 80,
+                        height: 80,
                         position: 'relative',
+                        borderRadius: 1,
                         overflow: 'hidden',
                       }}
                     >
                       <Box
                         component="img"
                         src={img}
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                        }}
+                        sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                       <IconButton
                         size="small"
                         onClick={() => setReviewImages(reviewImages.filter((_, i) => i !== idx))}
                         sx={{
                           position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                          top: 2,
+                          right: 2,
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
                           color: 'white',
-                          '&:hover': {
-                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                          },
+                          padding: 0.5,
+                          '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
                         }}
                       >
-                        <Close fontSize="small" />
+                        <Close sx={{ fontSize: 14 }} />
                       </IconButton>
                     </Box>
                   ))}
@@ -1722,25 +2081,15 @@ const RestaurantDetailPage: React.FC = () => {
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setReviewDialogOpen(false);
-              setEditingReview(null);
-              setReviewTitle('');
-              setReviewContent('');
-              setReviewRating(5);
-              setReviewIsAnonymous(false);
-              setReviewImages([]);
-            }}
-          >
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={closeReviewDialog}>
             취소
           </Button>
           <Button
             variant="contained"
             onClick={editingReview ? handleUpdateReview : handleSubmitReview}
           >
-            {editingReview ? '수정하기' : '작성하기'}
+            {editingReview ? '수정' : '작성'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1761,7 +2110,7 @@ const RestaurantDetailPage: React.FC = () => {
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              부적절한 리뷰를 신고해주세요. 신고 내용은 관리자가 검토합니다.
+              부적절한 리뷰를 신고해주세요. 신고 내용은 검토 후 처리됩니다.
             </Typography>
 
             <TextField
@@ -1783,28 +2132,26 @@ const RestaurantDetailPage: React.FC = () => {
 
             <TextField
               fullWidth
-              label="상세 내용 (선택사항)"
+              label="상세 내용 (선택)"
               multiline
-              rows={4}
+              rows={3}
               value={reportDetails}
               onChange={(e) => setReportDetails(e.target.value)}
-              placeholder="신고 사유를 자세히 설명해주세요."
+              placeholder="추가 설명이 필요하면 작성해주세요"
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setReportDialogOpen(false);
-              setReportingReviewId(null);
-              setReportReason('');
-              setReportDetails('');
-            }}
-          >
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => {
+            setReportDialogOpen(false);
+            setReportingReviewId(null);
+            setReportReason('');
+            setReportDetails('');
+          }}>
             취소
           </Button>
           <Button variant="contained" color="error" onClick={handleSubmitReport}>
-            신고하기
+            신고
           </Button>
         </DialogActions>
       </Dialog>
