@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Container,
@@ -152,9 +152,9 @@ const RestaurantDetailPage: React.FC = () => {
   const mapSectionRef = useRef<HTMLDivElement>(null);
 
   // 조회수 중복 방지
-  const getViewedKey = (restaurantId: string) => `viewed_restaurant_${restaurantId}`;
+  const getViewedKey = useCallback((restaurantId: string) => `viewed_restaurant_${restaurantId}`, []);
 
-  const hasAlreadyViewed = (restaurantId: string): boolean => {
+  const hasAlreadyViewed = useCallback((restaurantId: string): boolean => {
     try {
       const viewedTime = sessionStorage.getItem(getViewedKey(restaurantId));
       if (!viewedTime) return false;
@@ -163,28 +163,85 @@ const RestaurantDetailPage: React.FC = () => {
     } catch {
       return false;
     }
-  };
+  }, [getViewedKey]);
 
-  const markAsViewed = (restaurantId: string) => {
+  const markAsViewed = useCallback((restaurantId: string) => {
     try {
       sessionStorage.setItem(getViewedKey(restaurantId), Date.now().toString());
     } catch {}
-  };
+  }, [getViewedKey]);
 
-  // 데이터 로드
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (id) {
-      loadRestaurantData();
-    }
-  }, [id]);
+  // 데이터 로드 함수
+  const loadRestaurantData = useCallback(async (skipViewCount: boolean = false) => {
+    if (!id) return;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (id && restaurant) {
-      loadRestaurantData(true);
+    const shouldSkipViewCount = skipViewCount || hasAlreadyViewed(id);
+    if (!shouldSkipViewCount) {
+      markAsViewed(id);
     }
-  }, [language]);
+
+    try {
+      setLoading(true);
+      const response = await ApiService.getRestaurantCompleteData(id, language, shouldSkipViewCount);
+
+      if (response.success && response.data) {
+        const restaurantData = response.data.restaurant;
+        setRestaurant(restaurantData);
+        setReviews(response.data.reviews?.items || []);
+        setReviewStats(response.data.reviews?.stats || null);
+
+        if (restaurantData) {
+          updateMetaTags(generateRestaurantMeta(restaurantData));
+          const schemas = [
+            generateRestaurantSchema({
+              ...restaurantData,
+              contacts: response.data.contacts,
+              operations: response.data.operations
+            }),
+            generateBreadcrumbSchema([
+              { name: '홈', url: 'https://mzcube.com' },
+              { name: '맛집', url: 'https://mzcube.com/restaurants' },
+              { name: restaurantData.name, url: `https://mzcube.com/restaurant/${restaurantData.id}` }
+            ])
+          ];
+          insertMultipleStructuredData(schemas);
+        }
+
+        if (response.data.menus && typeof response.data.menus === 'object' && 'all' in response.data.menus) {
+          setMenus(response.data.menus);
+        } else {
+          setMenus({ all: response.data.menus || [], signature: [], popular: [] });
+        }
+
+        setPhotos(response.data.photos || { all: [], representative: [] });
+        setTags(response.data.tags || []);
+        setContacts(response.data.contacts || {});
+        setFacilities(response.data.facilities || {});
+        setOperations(response.data.operations || {});
+        setServices(response.data.services || {});
+        setIsFavorited(response.data.userInfo?.isFavorited || false);
+
+        if (user && response.data.reviews?.items) {
+          const helpfulSet = new Set<string>();
+          response.data.reviews.items.forEach((review: any) => {
+            if (review.user_helpful) {
+              helpfulSet.add(review.id);
+            }
+          });
+          setHelpfulReviews(helpfulSet);
+        }
+      }
+    } catch (err: any) {
+      setError(err.userMessage || '맛집 정보를 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, language, user, hasAlreadyViewed, markAsViewed]);
+
+  // 초기 데이터 로드 및 언어 변경 시 재로드
+  useEffect(() => {
+    loadRestaurantData();
+  }, [loadRestaurantData]);
 
   // Sticky Tab & Section Observer
   useEffect(() => {
@@ -223,73 +280,6 @@ const RestaurantDetailPage: React.FC = () => {
 
     return () => observer.disconnect();
   }, [restaurant]);
-
-  const loadRestaurantData = async (skipViewCount: boolean = false) => {
-    const shouldSkipViewCount = skipViewCount || hasAlreadyViewed(id!);
-    if (!shouldSkipViewCount) {
-      markAsViewed(id!);
-    }
-
-    try {
-      setLoading(true);
-      const response = await ApiService.getRestaurantCompleteData(id!, language, shouldSkipViewCount);
-
-      if (response.success && response.data) {
-        const restaurantData = response.data.restaurant;
-        setRestaurant(restaurantData);
-        setReviews(response.data.reviews?.items || []);
-        setReviewStats(response.data.reviews?.stats || null);
-
-        // SEO
-        if (restaurantData) {
-          updateMetaTags(generateRestaurantMeta(restaurantData));
-          const schemas = [
-            generateRestaurantSchema({
-              ...restaurantData,
-              contacts: response.data.contacts,
-              operations: response.data.operations
-            }),
-            generateBreadcrumbSchema([
-              { name: '홈', url: 'https://mzcube.com' },
-              { name: '맛집', url: 'https://mzcube.com/restaurants' },
-              { name: restaurantData.name, url: `https://mzcube.com/restaurant/${restaurantData.id}` }
-            ])
-          ];
-          insertMultipleStructuredData(schemas);
-        }
-
-        // 메뉴
-        if (response.data.menus && typeof response.data.menus === 'object' && 'all' in response.data.menus) {
-          setMenus(response.data.menus);
-        } else {
-          setMenus({ all: response.data.menus || [], signature: [], popular: [] });
-        }
-
-        setPhotos(response.data.photos || { all: [], representative: [] });
-        setTags(response.data.tags || []);
-        setContacts(response.data.contacts || {});
-        setFacilities(response.data.facilities || {});
-        setOperations(response.data.operations || {});
-        setServices(response.data.services || {});
-        setIsFavorited(response.data.userInfo?.isFavorited || false);
-
-        if (user && response.data.reviews?.items) {
-          const helpfulSet = new Set<string>();
-          response.data.reviews.items.forEach((review: any) => {
-            if (review.user_helpful) {
-              helpfulSet.add(review.id);
-            }
-          });
-          setHelpfulReviews(helpfulSet);
-        }
-      }
-    } catch (err: any) {
-      setError(err.userMessage || '맛집 정보를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 핸들러들
   const handleToggleFavorite = async () => {
     if (!user) {
