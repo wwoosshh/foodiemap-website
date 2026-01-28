@@ -421,8 +421,9 @@ const RestaurantDetailPage: React.FC = () => {
     try {
       const response = await ApiService.toggleReviewHelpful(reviewId);
       if (response.success && response.data) {
+        const { is_helpful, helpful_count } = response.data;
         const newHelpfulReviews = new Set(helpfulReviews);
-        if (response.data.is_helpful) {
+        if (is_helpful) {
           newHelpfulReviews.add(reviewId);
         } else {
           newHelpfulReviews.delete(reviewId);
@@ -430,7 +431,7 @@ const RestaurantDetailPage: React.FC = () => {
         setHelpfulReviews(newHelpfulReviews);
         setReviews(reviews.map(review =>
           review.id === reviewId
-            ? { ...review, helpful_count: response.data.helpful_count }
+            ? { ...review, helpful_count }
             : review
         ));
       }
