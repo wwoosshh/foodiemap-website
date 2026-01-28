@@ -30,7 +30,6 @@ import { Restaurant, Category, Banner } from '../types';
 import {
   StarFilledIcon,
   LocationIcon,
-  ArrowRightIcon,
   ReviewIcon,
   EyeIcon,
   HeartFilledIcon,
@@ -80,6 +79,24 @@ const NewHomePage: React.FC = () => {
   const [favoriteRestaurants, setFavoriteRestaurants] = useState<Restaurant[]>([]);
   const [latestRestaurants, setLatestRestaurants] = useState<Restaurant[]>([]);
 
+  // PC용 섹션별 확장 상태 및 페이지 관리
+  const [sectionPages, setSectionPages] = useState<{ [key: string]: number }>({
+    rating_desc: 1,
+    review_count_desc: 1,
+    view_count_desc: 1,
+    favorite_count_desc: 1,
+    created_at_desc: 1,
+  });
+  const [sectionLoading, setSectionLoading] = useState<{ [key: string]: boolean }>({});
+  const [sectionHasMore, setSectionHasMore] = useState<{ [key: string]: boolean }>({
+    rating_desc: true,
+    review_count_desc: true,
+    view_count_desc: true,
+    favorite_count_desc: true,
+    created_at_desc: true,
+  });
+  const SECTION_PAGE_SIZE = 8;
+
   // 모바일용 단일 목록 상태
   const [mobileRestaurants, setMobileRestaurants] = useState<Restaurant[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -102,7 +119,7 @@ const NewHomePage: React.FC = () => {
   const loadRestaurantsByCategory = useCallback(async (categoryIds: string[]) => {
     try {
       // 통합 API로 한 번에 모든 정렬 방식의 맛집 로드
-      const params = categoryIds.length > 0 ? { category_ids: categoryIds.join(','), limit: 10 } : { limit: 10 };
+      const params = categoryIds.length > 0 ? { category_ids: categoryIds.join(','), limit: SECTION_PAGE_SIZE } : { limit: SECTION_PAGE_SIZE };
 
       const multiSortRes = await ApiService.getRestaurantsMultiSort(params);
 
@@ -112,11 +129,76 @@ const NewHomePage: React.FC = () => {
         setViewCountRestaurants(multiSortRes.data.byViewCount || []);
         setFavoriteRestaurants(multiSortRes.data.byFavoriteCount || []);
         setLatestRestaurants(multiSortRes.data.byLatest || []);
+
+        // 섹션 상태 리셋
+        setSectionPages({
+          rating_desc: 1,
+          review_count_desc: 1,
+          view_count_desc: 1,
+          favorite_count_desc: 1,
+          created_at_desc: 1,
+        });
+        setSectionHasMore({
+          rating_desc: (multiSortRes.data.byRating || []).length >= SECTION_PAGE_SIZE,
+          review_count_desc: (multiSortRes.data.byReviewCount || []).length >= SECTION_PAGE_SIZE,
+          view_count_desc: (multiSortRes.data.byViewCount || []).length >= SECTION_PAGE_SIZE,
+          favorite_count_desc: (multiSortRes.data.byFavoriteCount || []).length >= SECTION_PAGE_SIZE,
+          created_at_desc: (multiSortRes.data.byLatest || []).length >= SECTION_PAGE_SIZE,
+        });
       }
     } catch (err: any) {
       console.error('Failed to load restaurants:', err);
     }
-  }, []);
+  }, [SECTION_PAGE_SIZE]);
+
+  // PC용 섹션별 더보기 로드 함수
+  const loadMoreForSection = useCallback(async (sortParam: string) => {
+    if (sectionLoading[sortParam] || !sectionHasMore[sortParam]) return;
+
+    setSectionLoading(prev => ({ ...prev, [sortParam]: true }));
+
+    try {
+      const nextPage = sectionPages[sortParam] + 1;
+      const params: any = {
+        page: nextPage,
+        limit: SECTION_PAGE_SIZE,
+        sort: sortParam,
+      };
+      if (selectedCategoryIds.length > 0) {
+        params.category_ids = selectedCategoryIds.join(',');
+      }
+
+      const res = await ApiService.getRestaurants(params);
+
+      if (res.success && res.data) {
+        const newRestaurants = res.data.restaurants || [];
+
+        // 해당 섹션에 데이터 추가
+        if (sortParam === 'rating_desc') {
+          setRatingRestaurants(prev => [...prev, ...newRestaurants]);
+        } else if (sortParam === 'review_count_desc') {
+          setReviewCountRestaurants(prev => [...prev, ...newRestaurants]);
+        } else if (sortParam === 'view_count_desc') {
+          setViewCountRestaurants(prev => [...prev, ...newRestaurants]);
+        } else if (sortParam === 'favorite_count_desc') {
+          setFavoriteRestaurants(prev => [...prev, ...newRestaurants]);
+        } else if (sortParam === 'created_at_desc') {
+          setLatestRestaurants(prev => [...prev, ...newRestaurants]);
+        }
+
+        setSectionPages(prev => ({ ...prev, [sortParam]: nextPage }));
+
+        // 더 이상 데이터가 없으면 hasMore를 false로
+        if (newRestaurants.length < SECTION_PAGE_SIZE) {
+          setSectionHasMore(prev => ({ ...prev, [sortParam]: false }));
+        }
+      }
+    } catch (err: any) {
+      console.error('Failed to load more restaurants:', err);
+    } finally {
+      setSectionLoading(prev => ({ ...prev, [sortParam]: false }));
+    }
+  }, [sectionLoading, sectionHasMore, sectionPages, selectedCategoryIds, SECTION_PAGE_SIZE]);
 
   // 모바일용 맛집 로드 함수
   const loadMobileRestaurants = useCallback(async (categoryIds: string[], page: number, sort: SortOption, reset: boolean = false) => {
@@ -663,51 +745,36 @@ const NewHomePage: React.FC = () => {
   }> = ({ title, icon, restaurants, sortParam }) => {
     if (restaurants.length === 0) return null;
 
+    const isLoading = sectionLoading[sortParam];
+    const hasMore = sectionHasMore[sortParam];
+
     return (
       <Box sx={{
-        mb: { xs: 6, md: 10 },
+        mb: { xs: 6, md: 8 },
       }}>
+        {/* 섹션 헤더 */}
         <Box sx={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          mb: { xs: 3, md: 4 },
+          gap: 1.5,
+          mb: { xs: 2.5, md: 3 },
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'primary.main',
-                '& svg': {
-                  fontSize: { xs: 22, md: 26 },
-                },
-              }}
-            >
-              {icon}
-            </Box>
-            <Typography variant="h4" fontWeight={600} sx={{ fontSize: { xs: '1.2rem', sm: '1.35rem', md: '1.5rem' }, letterSpacing: '-0.02em' }}>
-              {title}
-            </Typography>
-          </Box>
-          <Button
-            endIcon={<ArrowRightIcon />}
-            onClick={() => {
-              const categoryParam = selectedCategoryIds.length > 0 ? `&categories=${selectedCategoryIds.join(',')}` : '';
-              navigate(`/restaurants?sort=${sortParam}${categoryParam}`);
-            }}
+          <Box
             sx={{
-              fontSize: '0.85rem',
-              color: 'text.secondary',
-              '&:hover': {
-                color: 'primary.main',
-                backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'primary.main',
+              '& svg': {
+                fontSize: { xs: 22, md: 26 },
               },
             }}
           >
-            {t('home.viewMore')}
-          </Button>
+            {icon}
+          </Box>
+          <Typography variant="h4" fontWeight={600} sx={{ fontSize: { xs: '1.2rem', sm: '1.35rem', md: '1.5rem' }, letterSpacing: '-0.02em' }}>
+            {title}
+          </Typography>
         </Box>
 
         {/* 리스트 레이아웃 */}
@@ -723,10 +790,40 @@ const NewHomePage: React.FC = () => {
             gap: { xs: 2, md: 3 },
           }}
         >
-          {restaurants.slice(0, 8).map((restaurant) => (
+          {restaurants.map((restaurant) => (
             <RestaurantCard key={restaurant.id} restaurant={restaurant} />
           ))}
         </Box>
+
+        {/* 더보기 버튼 - 섹션 하단 중앙 */}
+        {hasMore && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Button
+              variant="outlined"
+              onClick={() => loadMoreForSection(sortParam)}
+              disabled={isLoading}
+              sx={{
+                px: 4,
+                py: 1.2,
+                borderRadius: 2,
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                textTransform: 'none',
+                borderColor: 'divider',
+                color: 'text.primary',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                },
+              }}
+            >
+              {isLoading ? (
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+              ) : null}
+              {isLoading ? '불러오는 중...' : `${title} 더보기`}
+            </Button>
+          </Box>
+        )}
       </Box>
     );
   };
