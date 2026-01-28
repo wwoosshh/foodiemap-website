@@ -334,7 +334,7 @@ const RestaurantDetailPage: React.FC = () => {
   };
 
   const scrollToSection = (sectionId: string) => {
-    const refs: { [key: string]: React.RefObject<HTMLDivElement> } = {
+    const refs: { [key: string]: React.RefObject<HTMLDivElement | null> } = {
       menu: menuSectionRef,
       review: reviewSectionRef,
       info: infoSectionRef,
