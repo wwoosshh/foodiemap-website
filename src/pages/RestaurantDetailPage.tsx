@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Container,
@@ -8,7 +8,6 @@ import {
   Button,
   IconButton,
   Divider,
-  CircularProgress,
   Alert,
   Rating,
   Avatar,
@@ -20,7 +19,6 @@ import {
   FormControlLabel,
   Checkbox,
   Stack,
-  Link,
   Paper,
   LinearProgress,
   Skeleton,
@@ -53,8 +51,6 @@ import {
   ContentCopy,
   NavigationOutlined,
   CheckCircleOutline,
-  ExpandMore,
-  ExpandLess,
   ArrowForward,
   ArrowBack,
 } from '@mui/icons-material';
@@ -107,14 +103,14 @@ const getBusinessStatus = (operations: any): { status: 'open' | 'break' | 'close
 const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
 
   // 데이터 상태
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [restaurant, setRestaurant] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewStats, setReviewStats] = useState<any>(null);
+  const [, setReviewStats] = useState<any>(null);
   const [menus, setMenus] = useState<any>({ all: [], signature: [], popular: [] });
   const [photos, setPhotos] = useState<any>({ all: [], representative: [] });
   const [tags, setTags] = useState<any[]>([]);
@@ -176,12 +172,14 @@ const RestaurantDetailPage: React.FC = () => {
   };
 
   // 데이터 로드
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (id) {
       loadRestaurantData();
     }
   }, [id]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (id && restaurant) {
       loadRestaurantData(true);
@@ -717,7 +715,7 @@ const RestaurantDetailPage: React.FC = () => {
             py: 1.5,
             gap: 0.5,
           }}>
-            {photos.all.slice(0, 5).map((_, idx) => (
+            {photos.all.slice(0, 5).map((_: any, idx: number) => (
               <Box
                 key={idx}
                 sx={{
