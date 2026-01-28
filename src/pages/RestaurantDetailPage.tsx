@@ -587,8 +587,11 @@ const RestaurantDetailPage: React.FC = () => {
             display: 'grid',
             gridTemplateColumns: { xs: '1fr', md: '3fr 2fr' },
             gap: 0.5,
-            height: { xs: 280, md: 420 },
-            mb: { xs: 0, md: 0 },
+            height: { xs: 250, md: 400 },
+            mt: { xs: 0, md: 3 },
+            mx: { xs: 0, md: 3 },
+            borderRadius: { xs: 0, md: 2 },
+            overflow: 'hidden',
             cursor: 'pointer',
           }}
           onClick={() => {
@@ -602,7 +605,6 @@ const RestaurantDetailPage: React.FC = () => {
               position: 'relative',
               overflow: 'hidden',
               backgroundColor: 'grey.200',
-              borderRadius: { xs: 0, md: '0 0 0 0' },
             }}
           >
             {photos.all.length > 0 ? (
@@ -725,21 +727,33 @@ const RestaurantDetailPage: React.FC = () => {
         )}
 
         {/* 맛집 헤더 정보 */}
-        <Box sx={{ px: { xs: 2, md: 4 }, pt: { xs: 2, md: 4 }, pb: 3 }}>
+        <Box sx={{ px: { xs: 2, md: 4 }, pt: { xs: 3, md: 4 }, pb: 3 }}>
           {/* 카테고리 */}
-          {restaurant.categories && (
+          {restaurant.categories ? (
             <Typography
               variant="body2"
               sx={{
                 color: restaurant.categories.color || 'primary.main',
                 fontWeight: 600,
-                mb: 1,
+                mb: 1.5,
+                display: 'inline-block',
               }}
             >
               {restaurant.categories.name}
               {restaurant.sub_category && ` · ${restaurant.sub_category}`}
             </Typography>
-          )}
+          ) : restaurant.sub_category ? (
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'primary.main',
+                fontWeight: 600,
+                mb: 1.5,
+              }}
+            >
+              {restaurant.sub_category}
+            </Typography>
+          ) : null}
 
           {/* 맛집명 */}
           <Typography
@@ -747,8 +761,9 @@ const RestaurantDetailPage: React.FC = () => {
             component="h1"
             sx={{
               fontWeight: 700,
-              mb: 1,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
+              mb: 1.5,
+              fontSize: { xs: '1.5rem', md: '2rem' },
+              lineHeight: 1.3,
             }}
           >
             {restaurant.name}
@@ -759,23 +774,26 @@ const RestaurantDetailPage: React.FC = () => {
             <Typography
               variant="body1"
               color="text.secondary"
-              sx={{ mb: 2 }}
+              sx={{ mb: 2.5, lineHeight: 1.6 }}
             >
               {restaurant.introduction}
             </Typography>
           )}
 
           {/* 평점 & 통계 */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <StarFilledIcon sx={{ fontSize: 20, color: '#FFB800' }} />
-              <Typography variant="body1" fontWeight={700}>
-                {restaurant.rating ? restaurant.rating.toFixed(1) : '-'}
-              </Typography>
-            </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
+            {restaurant.rating ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <StarFilledIcon sx={{ fontSize: 18, color: '#FFB800' }} />
+                <Typography variant="body1" fontWeight={700}>
+                  {restaurant.rating.toFixed(1)}
+                </Typography>
+              </Box>
+            ) : null}
             <Typography variant="body2" color="text.secondary">
               리뷰 {restaurant.review_count || 0}
             </Typography>
+            <Box sx={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: 'grey.400' }} />
             <Typography variant="body2" color="text.secondary">
               조회 {restaurant.view_count?.toLocaleString() || 0}
             </Typography>
